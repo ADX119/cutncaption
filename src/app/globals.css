@@ -148,6 +148,17 @@
     transform: rotate(calc((var(--is-dark) - 1) * 90deg)) scale(calc(0.6 + var(--is-dark) * 0.4));
   }
 
+  /* Something that shows up because of an action (a message, the chosen file) eases in. */
+  .appear {
+    animation: appear var(--duration-move) var(--ease-settle) both;
+  }
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
   /* Home page strip: the trim handles close in on the selection once, on load. */
   .strip-selection {
     animation: strip-select 700ms var(--ease-settle) 150ms both;

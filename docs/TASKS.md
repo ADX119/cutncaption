@@ -32,7 +32,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.9 SEO registry stub and `/tools/[slug]` route** — registry with 20 slugs from ARCHITECTURE §11, each mounting a placeholder; `generateStaticParams`. _Done before M0.6, whose header spec needs a tool page._
   - AC: 20 pages are exported.
   - Test: unit test: registry has 20 unique slugs; the "each URL returns 200" e2e check is part of the M0.6 spec.
-- [ ] **M0.10 Shared `FileDrop`** — picker + drag-and-drop, accept list, rejects URLs/text drops, keyboard accessible.
+- [x] **M0.10 Shared `FileDrop`** — picker + drag-and-drop, accept list, rejects URLs/text drops, keyboard accessible.
   - Test: component test for accept/reject; e2e sets a file and sees its name and size.
 - [x] **M0.11 Device detection and limits** — `engine/device`: capabilities, class L/M/H, `limits.ts` table, in-app browser detection.
   - Test: unit tests with mocked `navigator` for each class and each limit kind (hard/warn/clamp).

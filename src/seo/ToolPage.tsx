@@ -1,4 +1,5 @@
 import type { ToolPageEntry } from './registry';
+import { ToolPlaceholder } from './ToolPlaceholder';
 
 /** Placeholder until each tool lands (M2–M5) and the full template (M6.1). */
 export function ToolPage({ entry }: { entry: ToolPageEntry }) {
@@ -9,6 +10,9 @@ export function ToolPage({ entry }: { entry: ToolPageEntry }) {
       data-slug={entry.slug}
     >
       <h1 className="display text-4xl">{entry.slug}</h1>
+      <div className="mt-8">
+        <ToolPlaceholder />
+      </div>
     </main>
   );
 }

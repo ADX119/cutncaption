@@ -65,6 +65,7 @@ Motion answers something the person did. Nothing moves on its own, with one exce
 - `pressable`: anything you can press settles to 97% while held.
 - Toggles and switches slide or turn into their new state in 200 ms; they never jump and never bounce.
 - `link`: text links draw their underline in from the left.
+- `appear`: something that shows up because of an action (a message, the chosen file) fades in and rises 4 px.
 - Progress moves smoothly; do not animate numbers counting up for effect.
 - No entrance animations on scroll, no hover lift on lists or cards, no looping decoration.
 - `prefers-reduced-motion` is honoured globally in `globals.css`; do not add motion that bypasses it.

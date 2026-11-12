@@ -16,6 +16,17 @@ export const en = {
   'footer.privacy':
     'Your files are processed on this device and are never uploaded. No account, no watermark, no ads.',
 
+  'file.drop.title': 'Drop a video or audio file here',
+  'file.drop.hint': 'Or choose one from your device. It is never uploaded.',
+  'file.choose': 'Choose a file',
+  'file.chooseAnother': 'Choose another file',
+  'file.reject.not-a-file':
+    'That was not a file. Drop a video or audio file from your device; links cannot be opened.',
+  'file.reject.too-many': 'One file at a time. Drop a single file.',
+  'file.reject.wrong-type':
+    'This file type isn’t supported. Try MP4, MOV, WebM, MKV, AVI, MP3, WAV, M4A, AAC or OGG.',
+  'file.reject.empty': 'This file is empty. Choose another one.',
+
   'home.headline': 'Trim, caption and meme your videos, right in your browser.',
   'home.lede':
     'Pick a file from your device and get to work. Nothing is uploaded, so your video stays yours.',
