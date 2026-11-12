@@ -8,7 +8,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 
 ## M0 — Scaffold
 
-- [ ] **M0.1 Create the Next.js app** — pnpm, App Router, TypeScript strict, Tailwind, `output: 'export'`, `trailingSlash`, `images.unoptimized`, `src/` layout, Node version pinned.
+- [x] **M0.1 Create the Next.js app** — pnpm, App Router, TypeScript strict, Tailwind, `output: 'export'`, `trailingSlash`, `images.unoptimized`, `src/` layout, Node version pinned.
   - AC: `pnpm build` produces `out/` with `index.html`.
   - Test: build succeeds; `out/index.html` exists.
 - [ ] **M0.2 Lint, format, typecheck, `pnpm check`** — ESLint, Prettier, `tsc --noEmit`; `check` = lint + typecheck + unit tests + build.
