@@ -17,7 +17,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.3 Folder skeleton and boundary rules** — create the folders from ARCHITECTURE §2 with `index.ts` stubs; configure `eslint-plugin-boundaries` per §3.
   - AC: importing `engine/` from `components/`, or React from `editor/`, fails lint.
   - Test: a fixture file with a forbidden import is rejected by an ESLint test.
-- [ ] **M0.4 Vitest** — config, path aliases, coverage, one sample test.
+- [x] **M0.4 Vitest** — config, path aliases, coverage, one sample test.
   - Test: `pnpm test` runs and passes.
 - [ ] **M0.5 `_headers` and dev headers** — write `public/_headers` per ARCHITECTURE §4; dev-only COOP/COEP in `next.config.ts`.
   - AC: `/tools/*` is cross-origin isolated; `/` is not.
