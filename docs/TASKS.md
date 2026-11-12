@@ -25,7 +25,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.6 Playwright against `wrangler pages dev out`** — projects: Chromium, WebKit, Pixel, iPhone. First spec checks headers.
   - AC: `pnpm e2e` builds, serves `out/`, runs specs.
   - Test: spec asserts `crossOriginIsolated === true` on a `/tools/` page and `false` on `/`, and that COOP/COEP response headers match.
-- [ ] **M0.7 i18n catalogue** — `src/i18n/messages/en.ts`, typed `t()`; ESLint rule forbidding string literals in JSX text under `features/` and `components/`.
+- [x] **M0.7 i18n catalogue** — `src/i18n/messages/en.ts`, typed `t()`; ESLint rule forbidding string literals in JSX text under `features/` and `components/`.
   - Test: unit test for `t()` with params; lint fixture with a literal fails.
 - [ ] **M0.8 Design tokens and app shell** — Tailwind theme, layout, header, footer. Links from shell into `/tools/*` are plain `<a>`.
   - Test: e2e: home renders, header link to a tool triggers a full document load (navigation type check).

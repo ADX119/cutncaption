@@ -81,11 +81,26 @@ export default defineConfig([
       ],
     },
   },
+  {
+    // User-visible text comes from src/i18n via t(), never from literals in JSX.
+    files: ['src/**/*.tsx'],
+    rules: {
+      'react/jsx-no-literals': ['error', { noStrings: true, ignoreProps: true }],
+    },
+  },
   ...Object.keys(LAYERS).map((layer) => ({
     files: [`src/${layer}/**/*.{ts,tsx}`],
     rules: {
       'no-restricted-imports': ['error', { patterns: restrictedImports(layer) }],
     },
   })),
-  globalIgnores(['.next/**', 'out/**', 'coverage/**', 'next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    '.wrangler/**',
+    'test-results/**',
+    'playwright-report/**',
+    'out/**',
+    'coverage/**',
+    'next-env.d.ts',
+  ]),
 ]);

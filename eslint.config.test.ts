@@ -9,6 +9,19 @@ async function ruleIds(file: string, code: string): Promise<string[]> {
   return (result?.messages ?? []).map((m) => m.ruleId ?? 'fatal');
 }
 
+describe('no hardcoded UI strings', () => {
+  it('rejects a string literal in JSX', async () => {
+    const code = 'export const A = () => <p>Hello</p>;';
+    expect(await ruleIds('src/components/x.tsx', code)).toContain('react/jsx-no-literals');
+  });
+
+  it('allows text that comes from t()', async () => {
+    const code =
+      "import { t } from '@/i18n';\nexport const A = () => <p className=\"x\">{t('app.name')}</p>;";
+    expect(await ruleIds('src/components/x.tsx', code)).not.toContain('react/jsx-no-literals');
+  });
+});
+
 describe('module boundaries', () => {
   it.each([
     ['components -> engine', 'src/components/x.ts', "import '@/engine/media';"],

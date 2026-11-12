@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { t } from '@/i18n';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'cutncaption',
-  description: 'Free, private clip, meme and caption studio that runs in your browser.',
+  title: t('app.name'),
+  description: t('app.tagline'),
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
