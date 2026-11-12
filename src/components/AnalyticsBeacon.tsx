@@ -9,13 +9,18 @@ export function isBeaconToken(token: string | undefined): token is string {
 /**
  * Cloudflare Web Analytics: cookieless page views and Web Vitals. Renders nothing
  * unless a valid token is configured, so local and test builds make no outside request.
- * `crossOrigin` keeps the script loadable on the cross-origin isolated tool routes.
+ *
+ * Mirrors Cloudflare's own snippet (a module script). Module scripts are always fetched
+ * with CORS, which is what lets this load on the cross-origin isolated tool routes;
+ * `crossOrigin` states that explicitly.
  */
 export function AnalyticsBeacon({ token }: { token: string | undefined }) {
   if (!isBeaconToken(token)) return null;
   return (
+    // Module scripts are deferred by the HTML spec; the lint rule only knows async/defer.
+    // eslint-disable-next-line @next/next/no-sync-scripts
     <script
-      defer
+      type="module"
       src={BEACON_SRC}
       crossOrigin="anonymous"
       data-cf-beacon={JSON.stringify({ token })}

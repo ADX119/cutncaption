@@ -41,14 +41,17 @@ test('all 20 tool pages are served', async ({ request }) => {
   }
 });
 
-test('pages load without console or CSP errors', async ({ page }) => {
-  const errors: string[] = [];
-  page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(message.text());
+// One fresh page per URL. Navigating away mid-load makes WebKit log the cancelled
+// analytics request as an error, which says nothing about the page itself.
+for (const url of ['/', TOOL_URL]) {
+  test(`${url} loads without console or CSP errors`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'error') errors.push(message.text());
+    });
+    page.on('pageerror', (error) => errors.push(error.message));
+    await page.goto(url);
+    await page.waitForLoadState('networkidle');
+    expect(errors).toEqual([]);
   });
-  page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/');
-  await page.goto(TOOL_URL);
-  await page.waitForLoadState('networkidle');
-  expect(errors).toEqual([]);
-});
+}

@@ -22,7 +22,7 @@ describe('AnalyticsBeacon', () => {
     const html = renderToStaticMarkup(<AnalyticsBeacon token={TOKEN} />);
     expect(html).toContain('src="https://static.cloudflareinsights.com/beacon.min.js"');
     expect(html).toContain('crossorigin="anonymous"');
-    expect(html).toContain('defer');
+    expect(html).toContain('type="module"');
     expect(html).toContain(`data-cf-beacon="{&quot;token&quot;:&quot;${TOKEN}&quot;}"`);
   });
 });
