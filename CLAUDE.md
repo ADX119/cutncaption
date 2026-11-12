@@ -34,16 +34,16 @@ Next.js App Router (`output: 'export'`) · TypeScript strict · Tailwind · Zust
 
 ## Commands
 
-| Command | Does |
-|---|---|
-| `pnpm dev` | dev server (COOP/COEP on `/tools/*`) |
-| `pnpm build` | static export to `out/` |
-| `pnpm preview` | `wrangler pages dev out` (honours `_headers`) |
-| `pnpm lint` / `pnpm typecheck` | ESLint incl. boundary rules / `tsc --noEmit` |
-| `pnpm test` | Vitest unit tests |
-| `pnpm e2e` | build + Playwright against `pnpm preview` |
-| `pnpm e2e:slow` | `@slow` specs (real Whisper) |
-| `pnpm check` | lint + typecheck + test + build — must pass before every commit |
+| Command                        | Does                                                            |
+| ------------------------------ | --------------------------------------------------------------- |
+| `pnpm dev`                     | dev server (COOP/COEP on `/tools/*`)                            |
+| `pnpm build`                   | static export to `out/`                                         |
+| `pnpm preview`                 | `wrangler pages dev out` (honours `_headers`)                   |
+| `pnpm lint` / `pnpm typecheck` | ESLint incl. boundary rules / `tsc --noEmit`                    |
+| `pnpm test`                    | Vitest unit tests                                               |
+| `pnpm e2e`                     | build + Playwright against `pnpm preview`                       |
+| `pnpm e2e:slow`                | `@slow` specs (real Whisper)                                    |
+| `pnpm check`                   | lint + typecheck + test + build — must pass before every commit |
 
 Use pnpm only. Scripts are Node `.mjs` and must work on Windows; no bash-only scripts.
 

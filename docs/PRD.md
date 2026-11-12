@@ -4,22 +4,22 @@ Free, ad-free, privacy-first clip, meme and voice studio for short-form creators
 
 Decisions already taken (do not reopen without the owner):
 
-| Topic | Decision |
-|---|---|
+| Topic                                | Decision                                                                                                     |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
 | Large binaries (ffmpeg wasm, models) | Own private Cloudflare R2 bucket, served same-origin at `/assets/*` by a Pages Function; no third-party CDNs |
-| Domain | Launch on `*.pages.dev`; buy a domain before the SEO push (M6) |
-| Licence | Repo is open source, GPL-3.0-or-later; stock `@ffmpeg/core` builds |
-| Whisper | `base` everywhere; `small` offered as "Higher accuracy" only on capable devices |
-| Languages | English UI and pages only; all strings via message catalogue so `/hi/` can be added later |
+| Domain                               | Launch on `*.pages.dev`; buy a domain before the SEO push (M6)                                               |
+| Licence                              | Repo is open source, GPL-3.0-or-later; stock `@ffmpeg/core` builds                                           |
+| Whisper                              | `base` everywhere; `small` offered as "Higher accuracy" only on capable devices                              |
+| Languages                            | English UI and pages only; all strings via message catalogue so `/hi/` can be added later                    |
 
 ## 1. Users
 
-| Persona | Device | Needs |
-|---|---|---|
-| **Reels/Shorts creator** (primary) | Mid-range Android, some iPhone | Cut a moment, caption it, crop to 9:16, post |
-| **Meme maker** | Android, desktop | Turn a video moment into a captioned clip, GIF or WhatsApp sticker in under a minute |
-| **Hindi / Hinglish creator** | Low to mid Android | Accurate Hindi captions, in Devanagari or Roman script |
-| **Casual utility user** (SEO traffic) | Anything | One job: shrink a video for WhatsApp, get an MP3, convert to MP4 |
+| Persona                               | Device                         | Needs                                                                                |
+| ------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
+| **Reels/Shorts creator** (primary)    | Mid-range Android, some iPhone | Cut a moment, caption it, crop to 9:16, post                                         |
+| **Meme maker**                        | Android, desktop               | Turn a video moment into a captioned clip, GIF or WhatsApp sticker in under a minute |
+| **Hindi / Hinglish creator**          | Low to mid Android             | Accurate Hindi captions, in Devanagari or Roman script                               |
+| **Casual utility user** (SEO traffic) | Anything                       | One job: shrink a video for WhatsApp, get an MP3, convert to MP4                     |
 
 ## 2. Jobs to be done
 
@@ -51,25 +51,31 @@ Decisions already taken (do not reopen without the owner):
 ### 4.1 Core tools
 
 **Trim**
+
 - Timeline with start/end handles, preview playback of the selection, numeric time inputs (0.1 s steps).
-- Two modes: *Fast* (stream copy, cuts on keyframes, labelled as approximate) and *Precise* (re-encode).
+- Two modes: _Fast_ (stream copy, cuts on keyframes, labelled as approximate) and _Precise_ (re-encode).
 - AC: Precise output duration within ±0.1 s of the selection; Fast within ±1 keyframe interval and finishing in < 5 s for a 100 MB file on desktop. Audio and video stay in sync (≤ 50 ms drift).
 
 **Compress**
+
 - Three presets: Light (≤1080p), Balanced (≤720p), Small (≤480p). Shows estimated output size before running.
 - AC: output plays in Chrome, Safari and WhatsApp; Balanced on a typical 1080p phone clip is ≥ 50% smaller; output is never larger than the input (if it would be, the user is told and offered the original).
 
 **Compress to size**
+
 - Target in MB with presets: WhatsApp 16 MB, Discord 10 MB, Email 25 MB, custom.
 - AC: output ≤ target, and ≥ 85% of target when the source is larger than the target. If the target is unreachable at ≥ 150 kbps video, the user is told to trim first. If the source is already under target, no processing happens and the user is told.
 
 **Convert to MP4**
+
 - AC: output is H.264 + AAC, `yuv420p`, faststart. H.264/AAC inputs are remuxed without re-encoding (near-instant). MOV, WebM, MKV and AVI fixtures all convert.
 
 **Video to MP3**
+
 - Bitrate choice: 128 / 192 / 320 kbps-equivalent. AC: output is a valid MP3 whose duration matches the source ±0.1 s; a file with no audio track gives a clear error.
 
 **Mute**
+
 - AC: output has zero audio streams, video stream is bit-identical (stream copy), completes in < 5 s for 100 MB on desktop.
 
 ### 4.2 Meme Studio
@@ -95,7 +101,7 @@ Decisions already taken (do not reopen without the owner):
 - **Line splitting**: cues broken at punctuation and pauses; max 2 lines; max characters per line depends on aspect (42 landscape, 22 vertical); cue length 0.7–5 s.
 - **Edit screen**: cue list synced to video; edit text; nudge start/end; split, merge, delete, add; undo/redo.
 - **Script toggle** (Hindi): Devanagari ⇄ Roman (Hinglish-style transliteration). Manual edits in either script are kept when toggling back and forth.
-- **Export**: SRT and VTT (UTF-8), and burned-in MP4 in three styles: *Classic* (white, black outline), *Box* (text on dark box), *Highlight* (current word highlighted).
+- **Export**: SRT and VTT (UTF-8), and burned-in MP4 in three styles: _Classic_ (white, black outline), _Box_ (text on dark box), _Highlight_ (current word highlighted).
 - AC:
   - Word timestamps on the English fixture are within ±0.3 s of ground truth; fixture WER ≤ 15% (English, Base) and ≤ 35% (Hindi, Base), ≤ 25% (Hindi, Small).
   - A fixture with 10 s of silence in the middle yields no cue inside the silence.
@@ -137,11 +143,11 @@ Decisions already taken (do not reopen without the owner):
 
 Measured from 30 days after launch; targets are for day 90 and are initial guesses to revisit.
 
-| Metric | Definition | Target |
-|---|---|---|
-| **Tool runs per week** (north star) | `tool_run` events with outcome `ok` | 5,000 |
-| **Returning users** | share of weekly active browsers whose `returning` flag is true (had a run in an earlier calendar week) | ≥ 20% |
-| Completion rate | `ok` runs ÷ started runs | ≥ 85% |
-| Error rate | `error` runs ÷ started runs, per tool and device class | ≤ 5% |
-| Organic entry share | page views landing on `/tools/*` from search | ≥ 50% |
-| Web Vitals | LCP p75 on tool pages | < 2.5 s |
+| Metric                              | Definition                                                                                             | Target  |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------ | ------- |
+| **Tool runs per week** (north star) | `tool_run` events with outcome `ok`                                                                    | 5,000   |
+| **Returning users**                 | share of weekly active browsers whose `returning` flag is true (had a run in an earlier calendar week) | ≥ 20%   |
+| Completion rate                     | `ok` runs ÷ started runs                                                                               | ≥ 85%   |
+| Error rate                          | `error` runs ÷ started runs, per tool and device class                                                 | ≤ 5%    |
+| Organic entry share                 | page views landing on `/tools/*` from search                                                           | ≥ 50%   |
+| Web Vitals                          | LCP p75 on tool pages                                                                                  | < 2.5 s |

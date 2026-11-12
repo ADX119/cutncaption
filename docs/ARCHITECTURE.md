@@ -2,21 +2,21 @@
 
 Static Next.js site on Cloudflare Pages. All media and AI work runs in the browser. The only server code in Phase 1 is two Pages Functions: one streams large binaries from R2, one counts events.
 
-The site URL comes from `NEXT_PUBLIC_SITE_URL` (a `*.pages.dev` address until a domain is bought; switching is one env var plus redirects). Large binaries are served same-origin at `NEXT_PUBLIC_ASSET_BASE_URL` (`/assets`). Numbers marked *(calibrate)* are starting values to be confirmed on real devices in M5.
+The site URL comes from `NEXT_PUBLIC_SITE_URL` (a `*.pages.dev` address until a domain is bought; switching is one env var plus redirects). Large binaries are served same-origin at `NEXT_PUBLIC_ASSET_BASE_URL` (`/assets`). Numbers marked _(calibrate)_ are starting values to be confirmed on real devices in M5.
 
 ## 1. Stack
 
-| Layer | Choice |
-|---|---|
-| Framework | Next.js App Router, `output: 'export'`, `trailingSlash: true`, `images.unoptimized: true` |
-| Language / style | TypeScript `strict`, Tailwind, Radix primitives for sliders/dialogs/tabs |
-| State | Zustand (one store per feature; undo history in the captions store) |
-| Media | `@ffmpeg/ffmpeg` 0.12.x with `@ffmpeg/core` (single-thread) and `@ffmpeg/core-mt` (multi-thread); Mediabunny for the WebCodecs path |
-| AI | `@huggingface/transformers` v3 (Whisper), `onnxruntime-web` (Silero VAD) |
-| Worker RPC | Comlink |
-| Tests | Vitest (unit), Playwright (e2e against `wrangler pages dev out`) |
-| Hosting | Cloudflare Pages (site), R2 behind a Pages Function (large binaries), Pages Function + Analytics Engine (events) |
-| Package manager | pnpm; scripts are Node `.mjs` (must run on Windows, macOS and Linux) |
+| Layer            | Choice                                                                                                                              |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Framework        | Next.js App Router, `output: 'export'`, `trailingSlash: true`, `images.unoptimized: true`                                           |
+| Language / style | TypeScript `strict`, Tailwind, Radix primitives for sliders/dialogs/tabs                                                            |
+| State            | Zustand (one store per feature; undo history in the captions store)                                                                 |
+| Media            | `@ffmpeg/ffmpeg` 0.12.x with `@ffmpeg/core` (single-thread) and `@ffmpeg/core-mt` (multi-thread); Mediabunny for the WebCodecs path |
+| AI               | `@huggingface/transformers` v3 (Whisper), `onnxruntime-web` (Silero VAD)                                                            |
+| Worker RPC       | Comlink                                                                                                                             |
+| Tests            | Vitest (unit), Playwright (e2e against `wrangler pages dev out`)                                                                    |
+| Hosting          | Cloudflare Pages (site), R2 behind a Pages Function (large binaries), Pages Function + Analytics Engine (events)                    |
+| Package manager  | pnpm; scripts are Node `.mjs` (must run on Windows, macOS and Linux)                                                                |
 
 All dependencies must be GPL-3.0-compatible.
 
@@ -71,14 +71,14 @@ docs/
 
 Enforced by ESLint (`eslint-plugin-boundaries`); a violation fails lint.
 
-| Module | May import | Must not |
-|---|---|---|
-| `app/` | features, seo, components, i18n | contain logic, import engine |
-| `features/` | engine (public `index.ts` only), editor, components, i18n, lib | build ffmpeg args, touch wasm/model libraries |
-| `components/` | i18n, lib | import features or engine |
-| `engine/` | editor (types and pure functions), lib | import React, features, seo |
-| `editor/` | lib | import React, engine, DOM APIs other than a passed-in canvas context |
-| `seo/` | features (to mount a tool), i18n | import engine |
+| Module        | May import                                                     | Must not                                                             |
+| ------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `app/`        | features, seo, components, i18n                                | contain logic, import engine                                         |
+| `features/`   | engine (public `index.ts` only), editor, components, i18n, lib | build ffmpeg args, touch wasm/model libraries                        |
+| `components/` | i18n, lib                                                      | import features or engine                                            |
+| `engine/`     | editor (types and pure functions), lib                         | import React, features, seo                                          |
+| `editor/`     | lib                                                            | import React, engine, DOM APIs other than a passed-in canvas context |
+| `seo/`        | features (to mount a tool), i18n                               | import engine                                                        |
 
 Only `engine/` may import `@ffmpeg/*`, `@huggingface/transformers`, `onnxruntime-web`, `mediabunny`.
 
@@ -169,20 +169,21 @@ else core-st
 
 ## 6. Loading and caching workers, wasm and models
 
-| Asset | Size (approx.) | Served from | Cached by |
-|---|---|---|---|
-| App JS/CSS, our workers | — | Pages `/_next/static` | HTTP immutable |
-| ffmpeg JS glue (`ffmpeg-core.js`, pthread worker, class worker) | < 300 KB | Pages `/vendor/ffmpeg/<ver>/` | HTTP immutable |
-| `ffmpeg-core.wasm` (st), `ffmpeg-core.wasm` (mt) | ~32 MB each | R2 `/ffmpeg/<ver>/{st,mt}/` | Cache Storage |
-| ONNX Runtime wasm | ~10–25 MB | R2 `/ort/<ver>/` | Cache Storage |
-| Silero VAD | ~2 MB | R2 `/models/silero-vad/<ver>/` | Cache Storage |
-| Whisper base (timestamped) | ~80 MB | R2 `/models/whisper-base_timestamped/` | Cache Storage |
-| Whisper small (timestamped) | ~250 MB | R2 `/models/whisper-small_timestamped/` | Cache Storage |
-| Fonts | < 1 MB each | Pages `/fonts/` | HTTP immutable |
+| Asset                                                           | Size (approx.) | Served from                             | Cached by      |
+| --------------------------------------------------------------- | -------------- | --------------------------------------- | -------------- |
+| App JS/CSS, our workers                                         | —              | Pages `/_next/static`                   | HTTP immutable |
+| ffmpeg JS glue (`ffmpeg-core.js`, pthread worker, class worker) | < 300 KB       | Pages `/vendor/ffmpeg/<ver>/`           | HTTP immutable |
+| `ffmpeg-core.wasm` (st), `ffmpeg-core.wasm` (mt)                | ~32 MB each    | R2 `/ffmpeg/<ver>/{st,mt}/`             | Cache Storage  |
+| ONNX Runtime wasm                                               | ~10–25 MB      | R2 `/ort/<ver>/`                        | Cache Storage  |
+| Silero VAD                                                      | ~2 MB          | R2 `/models/silero-vad/<ver>/`          | Cache Storage  |
+| Whisper base (timestamped)                                      | ~80 MB         | R2 `/models/whisper-base_timestamped/`  | Cache Storage  |
+| Whisper small (timestamped)                                     | ~250 MB        | R2 `/models/whisper-small_timestamped/` | Cache Storage  |
+| Fonts                                                           | < 1 MB each    | Pages `/fonts/`                         | HTTP immutable |
 
 Why the split: Pages rejects files over 25 MiB, and `new Worker()` needs a same-origin script. So small scripts stay on Pages static files and only large binaries go to R2, reached through `/assets/*` on the same origin. "R2 `/x/`" in the table means the R2 key, fetched as `/assets/x/`.
 
 **Asset loader** (`engine/assets`):
+
 - `scripts/upload-assets.mjs` uploads versioned files to R2 and writes `src/engine/assets/manifest.json` (`path → { bytes, sha256 }`). Paths contain the version; objects are immutable (`Cache-Control: immutable`).
 - `fetchAsset(path, { onProgress, signal })`: look up Cache Storage `cnc-assets-v1`; on miss, stream from R2 with byte progress, verify length and SHA-256, store, return a `Blob`.
 - On `QuotaExceededError`, continue without caching and warn once. Call `navigator.storage.persist()` after the first successful job. Old-version entries are deleted on load.
@@ -211,35 +212,36 @@ MP4  = -movflags +faststart
 
 `superfast` on class L, `veryfast` otherwise.
 
-| Tool | Command |
-|---|---|
-| Probe | `-hide_banner -i IN` → parse stderr (`commands/probe.ts`), cross-checked with `HTMLVideoElement` metadata |
-| Trim, fast | `-ss {start} -i IN -t {dur} -c copy -avoid_negative_ts make_zero MP4 out.{srcExt}` |
-| Trim, precise | `-ss {start} -i IN -t {dur} X264 -crf 20 AAC(128) MP4 out.mp4` |
-| Compress | `-i IN -vf scale={w}:{h} X264 -crf {23|28|32} AAC({128|96|64}) MP4 out.mp4` — caps 1080/720/480 on the short side |
-| Compress to size | `-i IN -vf scale={w}:{h} X264 -b:v {v}k -maxrate {v}k -bufsize {2v}k AAC({a}) MP4 out.mp4` |
-| Convert, remux | `-i IN -c copy MP4 out.mp4` (when video is H.264 and audio is AAC or absent) |
-| Convert, re-encode | `-i IN X264 -crf 22 AAC(128) MP4 out.mp4` |
-| Video to MP3 | `-i IN -vn -c:a libmp3lame -b:a {128|192|320}k out.mp3` |
-| Mute | `-i IN -c:v copy -an MP4 out.{srcExt}` |
-| 9:16 crop | `-i IN -vf crop={cw}:{ch}:{x}:{y},scale=1080:1920 X264 -crf 21 AAC(128) MP4 out.mp4` |
-| PCM for Whisper | `-ss {s} -t {≤600} -i IN -vn -ac 1 -ar 16000 -f f32le out.pcm` (in 10-minute windows) |
+| Tool               | Command                                                                                                   |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| Probe              | `-hide_banner -i IN` → parse stderr (`commands/probe.ts`), cross-checked with `HTMLVideoElement` metadata |
+| Trim, fast         | `-ss {start} -i IN -t {dur} -c copy -avoid_negative_ts make_zero MP4 out.{srcExt}`                        |
+| Trim, precise      | `-ss {start} -i IN -t {dur} X264 -crf 20 AAC(128) MP4 out.mp4`                                            |
+| Compress           | `-i IN -vf scale={w}:{h} X264 -crf {23                                                                    | 28  | 32} AAC({128   | 96  | 64}) MP4 out.mp4` — caps 1080/720/480 on the short side |
+| Compress to size   | `-i IN -vf scale={w}:{h} X264 -b:v {v}k -maxrate {v}k -bufsize {2v}k AAC({a}) MP4 out.mp4`                |
+| Convert, remux     | `-i IN -c copy MP4 out.mp4` (when video is H.264 and audio is AAC or absent)                              |
+| Convert, re-encode | `-i IN X264 -crf 22 AAC(128) MP4 out.mp4`                                                                 |
+| Video to MP3       | `-i IN -vn -c:a libmp3lame -b:a {128                                                                      | 192 | 320}k out.mp3` |
+| Mute               | `-i IN -c:v copy -an MP4 out.{srcExt}`                                                                    |
+| 9:16 crop          | `-i IN -vf crop={cw}:{ch}:{x}:{y},scale=1080:1920 X264 -crf 21 AAC(128) MP4 out.mp4`                      |
+| PCM for Whisper    | `-ss {s} -t {≤600} -i IN -vn -ac 1 -ar 16000 -f f32le out.pcm` (in 10-minute windows)                     |
 
 **Compress-to-size maths** (`commands/bitrate.ts`): `total = targetBytes × 8 × 0.96 / duration`; audio 96k (64k if total < 400k); `v = total − audio`; refuse if `v < 150k`. Height ladder by `v`: ≥2500k→1080, ≥1200k→720, ≥600k→480, ≥300k→360, else 240. Single pass; if the output exceeds the target, rerun once with `v × (target/actual) × 0.93`.
 
 **Meme Studio.** Text is never drawn by ffmpeg. `editor/render` draws the caption onto a canvas (the browser shapes Devanagari and applies fonts), exported as a transparent PNG the size of the output frame and written to MEMFS as `ov.png`. The same renderer draws the preview, which is what makes it WYSIWYG. All start with `-ss {start} -t {dur} -i IN -i ov.png`.
 
-| Layout / export | filter_complex and output |
-|---|---|
-| Top/bottom text | `[0:v]scale={w}:{h}[v];[v][1:v]overlay=0:0[out]` |
-| Caption bar | `[0:v]scale={w}:{h},pad={w}:{h+bar}:0:{bar}:white[v];[v][1:v]overlay=0:0[out]` |
-| Freeze-frame zoom | `[0:v]scale={w}:{h},split[a0][b0];[a0]trim=0:{f},setpts=PTS-STARTPTS[a];[b0]trim=start={f}:end={f+1/fps},setpts=PTS-STARTPTS,zoompan=z='min(1+{rate}*on,{zmax})':x='{fx}*(iw-iw/zoom)':y='{fy}*(ih-ih/zoom)':d={hold*fps}:s={w}x{h}:fps={fps}[b];[a][b]concat=n=2:v=1:a=0[v];[v][1:v]overlay=0:0:enable='gte(t,{f})'[out]` with audio `[0:a]atrim=0:{f},asetpts=PTS-STARTPTS,apad=pad_dur={hold}[aout]` |
-| → MP4 | `-map [out] -map {0:a|[aout]}? X264 -crf 20 AAC(128) MP4 out.mp4` |
-| → GIF | append `,fps=12,scale=480:-2:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4` → `-loop 0 out.gif` |
-| → WhatsApp sticker | append `,fps={12},scale=512:512:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000` → `-an -c:v libwebp -q:v {q} -loop 0 out.webp`; retry ladder q 60→45→30, then fps 12→10→8, until ≤ 500 KB |
-| → Still image | no ffmpeg: draw the `<video>` frame and caption to a canvas, `toBlob` PNG/JPEG (`canvas` path) |
+| Layout / export    | filter_complex and output                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Top/bottom text    | `[0:v]scale={w}:{h}[v];[v][1:v]overlay=0:0[out]`                                                                                                                                                                                                                                                                                                                                                        |
+| Caption bar        | `[0:v]scale={w}:{h},pad={w}:{h+bar}:0:{bar}:white[v];[v][1:v]overlay=0:0[out]`                                                                                                                                                                                                                                                                                                                          |
+| Freeze-frame zoom  | `[0:v]scale={w}:{h},split[a0][b0];[a0]trim=0:{f},setpts=PTS-STARTPTS[a];[b0]trim=start={f}:end={f+1/fps},setpts=PTS-STARTPTS,zoompan=z='min(1+{rate}*on,{zmax})':x='{fx}*(iw-iw/zoom)':y='{fy}*(ih-ih/zoom)':d={hold*fps}:s={w}x{h}:fps={fps}[b];[a][b]concat=n=2:v=1:a=0[v];[v][1:v]overlay=0:0:enable='gte(t,{f})'[out]` with audio `[0:a]atrim=0:{f},asetpts=PTS-STARTPTS,apad=pad_dur={hold}[aout]` |
+| → MP4              | `-map [out] -map {0:a                                                                                                                                                                                                                                                                                                                                                                                   | [aout]}? X264 -crf 20 AAC(128) MP4 out.mp4` |
+| → GIF              | append `,fps=12,scale=480:-2:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4` → `-loop 0 out.gif`                                                                                                                                                                                                                                             |
+| → WhatsApp sticker | append `,fps={12},scale=512:512:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000` → `-an -c:v libwebp -q:v {q} -loop 0 out.webp`; retry ladder q 60→45→30, then fps 12→10→8, until ≤ 500 KB                                                                                                                                                            |
+| → Still image      | no ffmpeg: draw the `<video>` frame and caption to a canvas, `toBlob` PNG/JPEG (`canvas` path)                                                                                                                                                                                                                                                                                                          |
 
 **Burned-in captions.** Two renderers behind one `burnCaptions` job, both driven by the same `CaptionStyle` data:
+
 - `webcodecs` (preferred, M5): decode → draw frame + `editor/render` caption on an `OffscreenCanvas` → encode → mux. Identical to the preview.
 - ffmpeg fallback: `editor/captions/ass.ts` emits an ASS file; fonts are written to `/fonts` in MEMFS.
   `-i IN -vf subtitles=subs.ass:fontsdir=/fonts X264 -crf 21 -c:a copy MP4 out.mp4`
@@ -253,26 +255,27 @@ MP4  = -movflags +faststart
 
 `engine/device` classifies once per session using feature detection (`navigator.deviceMemory`, `hardwareConcurrency`, pointer/screen, platform). UA is used only to identify iOS and in-app browsers.
 
-| Class | Rule |
-|---|---|
-| **L** low | Android/mobile with `deviceMemory ≤ 3` or ≤ 4 cores |
-| **M** mid | other phones and tablets, including all iPhone/iPad |
-| **H** high | desktop/laptop, or `deviceMemory ≥ 8` |
+| Class      | Rule                                                |
+| ---------- | --------------------------------------------------- |
+| **L** low  | Android/mobile with `deviceMemory ≤ 3` or ≤ 4 cores |
+| **M** mid  | other phones and tablets, including all iPhone/iPad |
+| **H** high | desktop/laptop, or `deviceMemory ≥ 8`               |
 
-Limits *(calibrate)*, defined in one file, `engine/device/limits.ts`:
+Limits _(calibrate)_, defined in one file, `engine/device/limits.ts`:
 
-| Limit | L | M | H | Kind |
-|---|---|---|---|---|
-| Max input file | 500 MB | 1 GB | 2 GB | hard |
-| Max estimated output (held in memory) | 150 MB | 300 MB | 1 GB | hard |
-| Max re-encode duration | 3 min | 10 min | 30 min | warn |
-| Max encode resolution (short side) | 720 | 1080 | 1080 | clamp |
-| ffmpeg core | st | mt (Android) / st (iOS) | mt | — |
-| Whisper tiers offered | base | base | base, small (needs WebGPU) | — |
-| Whisper backend | WASM q8 | WebGPU if present, else WASM q8 | WebGPU if present, else WASM q8 | — |
-| Max caption audio | 10 min | 30 min | 60 min | hard |
+| Limit                                 | L       | M                               | H                               | Kind  |
+| ------------------------------------- | ------- | ------------------------------- | ------------------------------- | ----- |
+| Max input file                        | 500 MB  | 1 GB                            | 2 GB                            | hard  |
+| Max estimated output (held in memory) | 150 MB  | 300 MB                          | 1 GB                            | hard  |
+| Max re-encode duration                | 3 min   | 10 min                          | 30 min                          | warn  |
+| Max encode resolution (short side)    | 720     | 1080                            | 1080                            | clamp |
+| ffmpeg core                           | st      | mt (Android) / st (iOS)         | mt                              | —     |
+| Whisper tiers offered                 | base    | base                            | base, small (needs WebGPU)      | —     |
+| Whisper backend                       | WASM q8 | WebGPU if present, else WASM q8 | WebGPU if present, else WASM q8 | —     |
+| Max caption audio                     | 10 min  | 30 min                          | 60 min                          | hard  |
 
 Notes:
+
 - Stream-copy jobs are bounded by the output limit, not the input: trimming 30 s out of a 2 GB file is fine.
 - Whisper Small is offered only when a WebGPU adapter is obtained, the class is H, and the platform is not iOS.
 - `hard` blocks with a reason and a suggestion; `warn` lets the user continue; `clamp` is applied silently and shown in the summary.
@@ -281,18 +284,18 @@ Notes:
 
 Capabilities are always feature-detected; this matrix is the expectation tests are written against.
 
-| Browser | Supported | ffmpeg | WebCodecs path | Whisper | Notes |
-|---|---|---|---|---|---|
-| Chrome / Edge desktop 113+ | Full | mt | yes | WebGPU | Reference platform |
-| Chrome Android 121+, mid/high | Full | mt | yes | WebGPU where an adapter exists, else WASM | |
-| Chrome Android, low-end (≤ 3 GB) | Full, reduced limits | st | yes, if hardware encoder present | WASM base | Class L limits |
-| Samsung Internet (current) | Full | as Chrome Android | yes | as Chrome Android | |
-| Safari macOS 16.4+ | Full | st (mt off) | video yes; audio encode only on 26+ → audio via ffmpeg | WASM; WebGPU on 26+ | |
-| iOS / iPadOS Safari 16.4+ | Full, reduced limits | st only | as Safari macOS | WASM base; WebGPU base on 26+ | All iOS browsers are WebKit. Tab is killed near ~1 GB; class M limits. Share sheet used for "Save to Photos" |
-| Firefox desktop 130+ | Full | mt | yes | WASM; WebGPU where shipped | |
-| Firefox Android | Best effort | st | if detected | WASM base | Not in CI |
-| In-app browsers (Instagram, Facebook, TikTok) | Blocked | — | — | — | Blob downloads are unreliable → "Open in your browser" screen |
-| Anything without WebAssembly SIMD or module workers | Blocked | — | — | — | Unsupported-browser screen |
+| Browser                                             | Supported            | ffmpeg            | WebCodecs path                                         | Whisper                                   | Notes                                                                                                        |
+| --------------------------------------------------- | -------------------- | ----------------- | ------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Chrome / Edge desktop 113+                          | Full                 | mt                | yes                                                    | WebGPU                                    | Reference platform                                                                                           |
+| Chrome Android 121+, mid/high                       | Full                 | mt                | yes                                                    | WebGPU where an adapter exists, else WASM |                                                                                                              |
+| Chrome Android, low-end (≤ 3 GB)                    | Full, reduced limits | st                | yes, if hardware encoder present                       | WASM base                                 | Class L limits                                                                                               |
+| Samsung Internet (current)                          | Full                 | as Chrome Android | yes                                                    | as Chrome Android                         |                                                                                                              |
+| Safari macOS 16.4+                                  | Full                 | st (mt off)       | video yes; audio encode only on 26+ → audio via ffmpeg | WASM; WebGPU on 26+                       |                                                                                                              |
+| iOS / iPadOS Safari 16.4+                           | Full, reduced limits | st only           | as Safari macOS                                        | WASM base; WebGPU base on 26+             | All iOS browsers are WebKit. Tab is killed near ~1 GB; class M limits. Share sheet used for "Save to Photos" |
+| Firefox desktop 130+                                | Full                 | mt                | yes                                                    | WASM; WebGPU where shipped                |                                                                                                              |
+| Firefox Android                                     | Best effort          | st                | if detected                                            | WASM base                                 | Not in CI                                                                                                    |
+| In-app browsers (Instagram, Facebook, TikTok)       | Blocked              | —                 | —                                                      | —                                         | Blob downloads are unreliable → "Open in your browser" screen                                                |
+| Anything without WebAssembly SIMD or module workers | Blocked              | —                 | —                                                      | —                                         | Unsupported-browser screen                                                                                   |
 
 Minimum bar to run anything: WebAssembly + SIMD, module workers, Cache Storage, `File`/`Blob` streaming.
 
@@ -307,39 +310,39 @@ Minimum bar to run anything: WebAssembly + SIMD, module workers, Cache Storage, 
 
 Models (`engine/ai/models.ts`; confirm repo names when mirroring to R2):
 
-| Tier | Source repo | WASM dtype | WebGPU dtype |
-|---|---|---|---|
-| base | `onnx-community/whisper-base_timestamped` | q8 | encoder fp32, decoder q4 |
-| small | `onnx-community/whisper-small_timestamped` | — | encoder fp32, decoder q4 |
+| Tier  | Source repo                                | WASM dtype | WebGPU dtype             |
+| ----- | ------------------------------------------ | ---------- | ------------------------ |
+| base  | `onnx-community/whisper-base_timestamped`  | q8         | encoder fp32, decoder q4 |
+| small | `onnx-community/whisper-small_timestamped` | —          | encoder fp32, decoder q4 |
 
 Tests use `whisper-tiny` through an asset-base override so CI stays fast.
 
 ## 11. SEO pages
 
-One registry, `src/seo/registry.ts`: `slug → { tool component, preset, contentKey }`. `app/tools/[slug]/page.tsx` renders `<ToolPage>` (H1, tool, how-to, FAQ, related links, JSON-LD) and `generateMetadata`. Content lives in `src/seo/content/en/<slug>.ts`. Variant pages must differ in preset *and* copy.
+One registry, `src/seo/registry.ts`: `slug → { tool component, preset, contentKey }`. `app/tools/[slug]/page.tsx` renders `<ToolPage>` (H1, tool, how-to, FAQ, related links, JSON-LD) and `generateMetadata`. Content lives in `src/seo/content/en/<slug>.ts`. Variant pages must differ in preset _and_ copy.
 
-| # | Slug | Tool | Preset |
-|---|---|---|---|
-| 1 | `trim-video` | Trim | — |
-| 2 | `compress-video` | Compress | Balanced |
-| 3 | `compress-video-to-size` | Compress to size | custom |
-| 4 | `compress-video-for-whatsapp` | Compress to size | 16 MB |
-| 5 | `compress-video-for-discord` | Compress to size | 10 MB |
-| 6 | `convert-to-mp4` | Convert | — |
-| 7 | `mov-to-mp4` | Convert | accept `.mov` |
-| 8 | `video-to-mp3` | Video to MP3 | 192k |
-| 9 | `mute-video` | Mute | — |
-| 10 | `video-meme-maker` | Meme Studio | MP4 |
-| 11 | `video-to-gif` | Meme Studio | GIF |
-| 12 | `video-to-whatsapp-sticker` | Meme Studio | Sticker |
-| 13 | `video-to-image` | Meme Studio | Still |
-| 14 | `auto-captions` | Captions | English |
-| 15 | `hindi-captions` | Captions | Hindi, Devanagari |
-| 16 | `hinglish-captions` | Captions | Hindi, Roman |
-| 17 | `video-to-srt` | Captions | export SRT |
-| 18 | `crop-video-for-reels` | 9:16 crop | Reels |
-| 19 | `crop-video-for-youtube-shorts` | 9:16 crop | Shorts |
-| 20 | `crop-video-for-tiktok` | 9:16 crop | TikTok |
+| #   | Slug                            | Tool             | Preset            |
+| --- | ------------------------------- | ---------------- | ----------------- |
+| 1   | `trim-video`                    | Trim             | —                 |
+| 2   | `compress-video`                | Compress         | Balanced          |
+| 3   | `compress-video-to-size`        | Compress to size | custom            |
+| 4   | `compress-video-for-whatsapp`   | Compress to size | 16 MB             |
+| 5   | `compress-video-for-discord`    | Compress to size | 10 MB             |
+| 6   | `convert-to-mp4`                | Convert          | —                 |
+| 7   | `mov-to-mp4`                    | Convert          | accept `.mov`     |
+| 8   | `video-to-mp3`                  | Video to MP3     | 192k              |
+| 9   | `mute-video`                    | Mute             | —                 |
+| 10  | `video-meme-maker`              | Meme Studio      | MP4               |
+| 11  | `video-to-gif`                  | Meme Studio      | GIF               |
+| 12  | `video-to-whatsapp-sticker`     | Meme Studio      | Sticker           |
+| 13  | `video-to-image`                | Meme Studio      | Still             |
+| 14  | `auto-captions`                 | Captions         | English           |
+| 15  | `hindi-captions`                | Captions         | Hindi, Devanagari |
+| 16  | `hinglish-captions`             | Captions         | Hindi, Roman      |
+| 17  | `video-to-srt`                  | Captions         | export SRT        |
+| 18  | `crop-video-for-reels`          | 9:16 crop        | Reels             |
+| 19  | `crop-video-for-youtube-shorts` | 9:16 crop        | Shorts            |
+| 20  | `crop-video-for-tiktok`         | 9:16 crop        | TikTok            |
 
 Platform values (size targets, safe zones, duration warnings) live in `src/editor/crop/presets.ts` and `src/features/core-tools/sizePresets.ts`; check them against current platform documentation when implementing.
 
@@ -355,13 +358,13 @@ i18n: every UI string goes through `t('key')` from `src/i18n/messages/en.ts`. En
 
 ## 13. Testing strategy
 
-| Level | Tool | Covers |
-|---|---|---|
-| Unit | Vitest | command builders (exact arg arrays), bitrate maths, probe log parser, limits, device class, line splitter, SRT/VTT, transliteration, ASS emitter, layout geometry, crop maths, SEO registry and JSON-LD |
-| Engine integration | Playwright (Chromium) | real ffmpeg.wasm on fixtures ≤ 300 KB; output re-probed for codec, duration, dimensions, size |
-| E2E | Playwright: Chromium, WebKit, Pixel and iPhone emulation | one happy path per tool, cancel, limit block, privacy network assertion, header checks |
-| Slow | Playwright `@slow` | Whisper tiny on speech fixtures; run on demand and nightly |
-| Manual | checklist in TASKS M5 | real low-end Android and real iPhone |
+| Level              | Tool                                                     | Covers                                                                                                                                                                                                  |
+| ------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit               | Vitest                                                   | command builders (exact arg arrays), bitrate maths, probe log parser, limits, device class, line splitter, SRT/VTT, transliteration, ASS emitter, layout geometry, crop maths, SEO registry and JSON-LD |
+| Engine integration | Playwright (Chromium)                                    | real ffmpeg.wasm on fixtures ≤ 300 KB; output re-probed for codec, duration, dimensions, size                                                                                                           |
+| E2E                | Playwright: Chromium, WebKit, Pixel and iPhone emulation | one happy path per tool, cancel, limit block, privacy network assertion, header checks                                                                                                                  |
+| Slow               | Playwright `@slow`                                       | Whisper tiny on speech fixtures; run on demand and nightly                                                                                                                                              |
+| Manual             | checklist in TASKS M5                                    | real low-end Android and real iPhone                                                                                                                                                                    |
 
 In tests the asset base points at a local static server serving the cores from `node_modules`, so CI never depends on R2. The AI engine has a fake implementation fed by recorded word-timestamp JSON for UI tests.
 

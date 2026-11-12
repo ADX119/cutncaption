@@ -11,8 +11,8 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.1 Create the Next.js app** — pnpm, App Router, TypeScript strict, Tailwind, `output: 'export'`, `trailingSlash`, `images.unoptimized`, `src/` layout, Node version pinned.
   - AC: `pnpm build` produces `out/` with `index.html`.
   - Test: build succeeds; `out/index.html` exists.
-- [ ] **M0.2 Lint, format, typecheck, `pnpm check`** — ESLint, Prettier, `tsc --noEmit`; `check` = lint + typecheck + unit tests + build.
-  - AC: all scripts in CLAUDE.md exist and pass on a clean clone on Windows.
+- [x] **M0.2 Lint, format, typecheck, `pnpm check`** — ESLint, Prettier, `tsc --noEmit`; `check` = lint + typecheck + unit tests + build.
+  - AC: `lint`, `format`, `typecheck`, `test`, `check` exist and pass on Windows (`preview`, `e2e`, `e2e:slow` arrive with M0.6).
   - Test: `pnpm check` exits 0.
 - [ ] **M0.3 Folder skeleton and boundary rules** — create the folders from ARCHITECTURE §2 with `index.ts` stubs; configure `eslint-plugin-boundaries` per §3.
   - AC: importing `engine/` from `components/`, or React from `editor/`, fails lint.
@@ -40,7 +40,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: e2e with an Instagram UA shows the "Open in your browser" screen.
 - [ ] **M0.13 LICENSE, README, CI** — GPL-3.0-or-later, README with setup, GitHub Actions running `pnpm check` and Chromium e2e.
   - Test: CI green on a PR.
-- [ ] **M0.14 Cloudflare Pages deploy and R2 assets function** — Pages project from `out/` on `*.pages.dev`, preview deploys; private R2 bucket bound to the project; `functions/assets/[[path]].ts` per ARCHITECTURE §4. *Needs the owner's Cloudflare account (`wrangler login`): stop and ask before creating resources.*
+- [ ] **M0.14 Cloudflare Pages deploy and R2 assets function** — Pages project from `out/` on `*.pages.dev`, preview deploys; private R2 bucket bound to the project; `functions/assets/[[path]].ts` per ARCHITECTURE §4. _Needs the owner's Cloudflare account (`wrangler login`): stop and ask before creating resources._
   - AC: the `pages.dev` URL serves the site with correct headers; `GET /assets/<test-key>` returns the object with immutable caching; other methods return 405; a missing key returns 404.
   - Test: unit tests of the function handler with a mocked R2 binding; `curl -I` checks recorded in the PR; e2e header spec run against the preview URL.
 - [ ] **M0.15 Analytics beacon under COEP** — add the Web Analytics snippet with `crossorigin="anonymous"`; confirm it loads on an isolated page.
@@ -145,7 +145,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: integration test doing the comparison for Latin and Devanagari.
 - [ ] **M3.15 Wire into registry** — slugs 10–13 with export presets; limits applied (output capped per class).
   - Test: e2e smoke for the four URLs; privacy guard on.
-- [ ] **M3.16 Sticker check on a real phone** — send an exported sticker in WhatsApp on Android and iOS; record what happens. *Manual; ask the owner.*
+- [ ] **M3.16 Sticker check on a real phone** — send an exported sticker in WhatsApp on Android and iOS; record what happens. _Manual; ask the owner._
   - AC: result written into PRD §4.2 (and copy adjusted if WhatsApp treats it as an image).
 
 ## M4 — Auto captions
@@ -164,7 +164,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: integration: fixture → sample count = duration × 16000 ± 1%; over-limit rejects.
 - [ ] **M4.7 Speech fixtures and ground truth** — CC0 English and Hindi clips (~8 s each) plus one with a 10 s silent gap; word-level reference JSON.
   - Test: unit: fixtures and references load and validate.
-- [ ] **M4.8 Mirror models to R2** — Silero VAD, Whisper tiny (tests), base, small; add to manifest; confirm repo names and dtypes. *Uploads to the owner's R2: ask first.*
+- [ ] **M4.8 Mirror models to R2** — Silero VAD, Whisper tiny (tests), base, small; add to manifest; confirm repo names and dtypes. _Uploads to the owner's R2: ask first._
   - Test: manifest test lists all files; a HEAD request succeeds for each.
 - [ ] **M4.9 AI worker skeleton** — module worker, Comlink API, progress and abort plumbing, terminate.
   - Test: integration: ping/abort round trip; worker terminates cleanly.
@@ -226,9 +226,9 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: `@axe-core/playwright` spec with zero serious violations.
 - [ ] **M5.13 Performance budget** — bundle analysis, lazy-load engines and editors, enforce ≤ 200 KB gzip initial JS per tool route.
   - Test: script that fails the build when a route exceeds the budget.
-- [ ] **M5.14 Real-device calibration** — run the checklist below on one low-end Android (≤ 3 GB), one mid Android, one iPhone, one desktop; update `limits.ts` and ARCHITECTURE §8. *Manual; needs the owner's devices.*
+- [ ] **M5.14 Real-device calibration** — run the checklist below on one low-end Android (≤ 3 GB), one mid Android, one iPhone, one desktop; update `limits.ts` and ARCHITECTURE §8. _Manual; needs the owner's devices._
   - Checklist: each core tool on a 100 MB file · compress a 3-minute 1080p clip · meme MP4/GIF/sticker · 2-minute Hindi captions + burn-in · crop · cancel mid-job · five jobs in a row without reload.
-  - AC: results table committed; every *(calibrate)* marker removed.
+  - AC: results table committed; every _(calibrate)_ marker removed.
 
 ## M6 — SEO and launch
 
@@ -254,7 +254,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: e2e: sitemap lists home, 20 tool URLs, privacy, about with absolute URLs; robots references the sitemap.
 - [ ] **M6.11 Privacy and About pages** — what stays on device, every analytics field, open-source licence, ffmpeg and model credits with source links.
   - Test: unit: the analytics field list on the page is generated from the event schema.
-- [ ] **M6.12 Event endpoint** — `functions/api/e.ts` with Analytics Engine binding, schema validation, no cookies. *Creates a Cloudflare dataset: ask first.*
+- [ ] **M6.12 Event endpoint** — `functions/api/e.ts` with Analytics Engine binding, schema validation, no cookies. _Creates a Cloudflare dataset: ask first._
   - Test: unit tests of the handler: valid event accepted, unknown fields dropped, oversize body rejected.
 - [ ] **M6.13 Client events** — `tool_run`, `engine_load`, `weekly_active`; local `returning` flag; `sendBeacon`.
   - Test: unit: returning logic across ISO weeks; e2e: one successful run sends exactly one `tool_run`; blocked endpoint does not break the tool.
@@ -263,7 +263,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [ ] **M6.15 Lighthouse gate** — CI run on home and three tool pages.
   - AC: SEO ≥ 95, Accessibility ≥ 95, Performance ≥ 85 (mobile).
   - Test: Lighthouse CI assertion.
-- [ ] **M6.16 Production launch** — custom domain (buy and attach to the Pages project; redirect `*.pages.dev` to it; update `NEXT_PUBLIC_SITE_URL`), production env vars, R2 assets uploaded for the release versions, Search Console sitemap submission. *Outward-facing: owner confirms each step.*
+- [ ] **M6.16 Production launch** — custom domain (buy and attach to the Pages project; redirect `*.pages.dev` to it; update `NEXT_PUBLIC_SITE_URL`), production env vars, R2 assets uploaded for the release versions, Search Console sitemap submission. _Outward-facing: owner confirms each step._
   - AC: production passes the header spec, privacy guard and one e2e per tool group.
   - Test: `pnpm e2e --grep @smoke` against the production URL.
 - [ ] **M6.17 Post-launch check (day 7)** — review error rate by tool and device class, top failing paths, Web Vitals; file follow-up tasks here.
