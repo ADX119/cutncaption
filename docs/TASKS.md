@@ -36,7 +36,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: component test for accept/reject; e2e sets a file and sees its name and size.
 - [x] **M0.11 Device detection and limits** — `engine/device`: capabilities, class L/M/H, `limits.ts` table, in-app browser detection.
   - Test: unit tests with mocked `navigator` for each class and each limit kind (hard/warn/clamp).
-- [ ] **M0.12 Unsupported and in-app browser screens** — shown instead of the tool when the minimum bar fails.
+- [x] **M0.12 Unsupported and in-app browser screens** — shown instead of the tool when the minimum bar fails.
   - Test: e2e with an Instagram UA shows the "Open in your browser" screen.
 - [ ] **M0.13 LICENSE, README, CI** — GPL-3.0-or-later, README with setup, GitHub Actions running `pnpm check` and Chromium e2e.
   - Test: CI green on a PR.

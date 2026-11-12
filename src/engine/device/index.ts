@@ -11,5 +11,7 @@ export type {
   LimitIssue,
   WhisperTier,
 } from './limits';
+export { assessBrowser } from './support';
+export type { BrowserSupport } from './support';
 export { detectCapabilities, missingRequirements } from './capabilities';
 export type { Capabilities, MissingFeature } from './capabilities';

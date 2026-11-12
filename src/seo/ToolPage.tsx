@@ -1,3 +1,4 @@
+import { BrowserGate } from '@/features/shell';
 import type { ToolPageEntry } from './registry';
 import { ToolPlaceholder } from './ToolPlaceholder';
 
@@ -11,7 +12,9 @@ export function ToolPage({ entry }: { entry: ToolPageEntry }) {
     >
       <h1 className="display text-4xl">{entry.slug}</h1>
       <div className="mt-8">
-        <ToolPlaceholder />
+        <BrowserGate>
+          <ToolPlaceholder />
+        </BrowserGate>
       </div>
     </main>
   );

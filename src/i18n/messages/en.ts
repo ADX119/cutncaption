@@ -27,6 +27,24 @@ export const en = {
     'This file type isn’t supported. Try MP4, MOV, WebM, MKV, AVI, MP3, WAV, M4A, AAC or OGG.',
   'file.reject.empty': 'This file is empty. Choose another one.',
 
+  'browser.inApp.title': 'Open this page in your browser',
+  'browser.inApp.body':
+    'The browser built into {app} cannot save files reliably. Open its menu and choose “Open in browser”, or copy this link and paste it into Chrome or Safari.',
+  'browser.inApp.copy': 'Copy link',
+  'browser.inApp.copied': 'Link copied',
+  'browser.inApp.copyFailed': 'Copying was blocked. Press and hold the link above to copy it.',
+  'browser.app.instagram': 'Instagram',
+  'browser.app.facebook': 'Facebook',
+  'browser.app.tiktok': 'TikTok',
+  'browser.app.line': 'LINE',
+  'browser.unsupported.title': 'This browser cannot run the tools',
+  'browser.unsupported.body':
+    'It is missing: {features}. Update your browser, or use a current version of Chrome, Edge, Firefox or Safari.',
+  'browser.feature.wasm': 'WebAssembly',
+  'browser.feature.wasm-simd': 'WebAssembly SIMD',
+  'browser.feature.workers': 'web workers',
+  'browser.feature.cache-storage': 'file caching',
+
   'home.headline': 'Trim, caption and meme your videos, right in your browser.',
   'home.lede':
     'Pick a file from your device and get to work. Nothing is uploaded, so your video stays yours.',
