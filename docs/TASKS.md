@@ -38,7 +38,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit tests with mocked `navigator` for each class and each limit kind (hard/warn/clamp).
 - [x] **M0.12 Unsupported and in-app browser screens** — shown instead of the tool when the minimum bar fails.
   - Test: e2e with an Instagram UA shows the "Open in your browser" screen.
-- [ ] **M0.13 LICENSE, README, CI** — GPL-3.0-or-later, README with setup, GitHub Actions running `pnpm check` and Chromium e2e.
+- [ ] **M0.13 LICENSE, README, CI** _(files committed; stays open until the first CI run on GitHub is green)_ — GPL-3.0-or-later, README with setup, GitHub Actions running `pnpm check` and Chromium e2e.
   - Test: CI green on a PR.
 - [ ] **M0.14 Cloudflare Pages deploy and R2 assets function** — Pages project from `out/` on `*.pages.dev`, preview deploys; private R2 bucket bound to the project; `functions/assets/[[path]].ts` per ARCHITECTURE §4. _Needs the owner's Cloudflare account (`wrangler login`): stop and ask before creating resources._
   - AC: the `pages.dev` URL serves the site with correct headers; `GET /assets/<test-key>` returns the object with immutable caching; other methods return 405; a missing key returns 404.
