@@ -22,7 +22,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.5 `_headers` and dev headers** — write `public/_headers` per ARCHITECTURE §4; dev-only COOP/COEP in `next.config.ts`.
   - AC: `/tools/*` is cross-origin isolated; `/` is not.
   - Test: covered by M0.6.
-- [ ] **M0.6 Playwright against `wrangler pages dev out`** — projects: Chromium, WebKit, Pixel, iPhone. First spec checks headers.
+- [x] **M0.6 Playwright against `wrangler pages dev out`** — projects: Chromium, WebKit, Pixel, iPhone. First spec checks headers.
   - AC: `pnpm e2e` builds, serves `out/`, runs specs.
   - Test: spec asserts `crossOriginIsolated === true` on a `/tools/` page and `false` on `/`, and that COOP/COEP response headers match.
 - [ ] **M0.7 i18n catalogue** — `src/i18n/messages/en.ts`, typed `t()`; ESLint rule forbidding string literals in JSX text under `features/` and `components/`.
