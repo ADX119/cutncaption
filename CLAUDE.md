@@ -26,6 +26,7 @@ Free, ad-free, privacy-first clip, meme and voice studio. Everything in Phase 1 
 - **Large binaries** (ffmpeg wasm, ONNX wasm, models) come only from our R2 bucket, same-origin at `/assets/*`, via `engine/assets`. No third-party CDNs, no Hugging Face fetches at runtime.
 - **COOP/COEP only on `/tools/*`.** Links between isolated and non-isolated pages are plain `<a>`, not `next/link`.
 - **Licence**: every dependency must be GPL-3.0-compatible.
+- **Free tier only.** Nothing may be able to produce a bill: stay on the Workers Free plan, keep the R2 bucket private, add no paid product or service. See ARCHITECTURE §13. Anything that could cost money needs the owner's explicit yes.
 - Phase 2 (Supabase, Dodo Payments, TTS) is out of scope until the owner says so.
 
 ## Stack

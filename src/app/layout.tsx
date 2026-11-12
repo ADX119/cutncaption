@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Anek_Latin } from 'next/font/google';
 import type { ReactNode } from 'react';
-import { SiteFooter, SiteHeader } from '@/components';
+import { AnalyticsBeacon, SiteFooter, SiteHeader } from '@/components';
 import { t } from '@/i18n';
 import { THEME_INIT_SCRIPT } from '@/lib';
 import { toolPath } from '@/seo';
@@ -45,6 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <SiteHeader nav={NAV} />
         <div className="flex-1">{children}</div>
         <SiteFooter />
+        <AnalyticsBeacon token={process.env.NEXT_PUBLIC_CF_BEACON_TOKEN} />
       </body>
     </html>
   );

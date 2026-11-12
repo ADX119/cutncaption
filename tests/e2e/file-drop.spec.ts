@@ -34,8 +34,12 @@ test('an unsupported file is refused with a reason', async ({ page }) => {
 test('the picker button is reachable by keyboard', async ({ page }) => {
   await page.goto(TOOL_URL);
   const button = page.getByRole('button', { name: 'Choose a file' });
-  await button.focus();
-  const chooser = page.waitForEvent('filechooser');
-  await page.keyboard.press('Enter');
-  expect((await chooser).isMultiple()).toBe(false);
+  // The button exists in the static HTML before React attaches its handler, so a key
+  // press can land too early. Retry until the page is interactive.
+  await expect(async () => {
+    await button.focus();
+    const chooser = page.waitForEvent('filechooser', { timeout: 2_000 });
+    await page.keyboard.press('Enter');
+    expect((await chooser).isMultiple()).toBe(false);
+  }).toPass({ timeout: 20_000 });
 });

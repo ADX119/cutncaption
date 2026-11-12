@@ -26,6 +26,11 @@ test('every page carries the baseline security headers', async ({ request }) => 
     const headers = (await request.get(url)).headers();
     expect(headers['x-content-type-options'], url).toBe('nosniff');
     expect(headers['content-security-policy'], url).toContain("connect-src 'self'");
+    expect(headers['content-security-policy'], url).toContain("frame-ancestors 'none'");
+    expect(headers['content-security-policy'], url).toContain("object-src 'none'");
+    expect(headers['x-frame-options'], url).toBe('DENY');
+    expect(headers['strict-transport-security'], url).toContain('max-age=31536000');
+    expect(headers['permissions-policy'], url).toContain('camera=()');
   }
 });
 

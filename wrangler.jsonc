@@ -4,6 +4,8 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-11-12",
   "workers_dev": true,
+  // No extra public URL per deployment; only the main address serves the site.
+  "preview_urls": false,
   "assets": {
     // The Next.js static export. public/_headers is copied in and applied by Cloudflare.
     "directory": "./out/",

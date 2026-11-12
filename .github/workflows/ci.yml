@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# The workflow only reads the code; it cannot push, comment or change anything.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true

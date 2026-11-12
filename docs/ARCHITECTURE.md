@@ -138,7 +138,10 @@ All interactive tools live under `/tools/*`, so one header rule isolates them. H
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'
+  Strict-Transport-Security: max-age=31536000
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 ```
 
 Rules that follow from this:
@@ -359,7 +362,29 @@ i18n: every UI string goes through `t('key')` from `src/i18n/messages/en.ts`. En
 - `returning` is computed locally: `localStorage` holds only the ISO week of the first and the last run. No ID is generated.
 - Sent with `navigator.sendBeacon`; failures are ignored.
 
-## 13. Testing strategy
+## 13. Cost and exposure guardrails
+
+The owner's rule: nothing may be able to produce a bill until there is an audience. The setup is built so that the worst case is an error, never a charge.
+
+| Service                                     | Free allowance                          | What happens at the limit                                                                                   |
+| ------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Static pages and files                      | Unlimited, free                         | —                                                                                                           |
+| Worker (only `/assets/*`, later `/api/e`)   | 100,000 requests a day on the Free plan | Those paths return 429 until the next day; pages keep working. No charge on the Free plan                   |
+| R2 storage                                  | 10 GB                                   | We store well under 1 GB. Do not upload beyond a few GB                                                     |
+| R2 reads                                    | 10 million a month                      | Reads only happen through the Worker, which is capped at about 3 million a month, so this cannot be reached |
+| R2 writes                                   | 1 million a month                       | Only our own uploads; a handful per release                                                                 |
+| Web Analytics, GitHub Actions (public repo) | Free                                    | —                                                                                                           |
+
+Rules that keep it that way:
+
+- Stay on the **Workers Free plan**. The paid plan is what turns overage into charges. Never upgrade without the owner.
+- The R2 bucket stays **private**: no `r2.dev` public URL and no custom domain. A public bucket could be read without the Worker's daily cap.
+- No paid Cloudflare products (Images, Stream, Workers AI, D1, KV, Queues, Durable Objects, Logpush) and no other paid services.
+- `preview_urls` is off, so only the main address serves the site.
+- Known limits of a `workers.dev` address: plain HTTP is not redirected to HTTPS (HSTS covers returning visitors), and there is no rate limiting. Both are fixed by a custom domain (Always Use HTTPS, one free rate-limit rule).
+- The CSP still needs `'unsafe-inline'` for scripts because a static Next.js export inlines its bootstrap data and cannot use nonces.
+
+## 14. Testing strategy
 
 | Level              | Tool                                                     | Covers                                                                                                                                                                                                  |
 | ------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -371,7 +396,7 @@ i18n: every UI string goes through `t('key')` from `src/i18n/messages/en.ts`. En
 
 In tests the asset base points at a local static server serving the cores from `node_modules`, so CI never depends on R2. The AI engine has a fake implementation fed by recorded word-timestamp JSON for UI tests.
 
-## 14. Phase 2 hooks (do not build now)
+## 15. Phase 2 hooks (do not build now)
 
 - Server code goes in Cloudflare Workers. Supabase for accounts and credits, Dodo Payments for one-time passes, a TTS API for AI voice.
 - Account and checkout routes live outside `/tools/*` so they are not cross-origin isolated.

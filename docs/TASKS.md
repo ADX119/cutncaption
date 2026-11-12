@@ -43,7 +43,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.14 Cloudflare deploy and R2 assets route** — Worker with static assets from `out/` on `*.workers.dev` (Pages is now part of Workers); private R2 bucket `cutncaption-assets` bound to it; `worker/assets.ts` per ARCHITECTURE §4. _Needs the owner's Cloudflare account (`wrangler login`): stop and ask before creating resources._
   - AC: the `workers.dev` URL serves the site with correct headers; `GET /assets/<test-key>` returns the object with immutable caching; other methods return 405; a missing key returns 404.
   - Test: unit tests of the function handler with a mocked R2 binding; `curl -I` checks recorded in the PR; e2e header spec run against the preview URL.
-- [ ] **M0.15 Analytics beacon under COEP** — add the Web Analytics snippet with `crossorigin="anonymous"`; confirm it loads on an isolated page.
+- [ ] **M0.15 Analytics beacon under COEP** _(code done and the script is confirmed to load on isolated pages in Chromium and WebKit; open until the owner creates the Web Analytics site and the token is set, so the data POST can be confirmed)_ — add the Web Analytics snippet with `crossorigin="anonymous"`; confirm it loads on an isolated page.
   - AC: beacon script loads on `/tools/*` without a COEP console error; if it cannot, record the fallback decision in ARCHITECTURE §4.
   - Test: e2e asserts no COEP/CORP console errors on a tool page.
 

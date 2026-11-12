@@ -6,3 +6,4 @@ export { FileDrop } from './file-drop/FileDrop';
 export { FileSummary } from './file-drop/FileSummary';
 export { MEDIA_ACCEPT, VIDEO_ACCEPT, matchesAccept, pickFile } from './file-drop/accept';
 export type { AcceptSpec, FileRejection } from './file-drop/accept';
+export { AnalyticsBeacon } from './AnalyticsBeacon';
