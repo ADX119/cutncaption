@@ -255,11 +255,11 @@ MP4  = -movflags +faststart
 
 `engine/device` classifies once per session using feature detection (`navigator.deviceMemory`, `hardwareConcurrency`, pointer/screen, platform). UA is used only to identify iOS and in-app browsers.
 
-| Class      | Rule                                                |
-| ---------- | --------------------------------------------------- |
-| **L** low  | Android/mobile with `deviceMemory ≤ 3` or ≤ 4 cores |
-| **M** mid  | other phones and tablets, including all iPhone/iPad |
-| **H** high | desktop/laptop, or `deviceMemory ≥ 8`               |
+| Class      | Rule                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------ |
+| **L** low  | Android/mobile with `deviceMemory ≤ 3` or ≤ 4 cores                                        |
+| **M** mid  | other phones and tablets, including all iPhone/iPad; desktops reporting `deviceMemory ≤ 3` |
+| **H** high | desktop/laptop, or `deviceMemory ≥ 8`                                                      |
 
 Limits _(calibrate)_, defined in one file, `engine/device/limits.ts`:
 

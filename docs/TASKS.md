@@ -34,7 +34,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit test: registry has 20 unique slugs; the "each URL returns 200" e2e check is part of the M0.6 spec.
 - [ ] **M0.10 Shared `FileDrop`** — picker + drag-and-drop, accept list, rejects URLs/text drops, keyboard accessible.
   - Test: component test for accept/reject; e2e sets a file and sees its name and size.
-- [ ] **M0.11 Device detection and limits** — `engine/device`: capabilities, class L/M/H, `limits.ts` table, in-app browser detection.
+- [x] **M0.11 Device detection and limits** — `engine/device`: capabilities, class L/M/H, `limits.ts` table, in-app browser detection.
   - Test: unit tests with mocked `navigator` for each class and each limit kind (hard/warn/clamp).
 - [ ] **M0.12 Unsupported and in-app browser screens** — shown instead of the tool when the minimum bar fails.
   - Test: e2e with an Instagram UA shows the "Open in your browser" screen.
