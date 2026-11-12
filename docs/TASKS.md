@@ -14,7 +14,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.2 Lint, format, typecheck, `pnpm check`** — ESLint, Prettier, `tsc --noEmit`; `check` = lint + typecheck + unit tests + build.
   - AC: `lint`, `format`, `typecheck`, `test`, `check` exist and pass on Windows (`preview`, `e2e`, `e2e:slow` arrive with M0.6).
   - Test: `pnpm check` exits 0.
-- [ ] **M0.3 Folder skeleton and boundary rules** — create the folders from ARCHITECTURE §2 with `index.ts` stubs; configure `eslint-plugin-boundaries` per §3.
+- [x] **M0.3 Folder skeleton and boundary rules** — create the folders from ARCHITECTURE §2 with `index.ts` stubs; configure `eslint-plugin-boundaries` per §3.
   - AC: importing `engine/` from `components/`, or React from `editor/`, fails lint.
   - Test: a fixture file with a forbidden import is rejected by an ESLint test.
 - [ ] **M0.4 Vitest** — config, path aliases, coverage, one sample test.

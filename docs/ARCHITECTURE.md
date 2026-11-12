@@ -78,7 +78,7 @@ Enforced by ESLint (`eslint-plugin-boundaries`); a violation fails lint.
 | `components/` | i18n, lib                                                      | import features or engine                                            |
 | `engine/`     | editor (types and pure functions), lib                         | import React, features, seo                                          |
 | `editor/`     | lib                                                            | import React, engine, DOM APIs other than a passed-in canvas context |
-| `seo/`        | features (to mount a tool), i18n                               | import engine                                                        |
+| `seo/`        | features (to mount a tool), components, i18n, lib              | import engine                                                        |
 
 Only `engine/` may import `@ffmpeg/*`, `@huggingface/transformers`, `onnxruntime-web`, `mediabunny`.
 
