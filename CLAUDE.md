@@ -32,6 +32,8 @@ Free, ad-free, privacy-first clip, meme and voice studio. Everything in Phase 1 
 
 Next.js App Router (`output: 'export'`) · TypeScript strict · Tailwind · Zustand · Radix primitives · `@ffmpeg/ffmpeg` 0.12 · Mediabunny · `@huggingface/transformers` · `onnxruntime-web` · Comlink · Vitest · Playwright · pnpm.
 
+Pinned on purpose: TypeScript 6 and ESLint 9 (the lint plugins do not support TS 7 or ESLint 10 yet). This is Next.js 16; its docs ship in `node_modules/next/dist/docs/` — read the relevant guide before using a Next API (see `AGENTS.md`, which `next dev` regenerates).
+
 ## Commands
 
 | Command                        | Does                                                            |

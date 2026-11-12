@@ -19,7 +19,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: a fixture file with a forbidden import is rejected by an ESLint test.
 - [x] **M0.4 Vitest** — config, path aliases, coverage, one sample test.
   - Test: `pnpm test` runs and passes.
-- [ ] **M0.5 `_headers` and dev headers** — write `public/_headers` per ARCHITECTURE §4; dev-only COOP/COEP in `next.config.ts`.
+- [x] **M0.5 `_headers` and dev headers** — write `public/_headers` per ARCHITECTURE §4; dev-only COOP/COEP in `next.config.ts`.
   - AC: `/tools/*` is cross-origin isolated; `/` is not.
   - Test: covered by M0.6.
 - [ ] **M0.6 Playwright against `wrangler pages dev out`** — projects: Chromium, WebKit, Pixel, iPhone. First spec checks headers.

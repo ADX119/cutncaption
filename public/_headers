@@ -1,0 +1,22 @@
+# Cloudflare Pages response headers. See docs/ARCHITECTURE.md section 4.
+# Cross-origin isolation applies to tool routes only.
+
+/tools/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+
+# Worker scripts started from an isolated page must carry COEP themselves.
+/_next/static/*
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin
+  Cache-Control: public, max-age=31536000, immutable
+
+/vendor/*
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin
+  Cache-Control: public, max-age=31536000, immutable
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'
