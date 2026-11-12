@@ -6,7 +6,7 @@ import boundaries from 'eslint-plugin-boundaries';
 
 // Module boundaries from docs/ARCHITECTURE.md §3: layer -> layers it may import.
 const LAYERS = {
-  app: ['features', 'seo', 'components', 'i18n'],
+  app: ['features', 'seo', 'components', 'i18n', 'lib'],
   features: ['engine', 'editor', 'components', 'i18n', 'lib'],
   components: ['i18n', 'lib'],
   engine: ['editor', 'lib'],
@@ -57,6 +57,8 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/ban-ts-comment': 'error',
+      // Links across the isolation boundary must be plain <a> (docs/ARCHITECTURE.md §4).
+      '@next/next/no-html-link-for-pages': 'off',
     },
   },
   {

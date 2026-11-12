@@ -1,17 +1,51 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
+import { Anek_Latin } from 'next/font/google';
 import type { ReactNode } from 'react';
+import { SiteFooter, SiteHeader } from '@/components';
 import { t } from '@/i18n';
+import { THEME_INIT_SCRIPT } from '@/lib';
+import { toolPath } from '@/seo';
 import './globals.css';
+
+// Self-hosted at build time; no request goes to a font CDN from the browser.
+const anek = Anek_Latin({
+  subsets: ['latin'],
+  axes: ['wdth'],
+  variable: '--font-anek',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: t('app.name'),
   description: t('app.tagline'),
 };
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f5f6f3' },
+    { media: '(prefers-color-scheme: dark)', color: '#101412' },
+  ],
+};
+
+const NAV = [
+  { href: toolPath('trim-video'), label: t('nav.trim') },
+  { href: toolPath('video-meme-maker'), label: t('nav.meme') },
+  { href: toolPath('auto-captions'), label: t('nav.captions') },
+  { href: toolPath('crop-video-for-reels'), label: t('nav.crop') },
+];
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen antialiased">{children}</body>
+    // The init script sets data-theme before hydration, so the attribute may differ.
+    <html lang="en" className={anek.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="flex min-h-dvh flex-col antialiased">
+        <SiteHeader nav={NAV} />
+        <div className="flex-1">{children}</div>
+        <SiteFooter />
+      </body>
     </html>
   );
 }

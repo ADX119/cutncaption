@@ -27,7 +27,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: spec asserts `crossOriginIsolated === true` on a `/tools/` page and `false` on `/`, and that COOP/COEP response headers match.
 - [x] **M0.7 i18n catalogue** — `src/i18n/messages/en.ts`, typed `t()`; ESLint rule forbidding string literals in JSX text under `features/` and `components/`.
   - Test: unit test for `t()` with params; lint fixture with a literal fails.
-- [ ] **M0.8 Design tokens and app shell** — Tailwind theme, layout, header, footer. Links from shell into `/tools/*` are plain `<a>`.
+- [x] **M0.8 Design tokens and app shell** — Tailwind theme, layout, header, footer. Links from shell into `/tools/*` are plain `<a>`.
   - Test: e2e: home renders, header link to a tool triggers a full document load (navigation type check).
 - [x] **M0.9 SEO registry stub and `/tools/[slug]` route** — registry with 20 slugs from ARCHITECTURE §11, each mounting a placeholder; `generateStaticParams`. _Done before M0.6, whose header spec needs a tool page._
   - AC: 20 pages are exported.

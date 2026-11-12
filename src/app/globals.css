@@ -1,1 +1,168 @@
 @import 'tailwindcss';
+
+/*
+ * Design tokens. See docs/DESIGN.md.
+ * Theme: follows the system unless <html data-theme="light|dark"> is set by the toggle.
+ */
+:root {
+  color-scheme: light;
+  --paper: #f5f6f3;
+  --sheet: #ffffff;
+  --ink: #18201c;
+  --graphite: #5c6661;
+  --rule: #d9ddd8;
+  --accent: #2e6b57;
+  --accent-strong: #245545;
+  --on-accent: #ffffff;
+  --accent-wash: #e4ece7;
+  --danger: #a3443a;
+  --is-dark: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --paper: #101412;
+    --sheet: #171c19;
+    --ink: #e6eae7;
+    --graphite: #98a39d;
+    --rule: #29302c;
+    --accent: #86bfa6;
+    --accent-strong: #a3d1bc;
+    --on-accent: #101412;
+    --accent-wash: #1c2823;
+    --danger: #e09a90;
+    --is-dark: 1;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #101412;
+  --sheet: #171c19;
+  --ink: #e6eae7;
+  --graphite: #98a39d;
+  --rule: #29302c;
+  --accent: #86bfa6;
+  --accent-strong: #a3d1bc;
+  --on-accent: #101412;
+  --accent-wash: #1c2823;
+  --danger: #e09a90;
+  --is-dark: 1;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-sheet: var(--sheet);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-rule: var(--rule);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-on-accent: var(--on-accent);
+  --color-accent-wash: var(--accent-wash);
+  --color-danger: var(--danger);
+
+  --font-sans: var(--font-anek), ui-sans-serif, system-ui, sans-serif;
+
+  /* Motion: short, and only in answer to something the person did. */
+  --ease-settle: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-press: 120ms;
+  --duration-move: 200ms;
+}
+
+@layer base {
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    transition:
+      background-color var(--duration-move) var(--ease-settle),
+      color var(--duration-move) var(--ease-settle);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background-color: var(--accent-wash);
+  }
+}
+
+@layer components {
+  /* Headings use Anek's width axis: slightly condensed, heavier, tighter. */
+  .display {
+    font-variation-settings: 'wdth' 86;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.04;
+  }
+
+  /* Anything pressable settles inward a little while held. */
+  .pressable {
+    transition:
+      transform var(--duration-press) var(--ease-settle),
+      background-color var(--duration-press) var(--ease-settle),
+      border-color var(--duration-press) var(--ease-settle),
+      color var(--duration-press) var(--ease-settle);
+  }
+  .pressable:active {
+    transform: scale(0.97);
+  }
+
+  /* Text links: the underline draws in from the left on hover and focus. */
+  .link {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 0 1px;
+    transition: background-size var(--duration-move) var(--ease-settle);
+  }
+  .link:hover,
+  .link:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* Theme toggle: sun and moon share one spot and turn into each other. */
+  .theme-icon {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    transition:
+      opacity var(--duration-move) var(--ease-settle),
+      transform var(--duration-move) var(--ease-settle);
+  }
+  .theme-icon-sun {
+    opacity: calc(1 - var(--is-dark));
+    transform: rotate(calc(var(--is-dark) * 90deg)) scale(calc(1 - var(--is-dark) * 0.4));
+  }
+  .theme-icon-moon {
+    opacity: var(--is-dark);
+    transform: rotate(calc((var(--is-dark) - 1) * 90deg)) scale(calc(0.6 + var(--is-dark) * 0.4));
+  }
+
+  /* Home page strip: the trim handles close in on the selection once, on load. */
+  .strip-selection {
+    animation: strip-select 700ms var(--ease-settle) 150ms both;
+  }
+  @keyframes strip-select {
+    from {
+      left: 0;
+      right: 0;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

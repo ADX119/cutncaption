@@ -73,7 +73,7 @@ Enforced by ESLint (`eslint-plugin-boundaries`); a violation fails lint.
 
 | Module        | May import                                                     | Must not                                                             |
 | ------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `app/`        | features, seo, components, i18n                                | contain logic, import engine                                         |
+| `app/`        | features, seo, components, i18n, lib                           | contain logic, import engine                                         |
 | `features/`   | engine (public `index.ts` only), editor, components, i18n, lib | build ffmpeg args, touch wasm/model libraries                        |
 | `components/` | i18n, lib                                                      | import features or engine                                            |
 | `engine/`     | editor (types and pure functions), lib                         | import React, features, seo                                          |

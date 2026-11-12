@@ -3,8 +3,12 @@ import type { ToolPageEntry } from './registry';
 /** Placeholder until each tool lands (M2–M5) and the full template (M6.1). */
 export function ToolPage({ entry }: { entry: ToolPageEntry }) {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-16" data-tool={entry.tool} data-slug={entry.slug}>
-      <h1 className="text-3xl font-bold">{entry.slug}</h1>
+    <main
+      className="mx-auto max-w-5xl px-4 pt-14 sm:px-6"
+      data-tool={entry.tool}
+      data-slug={entry.slug}
+    >
+      <h1 className="display text-4xl">{entry.slug}</h1>
     </main>
   );
 }

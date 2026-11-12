@@ -4,7 +4,7 @@ Free, ad-free, privacy-first clip, meme and voice studio. Everything in Phase 1 
 
 ## Before you code
 
-1. Read `docs/PRD.md`, `docs/ARCHITECTURE.md` and `docs/TASKS.md`. They are the source of truth; code follows them.
+1. Read `docs/PRD.md`, `docs/ARCHITECTURE.md` and `docs/TASKS.md`, and `docs/DESIGN.md` before any UI work. They are the source of truth; code follows them.
 2. Take the **first unticked task** in `docs/TASKS.md`. One task per session unless told otherwise.
 3. If the task conflicts with the docs or is unclear, or would take more than ~2 hours, stop: split it in TASKS.md or ask. Do not improvise scope.
 4. If a decision changes the design, update the relevant doc in the same commit.
@@ -77,6 +77,7 @@ ESLint enforces these boundaries. Fix the import, not the rule.
 - No string literals in JSX; use `t('key')` from `src/i18n`.
 - Client components only where needed (`'use client'` at the leaf). Engines and editors load lazily after a file is chosen.
 - Accessibility: keyboard operable, labelled controls, visible focus.
+- UI follows `docs/DESIGN.md`: colour tokens only (no hex values in components), one muted accent, no neon or gradients, motion only in response to an action.
 - No new dependency without a reason in the commit body; check its licence and bundle size.
 - Comments explain why, not what. No dead code, no TODOs without a task ID.
 
