@@ -1,4 +1,4 @@
-# Cloudflare Pages response headers. See docs/ARCHITECTURE.md section 4.
+# Cloudflare static-asset response headers. See docs/ARCHITECTURE.md section 4.
 # Cross-origin isolation applies to tool routes only.
 
 /tools/*

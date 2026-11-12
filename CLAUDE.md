@@ -22,7 +22,7 @@ Free, ad-free, privacy-first clip, meme and voice studio. Everything in Phase 1 
 - **No uploads.** File bytes never leave the device. No new network destination without the owner's approval; `connect-src` in `public/_headers` and the Playwright privacy guard enforce this.
 - **No accounts, payments, ads or watermarks** in Phase 1.
 - **Client-side processing**: ffmpeg.wasm in a worker, WebCodecs fast paths, transformers.js / ONNX Runtime Web for AI (WebGPU when available).
-- **Hosting**: Next.js static export on Cloudflare Pages. Server code = Cloudflare Workers / Pages Functions only. **Never Vercel**, never Next.js server features (route handlers, server actions, middleware, ISR, `next/image` optimisation).
+- **Hosting**: Next.js static export on Cloudflare, deployed as Workers static assets with `wrangler deploy` (Cloudflare Pages is now part of Workers; do not use `wrangler pages`). Server code = Cloudflare Workers only, in `worker/`. **Never Vercel**, never Next.js server features (route handlers, server actions, middleware, ISR, `next/image` optimisation).
 - **Large binaries** (ffmpeg wasm, ONNX wasm, models) come only from our R2 bucket, same-origin at `/assets/*`, via `engine/assets`. No third-party CDNs, no Hugging Face fetches at runtime.
 - **COOP/COEP only on `/tools/*`.** Links between isolated and non-isolated pages are plain `<a>`, not `next/link`.
 - **Licence**: every dependency must be GPL-3.0-compatible.
@@ -36,16 +36,17 @@ Pinned on purpose: TypeScript 6 and ESLint 9 (the lint plugins do not support TS
 
 ## Commands
 
-| Command                        | Does                                                            |
-| ------------------------------ | --------------------------------------------------------------- |
-| `pnpm dev`                     | dev server (COOP/COEP on `/tools/*`)                            |
-| `pnpm build`                   | static export to `out/`                                         |
-| `pnpm preview`                 | `wrangler pages dev out` (honours `_headers`)                   |
-| `pnpm lint` / `pnpm typecheck` | ESLint incl. boundary rules / `tsc --noEmit`                    |
-| `pnpm test`                    | Vitest unit tests                                               |
-| `pnpm e2e`                     | build + Playwright against `pnpm preview`                       |
-| `pnpm e2e:slow`                | `@slow` specs (real Whisper)                                    |
-| `pnpm check`                   | lint + typecheck + test + build — must pass before every commit |
+| Command                        | Does                                                             |
+| ------------------------------ | ---------------------------------------------------------------- |
+| `pnpm dev`                     | dev server (COOP/COEP on `/tools/*`)                             |
+| `pnpm build`                   | static export to `out/`                                          |
+| `pnpm preview`                 | `wrangler dev` (serves `out/`, honours `_headers`)               |
+| `pnpm deploy:cf`               | build, then `wrangler deploy` to Cloudflare. Ask the owner first |
+| `pnpm lint` / `pnpm typecheck` | ESLint incl. boundary rules / `tsc --noEmit`                     |
+| `pnpm test`                    | Vitest unit tests                                                |
+| `pnpm e2e`                     | build + Playwright against `pnpm preview`                        |
+| `pnpm e2e:slow`                | `@slow` specs (real Whisper)                                     |
+| `pnpm check`                   | lint + typecheck + test + build — must pass before every commit  |
 
 Use pnpm only. Scripts are Node `.mjs` and must work on Windows; no bash-only scripts.
 
@@ -93,7 +94,7 @@ ESLint enforces these boundaries. Fix the import, not the rule.
 
 ## Ask before doing
 
-- Creating or changing anything in Cloudflare (Pages, R2, Analytics Engine, DNS) or uploading assets.
+- Creating or changing anything in Cloudflare (Workers, R2, Analytics Engine, DNS) or uploading assets.
 - Adding a network destination, analytics field or third-party script.
 - Changing limits, PRD thresholds, the licence, or any hard constraint.
 - Deploying to production.

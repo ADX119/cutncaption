@@ -8,7 +8,7 @@ Status: early development. The plan and progress are in [`docs/TASKS.md`](docs/T
 
 - Media processing uses ffmpeg compiled to WebAssembly, with WebCodecs where the browser supports it.
 - Captions use Whisper running on your device.
-- The site is a static Next.js export hosted on Cloudflare Pages. There is no application server.
+- The site is a static Next.js export hosted on Cloudflare. The only server code is a small Worker that serves large engine files from storage.
 
 ## Develop
 
@@ -20,13 +20,13 @@ pnpm exec playwright install chromium webkit   # once, for the browser tests
 pnpm dev                                        # http://localhost:3000
 ```
 
-| Command        | What it does                                                            |
-| -------------- | ----------------------------------------------------------------------- |
-| `pnpm dev`     | Development server                                                      |
-| `pnpm check`   | Lint, typecheck, unit tests and a production build. Run before commits  |
-| `pnpm test`    | Unit and component tests (Vitest)                                       |
-| `pnpm e2e`     | Builds, serves the static site with Wrangler, runs Playwright           |
-| `pnpm preview` | Serves `out/` the way Cloudflare Pages does, including response headers |
+| Command        | What it does                                                           |
+| -------------- | ---------------------------------------------------------------------- |
+| `pnpm dev`     | Development server                                                     |
+| `pnpm check`   | Lint, typecheck, unit tests and a production build. Run before commits |
+| `pnpm test`    | Unit and component tests (Vitest)                                      |
+| `pnpm e2e`     | Builds, serves the static site with Wrangler, runs Playwright          |
+| `pnpm preview` | Serves `out/` the way Cloudflare does, including response headers      |
 
 ## Read before contributing
 

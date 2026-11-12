@@ -4,13 +4,13 @@ Free, ad-free, privacy-first clip, meme and voice studio for short-form creators
 
 Decisions already taken (do not reopen without the owner):
 
-| Topic                                | Decision                                                                                                     |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| Large binaries (ffmpeg wasm, models) | Own private Cloudflare R2 bucket, served same-origin at `/assets/*` by a Pages Function; no third-party CDNs |
-| Domain                               | Launch on `*.pages.dev`; buy a domain before the SEO push (M6)                                               |
-| Licence                              | Repo is open source, GPL-3.0-or-later; stock `@ffmpeg/core` builds                                           |
-| Whisper                              | `base` everywhere; `small` offered as "Higher accuracy" only on capable devices                              |
-| Languages                            | English UI and pages only; all strings via message catalogue so `/hi/` can be added later                    |
+| Topic                                | Decision                                                                                                   |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Large binaries (ffmpeg wasm, models) | Own private Cloudflare R2 bucket, served same-origin at `/assets/*` by a small Worker; no third-party CDNs |
+| Domain                               | Launch on `*.workers.dev`; buy a domain before the SEO push (M6)                                           |
+| Licence                              | Repo is open source, GPL-3.0-or-later; stock `@ffmpeg/core` builds                                         |
+| Whisper                              | `base` everywhere; `small` offered as "Higher accuracy" only on capable devices                            |
+| Languages                            | English UI and pages only; all strings via message catalogue so `/hi/` can be added later                  |
 
 ## 1. Users
 

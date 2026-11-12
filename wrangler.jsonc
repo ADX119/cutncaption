@@ -1,6 +1,16 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "cutncaption",
-  "pages_build_output_dir": "out",
-  "compatibility_date": "2026-11-01",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-11-12",
+  "workers_dev": true,
+  "assets": {
+    // The Next.js static export. public/_headers is copied in and applied by Cloudflare.
+    "directory": "./out/",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    // Everything else is served as a static file without running the Worker.
+    "run_worker_first": ["/assets/*"],
+  },
+  "r2_buckets": [{ "binding": "ASSETS_BUCKET", "bucket_name": "cutncaption-assets" }],
 }

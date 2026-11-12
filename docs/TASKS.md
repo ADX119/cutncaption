@@ -22,7 +22,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M0.5 `_headers` and dev headers** — write `public/_headers` per ARCHITECTURE §4; dev-only COOP/COEP in `next.config.ts`.
   - AC: `/tools/*` is cross-origin isolated; `/` is not.
   - Test: covered by M0.6.
-- [x] **M0.6 Playwright against `wrangler pages dev out`** — projects: Chromium, WebKit, Pixel, iPhone. First spec checks headers.
+- [x] **M0.6 Playwright against `wrangler dev`** — projects: Chromium, WebKit, Pixel, iPhone. First spec checks headers.
   - AC: `pnpm e2e` builds, serves `out/`, runs specs.
   - Test: spec asserts `crossOriginIsolated === true` on a `/tools/` page and `false` on `/`, and that COOP/COEP response headers match.
 - [x] **M0.7 i18n catalogue** — `src/i18n/messages/en.ts`, typed `t()`; ESLint rule forbidding string literals in JSX text under `features/` and `components/`.
@@ -38,10 +38,10 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit tests with mocked `navigator` for each class and each limit kind (hard/warn/clamp).
 - [x] **M0.12 Unsupported and in-app browser screens** — shown instead of the tool when the minimum bar fails.
   - Test: e2e with an Instagram UA shows the "Open in your browser" screen.
-- [ ] **M0.13 LICENSE, README, CI** _(files committed; stays open until the first CI run on GitHub is green)_ — GPL-3.0-or-later, README with setup, GitHub Actions running `pnpm check` and Chromium e2e.
+- [x] **M0.13 LICENSE, README, CI** — GPL-3.0-or-later, README with setup, GitHub Actions running `pnpm check` and Chromium e2e.
   - Test: CI green on a PR.
-- [ ] **M0.14 Cloudflare Pages deploy and R2 assets function** — Pages project from `out/` on `*.pages.dev`, preview deploys; private R2 bucket bound to the project; `functions/assets/[[path]].ts` per ARCHITECTURE §4. _Needs the owner's Cloudflare account (`wrangler login`): stop and ask before creating resources._
-  - AC: the `pages.dev` URL serves the site with correct headers; `GET /assets/<test-key>` returns the object with immutable caching; other methods return 405; a missing key returns 404.
+- [x] **M0.14 Cloudflare deploy and R2 assets route** — Worker with static assets from `out/` on `*.workers.dev` (Pages is now part of Workers); private R2 bucket `cutncaption-assets` bound to it; `worker/assets.ts` per ARCHITECTURE §4. _Needs the owner's Cloudflare account (`wrangler login`): stop and ask before creating resources._
+  - AC: the `workers.dev` URL serves the site with correct headers; `GET /assets/<test-key>` returns the object with immutable caching; other methods return 405; a missing key returns 404.
   - Test: unit tests of the function handler with a mocked R2 binding; `curl -I` checks recorded in the PR; e2e header spec run against the preview URL.
 - [ ] **M0.15 Analytics beacon under COEP** — add the Web Analytics snippet with `crossorigin="anonymous"`; confirm it loads on an isolated page.
   - AC: beacon script loads on `/tools/*` without a COEP console error; if it cannot, record the fallback decision in ARCHITECTURE §4.
@@ -254,7 +254,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: e2e: sitemap lists home, 20 tool URLs, privacy, about with absolute URLs; robots references the sitemap.
 - [ ] **M6.11 Privacy and About pages** — what stays on device, every analytics field, open-source licence, ffmpeg and model credits with source links.
   - Test: unit: the analytics field list on the page is generated from the event schema.
-- [ ] **M6.12 Event endpoint** — `functions/api/e.ts` with Analytics Engine binding, schema validation, no cookies. _Creates a Cloudflare dataset: ask first._
+- [ ] **M6.12 Event endpoint** — `worker/events.ts` with Analytics Engine binding, schema validation, no cookies. _Creates a Cloudflare dataset: ask first._
   - Test: unit tests of the handler: valid event accepted, unknown fields dropped, oversize body rejected.
 - [ ] **M6.13 Client events** — `tool_run`, `engine_load`, `weekly_active`; local `returning` flag; `sendBeacon`.
   - Test: unit: returning logic across ISO weeks; e2e: one successful run sends exactly one `tool_run`; blocked endpoint does not break the tool.
@@ -263,7 +263,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [ ] **M6.15 Lighthouse gate** — CI run on home and three tool pages.
   - AC: SEO ≥ 95, Accessibility ≥ 95, Performance ≥ 85 (mobile).
   - Test: Lighthouse CI assertion.
-- [ ] **M6.16 Production launch** — custom domain (buy and attach to the Pages project; redirect `*.pages.dev` to it; update `NEXT_PUBLIC_SITE_URL`), production env vars, R2 assets uploaded for the release versions, Search Console sitemap submission. _Outward-facing: owner confirms each step._
+- [ ] **M6.16 Production launch** — custom domain (buy and attach to the Worker; redirect `*.workers.dev` to it; update `NEXT_PUBLIC_SITE_URL`), production env vars, R2 assets uploaded for the release versions, Search Console sitemap submission. _Outward-facing: owner confirms each step._
   - AC: production passes the header spec, privacy guard and one e2e per tool group.
   - Test: `pnpm e2e --grep @smoke` against the production URL.
 - [ ] **M6.17 Post-launch check (day 7)** — review error rate by tool and device class, top failing paths, Web Vitals; file follow-up tasks here.

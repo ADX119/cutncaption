@@ -1,8 +1,8 @@
 # cutncaption — Architecture
 
-Static Next.js site on Cloudflare Pages. All media and AI work runs in the browser. The only server code in Phase 1 is two Pages Functions: one streams large binaries from R2, one counts events.
+Static Next.js site on Cloudflare Workers static assets (what Cloudflare Pages has become; new projects deploy this way). All media and AI work runs in the browser. The only server code in Phase 1 is one small Worker in `worker/` that handles two paths: `/assets/*` streams large binaries from R2, and `/api/e` (M6.12) counts events.
 
-The site URL comes from `NEXT_PUBLIC_SITE_URL` (a `*.pages.dev` address until a domain is bought; switching is one env var plus redirects). Large binaries are served same-origin at `NEXT_PUBLIC_ASSET_BASE_URL` (`/assets`). Numbers marked _(calibrate)_ are starting values to be confirmed on real devices in M5.
+The site URL comes from `NEXT_PUBLIC_SITE_URL` (a `*.workers.dev` address until a domain is bought; switching is one env var plus redirects). Large binaries are served same-origin at `NEXT_PUBLIC_ASSET_BASE_URL` (`/assets`). Numbers marked _(calibrate)_ are starting values to be confirmed on real devices in M5.
 
 ## 1. Stack
 
@@ -14,8 +14,8 @@ The site URL comes from `NEXT_PUBLIC_SITE_URL` (a `*.pages.dev` address until a 
 | Media            | `@ffmpeg/ffmpeg` 0.12.x with `@ffmpeg/core` (single-thread) and `@ffmpeg/core-mt` (multi-thread); Mediabunny for the WebCodecs path |
 | AI               | `@huggingface/transformers` v3 (Whisper), `onnxruntime-web` (Silero VAD)                                                            |
 | Worker RPC       | Comlink                                                                                                                             |
-| Tests            | Vitest (unit), Playwright (e2e against `wrangler pages dev out`)                                                                    |
-| Hosting          | Cloudflare Pages (site), R2 behind a Pages Function (large binaries), Pages Function + Analytics Engine (events)                    |
+| Tests            | Vitest (unit), Playwright (e2e against `wrangler dev`)                                                                              |
+| Hosting          | Cloudflare Workers static assets (site), R2 behind the Worker (large binaries), Worker + Analytics Engine (events)                  |
 | Package manager  | pnpm; scripts are Node `.mjs` (must run on Windows, macOS and Linux)                                                                |
 
 All dependencies must be GPL-3.0-compatible.
@@ -57,8 +57,9 @@ src/
   seo/                      tool registry, page template, JSON-LD builders, content/en/*
   i18n/                     messages/en.ts, t()
   lib/                      small shared utilities
-functions/api/e.ts          Pages Function: event counter
-functions/assets/[[path]].ts  Pages Function: streams R2 objects (GET/HEAD only)
+worker/index.ts             Worker entry: routes /assets/* (and /api/* from M6.12)
+worker/assets.ts            streams R2 objects (GET/HEAD, Range)
+wrangler.jsonc              deploy config: static assets dir, run_worker_first, R2 binding
 public/
   _headers                  COOP/COEP, CSP, cache rules
   fonts/                    Anton, Noto Sans, Noto Sans Devanagari (OFL)
@@ -145,9 +146,10 @@ Rules that follow from this:
 - **Worker scripts need COEP too.** A dedicated worker started from an isolated page is blocked unless its script response carries COEP; hence the `/_next/static/*` and `/vendor/*` rules.
 - **Hard navigation across the boundary.** Client-side navigation does not re-fetch the document, so the headers would not apply. Any link from a non-isolated page to `/tools/*` (and back) is a plain `<a>`, never `next/link`. Links between tool pages may use `next/link`.
 - **Runtime check, not assumption.** The engine reads `self.crossOriginIsolated`; if false it uses the single-thread core.
-- **Large binaries are same-origin.** `functions/assets/[[path]].ts` has an R2 binding and streams the object for `GET /assets/<key>` with `Cache-Control: public, max-age=31536000, immutable`, `Cross-Origin-Resource-Policy: same-origin`, `ETag` and `Content-Length`; it uses the Workers Cache API so repeat requests skip R2. The bucket is private. No CORS setup and no custom domain are needed.
-- **Analytics beacon** is added manually with `crossorigin="anonymous"` (Pages auto-injection is off). M0 verifies it loads under COEP; if not, tool-route page views are sent through `/api/e` instead.
-- **Dev**: `next.config.ts` sets the same COOP/COEP headers only when `NODE_ENV === 'development'`. E2E runs against `wrangler pages dev out`, which honours `_headers`.
+- **Large binaries are same-origin.** `worker/assets.ts` has an R2 binding and streams the object for `GET /assets/<key>` with `Cache-Control: public, max-age=31536000, immutable`, `Cross-Origin-Resource-Policy: same-origin`, `ETag` and `Content-Length`, and answers `Range` requests with 206. `_headers` rules do not apply to responses a Worker generates, so it sets its own isolation and caching headers. The bucket is private. No CORS setup and no custom domain are needed.
+- **Analytics beacon** is added manually with `crossorigin="anonymous"` (automatic injection is off). M0 verifies it loads under COEP; if not, tool-route page views are sent through `/api/e` instead.
+- **Dev**: `next.config.ts` sets the same COOP/COEP headers only when `NODE_ENV === 'development'`. E2E runs against `wrangler dev`, which honours `_headers`.
+- **Deploy**: `pnpm deploy:cf` (build, then `wrangler deploy`). Cloudflare serves `out/` directly; the Worker runs only for paths listed in `assets.run_worker_first` in `wrangler.jsonc`. A brand-new deployment can return 404s for its first minute.
 
 ## 5. Multi-thread vs single-thread ffmpeg
 
@@ -172,16 +174,16 @@ else core-st
 
 | Asset                                                           | Size (approx.) | Served from                             | Cached by      |
 | --------------------------------------------------------------- | -------------- | --------------------------------------- | -------------- |
-| App JS/CSS, our workers                                         | —              | Pages `/_next/static`                   | HTTP immutable |
-| ffmpeg JS glue (`ffmpeg-core.js`, pthread worker, class worker) | < 300 KB       | Pages `/vendor/ffmpeg/<ver>/`           | HTTP immutable |
+| App JS/CSS, our workers                                         | —              | Static `/_next/static`                  | HTTP immutable |
+| ffmpeg JS glue (`ffmpeg-core.js`, pthread worker, class worker) | < 300 KB       | Static `/vendor/ffmpeg/<ver>/`          | HTTP immutable |
 | `ffmpeg-core.wasm` (st), `ffmpeg-core.wasm` (mt)                | ~32 MB each    | R2 `/ffmpeg/<ver>/{st,mt}/`             | Cache Storage  |
 | ONNX Runtime wasm                                               | ~10–25 MB      | R2 `/ort/<ver>/`                        | Cache Storage  |
 | Silero VAD                                                      | ~2 MB          | R2 `/models/silero-vad/<ver>/`          | Cache Storage  |
 | Whisper base (timestamped)                                      | ~80 MB         | R2 `/models/whisper-base_timestamped/`  | Cache Storage  |
 | Whisper small (timestamped)                                     | ~250 MB        | R2 `/models/whisper-small_timestamped/` | Cache Storage  |
-| Fonts                                                           | < 1 MB each    | Pages `/fonts/`                         | HTTP immutable |
+| Fonts                                                           | < 1 MB each    | Static `/fonts/`                        | HTTP immutable |
 
-Why the split: Pages rejects files over 25 MiB, and `new Worker()` needs a same-origin script. So small scripts stay on Pages static files and only large binaries go to R2, reached through `/assets/*` on the same origin. "R2 `/x/`" in the table means the R2 key, fetched as `/assets/x/`.
+Why the split: Cloudflare static assets reject files over 25 MiB, and `new Worker()` needs a same-origin script. So small scripts stay in the static export and only large binaries go to R2, reached through `/assets/*` on the same origin. "R2 `/x/`" in the table means the R2 key, fetched as `/assets/x/`.
 
 **Asset loader** (`engine/assets`):
 
@@ -352,7 +354,7 @@ i18n: every UI string goes through `t('key')` from `src/i18n/messages/en.ts`. En
 ## 12. Analytics
 
 - **Cloudflare Web Analytics** beacon for page views and Web Vitals.
-- **Event counter**: `POST /api/e` → `functions/api/e.ts` → Workers Analytics Engine dataset. Validates against a fixed schema, drops anything else, stores no IP and sets no cookie.
+- **Event counter**: `POST /api/e` → `worker/events.ts` → Workers Analytics Engine dataset. Validates against a fixed schema, drops anything else, stores no IP and sets no cookie.
   `{ e: 'tool_run' | 'engine_load' | 'weekly_active', tool, outcome: 'ok'|'error'|'cancel', path: EnginePath, cls: 'L'|'M'|'H', durBucket, returning: boolean, fallback?: boolean }`
 - `returning` is computed locally: `localStorage` holds only the ISO week of the first and the last run. No ID is generated.
 - Sent with `navigator.sendBeacon`; failures are ignored.
@@ -371,6 +373,6 @@ In tests the asset base points at a local static server serving the cores from `
 
 ## 14. Phase 2 hooks (do not build now)
 
-- Server code goes in Cloudflare Workers / Pages Functions. Supabase for accounts and credits, Dodo Payments for one-time passes, a TTS API for AI voice.
+- Server code goes in Cloudflare Workers. Supabase for accounts and credits, Dodo Payments for one-time passes, a TTS API for AI voice.
 - Account and checkout routes live outside `/tools/*` so they are not cross-origin isolated.
 - Web Share Target and offline need a service worker and manifest; `engine/assets` already owns caching, so the service worker should delegate to it.
