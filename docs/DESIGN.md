@@ -28,6 +28,7 @@ Rules:
 - One accent. No second brand colour, no gradients, no glows, no coloured shadows, no saturated or neon colours.
 - Depth comes from `paper` vs `sheet` and a `rule` border, not from drop shadows.
 - The user's video is the most colourful thing on the screen; the interface stays out of its way.
+- **Neutral around the picture.** The video frame and the area directly around it use `stage` (`#0f0f0f` in both themes), a pure neutral with no green tint, so the surroundings never skew how the video's colours look. The accent appears there only on the selection and handles.
 - Text contrast is at least WCAG AA in both themes. Check any new pairing.
 
 ## Theme

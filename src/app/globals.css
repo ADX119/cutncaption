@@ -16,6 +16,8 @@
   --on-accent: #ffffff;
   --accent-wash: #e4ece7;
   --danger: #a3443a;
+  /* Behind and around video: pure neutral in both themes so it never tints the picture. */
+  --stage: #0f0f0f;
   --is-dark: 0;
 }
 
@@ -62,6 +64,7 @@
   --color-on-accent: var(--on-accent);
   --color-accent-wash: var(--accent-wash);
   --color-danger: var(--danger);
+  --color-stage: var(--stage);
 
   --font-sans: var(--font-anek), ui-sans-serif, system-ui, sans-serif;
 
