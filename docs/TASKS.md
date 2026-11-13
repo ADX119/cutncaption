@@ -53,7 +53,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit test checks every fixture exists and is under its size cap.
 - [x] **M1.2 Vendor copy script** — `scripts/vendor-copy.mjs` copies ffmpeg JS glue to `public/vendor/ffmpeg/<ver>/`, copies the wasm files to `public/assets/` for `next dev` only (kept out of deploys by `public/.assetsignore`), and writes `src/engine/media/ffmpeg/vendor.json`; runs on `postinstall`.
   - Test: files exist after install; version folder matches `package.json`.
-- [ ] **M1.3 Asset manifest and upload script** _(manifest and local seeding done; open until the owner approves `pnpm assets:upload` and the live check passes)_ — `scripts/assets.mjs`: `manifest` writes `src/engine/assets/manifest.json` (bytes and SHA-256, on install); `seed-local` fills Wrangler's local R2 so `pnpm preview` and e2e serve `/assets/*` exactly as production does; `upload` puts the files in the real bucket.
+- [x] **M1.3 Asset manifest and upload script** — `scripts/assets.mjs`: `manifest` writes `src/engine/assets/manifest.json` (bytes and SHA-256, on install); `seed-local` fills Wrangler's local R2 so `pnpm preview` and e2e serve `/assets/*` exactly as production does; `upload` puts the files in the real bucket.
   - Test: unit test of manifest generation on a temp dir; e2e downloads every manifest entry through `/assets/*` and checks size, SHA-256 and headers (locally, and against the live site after upload).
 - [ ] **M1.4 `fetchAsset` with Cache Storage** — progress, integrity check, abort, quota fallback, old-version cleanup.
   - Test: unit tests with mocked `fetch`/`caches`: miss→store, hit→no fetch, bad hash→error, quota error→still returns, abort rejects.
