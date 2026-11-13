@@ -1,0 +1,5 @@
+# Files in the build output that Cloudflare must not upload or serve as static files.
+
+# Large engine binaries copied here only so `next dev` can serve them. They exceed the
+# 25 MiB static-file limit; deployed sites serve /assets/* from R2 through the Worker.
+assets/

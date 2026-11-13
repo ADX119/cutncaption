@@ -9,3 +9,7 @@ next-env.d.ts
 coverage/
 test-results/
 playwright-report/
+
+# Copied from node_modules by scripts/vendor-copy.mjs
+public/vendor/
+public/assets/

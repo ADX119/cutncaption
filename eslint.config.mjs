@@ -99,6 +99,9 @@ export default defineConfig([
   globalIgnores([
     '.next/**',
     '.wrangler/**',
+    // Third-party files copied from node_modules by scripts/vendor-copy.mjs.
+    'public/vendor/**',
+    'public/assets/**',
     'test-results/**',
     'playwright-report/**',
     'out/**',

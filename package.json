@@ -20,14 +20,20 @@
     "deploy:cf": "node scripts/deploy.mjs",
     "e2e": "pnpm build && playwright test --grep-invert @slow",
     "e2e:slow": "pnpm build && playwright test --grep @slow",
-    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "postinstall": "node scripts/vendor-copy.mjs",
+    "fixtures": "node scripts/gen-fixtures.mjs"
   },
   "dependencies": {
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "next": "^16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/core-mt": "^0.12.10",
     "@playwright/test": "^1.65.0",
     "@tailwindcss/postcss": "^4.3.5",
     "@testing-library/react": "^16.3.3",

@@ -1,0 +1,6 @@
+{
+  "wrapperVersion": "0.12.15",
+  "coreVersion": "0.12.10",
+  "vendorBase": "/vendor/ffmpeg/0.12.15_0.12.10",
+  "assetPrefix": "ffmpeg/0.12.10"
+}

@@ -49,9 +49,9 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 
 ## M1 — Media engine
 
-- [ ] **M1.1 Test fixtures** — `scripts/gen-fixtures.mjs` (uses system ffmpeg; outputs committed): H.264/AAC MP4 5 s 720p, portrait MP4, MOV, VP9/Opus WebM, MKV, video with no audio, 60 s low-res MP4. Each ≤ 300 KB.
+- [ ] **M1.1 Test fixtures** _(script written, `pnpm fixtures`; not yet run because no ffmpeg is installed on the dev machine. The fixtures, `index.json` and the unit test are still to do)_ — `scripts/gen-fixtures.mjs` (uses system ffmpeg; outputs committed): H.264/AAC MP4 5 s 720p, portrait MP4, MOV, VP9/Opus WebM, MKV, AVI, rotated MP4, MP3, video with no audio, 60 s low-res MP4. Each ≤ 300 KB.
   - Test: unit test checks every fixture exists and is under its size cap.
-- [ ] **M1.2 Vendor copy script** — `scripts/vendor-copy.mjs` copies ffmpeg JS glue to `public/vendor/ffmpeg/<ver>/`; runs on `postinstall`.
+- [x] **M1.2 Vendor copy script** — `scripts/vendor-copy.mjs` copies ffmpeg JS glue to `public/vendor/ffmpeg/<ver>/`, copies the wasm files to `public/assets/` for `next dev` only (kept out of deploys by `public/.assetsignore`), and writes `src/engine/media/ffmpeg/vendor.json`; runs on `postinstall`.
   - Test: files exist after install; version folder matches `package.json`.
 - [ ] **M1.3 Asset manifest and upload script** — `scripts/upload-assets.mjs` uploads cores to R2 and writes `manifest.json` with bytes and SHA-256; a local static server serves the same paths from `node_modules` for tests.
   - Test: unit test of manifest generation on a temp dir; local server returns a core wasm with CORS headers.
