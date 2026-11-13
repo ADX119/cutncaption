@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cutncaption",
+  // The address is <name>.<account subdomain>.workers.dev.
+  "name": "app",
   "main": "worker/index.ts",
   "compatibility_date": "2026-11-12",
   "workers_dev": true,
