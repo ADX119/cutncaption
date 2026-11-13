@@ -57,7 +57,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit test of manifest generation on a temp dir; e2e downloads every manifest entry through `/assets/*` and checks size, SHA-256 and headers (locally, and against the live site after upload).
 - [x] **M1.4 `fetchAsset` with Cache Storage** — progress, integrity check, abort, quota fallback, old-version cleanup.
   - Test: unit tests with mocked `fetch`/`caches`: miss→store, hit→no fetch, bad hash→error, quota error→still returns, abort rejects.
-- [ ] **M1.5 ffmpeg loader (single-thread)** — `classWorkerURL`, core from `/vendor`, wasm via `fetchAsset`; load, terminate, reload.
+- [x] **M1.5 ffmpeg loader (single-thread)** — wrapper and core loaded from `/vendor` as native modules (not bundled), wasm via `fetchAsset`; load, terminate, reload. Exercised through the unlisted diagnostics page `/tools/engine-check/`.
   - Test: integration: `-version` runs in Chromium and WebKit; second load makes no network request for the wasm.
 - [ ] **M1.6 Capability check** — assert encoders, filters and muxers listed in ARCHITECTURE §7 exist in the shipped core.
   - AC: any missing item is resolved by updating §7 before continuing.
@@ -227,7 +227,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [ ] **M5.13 Performance budget** — bundle analysis, lazy-load engines and editors, enforce ≤ 200 KB gzip initial JS per tool route.
   - Test: script that fails the build when a route exceeds the budget.
 - [ ] **M5.14 Real-device calibration** — run the checklist below on one low-end Android (≤ 3 GB), one mid Android, one iPhone, one desktop; update `limits.ts` and ARCHITECTURE §8. _Manual; needs the owner's devices._
-  - Checklist: each core tool on a 100 MB file · compress a 3-minute 1080p clip · meme MP4/GIF/sticker · 2-minute Hindi captions + burn-in · crop · cancel mid-job · five jobs in a row without reload.
+  - Checklist: each core tool on a 100 MB file · compress a 3-minute 1080p clip · meme MP4/GIF/sticker · 2-minute Hindi captions + burn-in · crop · cancel mid-job · five jobs in a row without reload · open `/tools/engine-check/` twice on the iPhone and confirm the second run says "Loaded from this device: Yes" (the WebKit test browser cannot check this).
   - AC: results table committed; every _(calibrate)_ marker removed.
 
 ## M6 — SEO and launch

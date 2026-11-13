@@ -19,9 +19,13 @@ describe('ffmpeg vendor files (scripts/vendor-copy.mjs)', () => {
   });
 
   it.each([
-    'class/worker.js',
+    'class/index.js',
+    'class/classes.js',
+    'class/types.js',
+    'class/utils.js',
     'class/const.js',
     'class/errors.js',
+    'class/worker.js',
     'st/ffmpeg-core.js',
     'mt/ffmpeg-core.js',
     'mt/ffmpeg-core.worker.js',
@@ -34,10 +38,16 @@ describe('ffmpeg vendor files (scripts/vendor-copy.mjs)', () => {
     expect(folders).toEqual([`${vendor.wrapperVersion}_${vendor.coreVersion}`]);
   });
 
-  it('the wrapper worker only imports files that were copied with it', () => {
-    const source = fs.readFileSync(publicFile(`${vendor.vendorBase}/class/worker.js`), 'utf8');
-    const imports = [...source.matchAll(/from\s+"(\.[^"]+)"/g)].map((match) => match[1]);
-    expect(imports.sort()).toEqual(['./const.js', './errors.js']);
+  it('the wrapper modules only import files that were copied with them', () => {
+    const dir = publicFile(`${vendor.vendorBase}/class`);
+    const copied = new Set(fs.readdirSync(dir));
+    for (const file of copied) {
+      const source = fs.readFileSync(path.join(dir, file), 'utf8');
+      for (const [, specifier = ''] of source.matchAll(/from\s+"([^"]+)"/g)) {
+        expect(specifier.startsWith('./'), `${file} imports ${specifier}`).toBe(true);
+        expect(copied.has(specifier.slice(2)), `${file} imports ${specifier}`).toBe(true);
+      }
+    }
   });
 
   it('has the wasm files for the dev server, and they are excluded from deployment', () => {

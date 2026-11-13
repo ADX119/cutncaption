@@ -52,6 +52,25 @@ export const en = {
     'The editor could not finish downloading. Check your connection and try again.',
   'error.asset-corrupt': 'The editor download was damaged on the way. Try again.',
 
+  'error.engine-load-failed':
+    'The editor could not start in this browser. Reload the page, or try another browser.',
+
+  'engineCheck.title': 'Engine check',
+  'engineCheck.intro':
+    'This loads the video engine in your browser and reports what it finds. Nothing is uploaded.',
+  'engineCheck.run': 'Run the check',
+  'engineCheck.running': 'Checking…',
+  'engineCheck.failed': 'The check could not finish.',
+  'engineCheck.ffmpeg': 'FFmpeg version',
+  'engineCheck.loadTime': 'Time to load',
+  'engineCheck.seconds': '{seconds} s',
+  'engineCheck.fromCache': 'Loaded from this device',
+  'engineCheck.deviceClass': 'Device class',
+  'engineCheck.isolated': 'Isolated page',
+  'engineCheck.threads': 'Multi-threading available',
+  'engineCheck.yes': 'Yes',
+  'engineCheck.no': 'No',
+
   'home.headline': 'Trim, caption and meme your videos, right in your browser.',
   'home.lede':
     'Pick a file from your device and get to work. Nothing is uploaded, so your video stays yours.',

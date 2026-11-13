@@ -141,7 +141,7 @@ All interactive tools live under `/tools/*`, so one header rule isolates them. H
   Strict-Transport-Security: max-age=31536000
   X-Frame-Options: DENY
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self' blob:; connect-src 'self' https://cloudflareinsights.com; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://static.cloudflareinsights.com; worker-src 'self' blob:; connect-src 'self' blob: https://cloudflareinsights.com; img-src 'self' blob: data:; media-src 'self' blob:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 ```
 
 Rules that follow from this:
@@ -196,7 +196,7 @@ Why the split: Cloudflare static assets reject files over 25 MiB, and `new Worke
 - Safari may evict script-written storage after 7 days without a visit; the UI must always handle a re-download.
 - No service worker in Phase 1 (added with PWA/Share Target later).
 
-**ffmpeg** (`engine/media/ffmpeg/loader.ts`): `new FFmpeg()` with `classWorkerURL` pointing at `/vendor/ffmpeg/<ver>/`; `load({ coreURL, workerURL })` from `/vendor`, `wasmURL` = blob URL from `fetchAsset`. `@ffmpeg/ffmpeg` runs ffmpeg in its own worker, so the main thread never blocks. One instance, one job at a time. Loading starts when a file is chosen (and is pre-warmed on idle if already cached).
+**ffmpeg** (`engine/media/ffmpeg/loader.ts`): the `@ffmpeg/ffmpeg` wrapper is **not bundled**. It is copied to `/vendor/ffmpeg/<ver>/class/` and loaded at runtime with a native `import()` (Turbopack cannot process how it starts its worker; the npm package is a dev dependency used for types). The wrapper always starts a module worker, so the ESM cores are used: `load({ coreURL, workerURL })` from `/vendor`, `wasmURL` = blob URL from `fetchAsset`, which is why the CSP allows `blob:` in `connect-src`. `/tools/engine-check/` is an unlisted, noindex diagnostics page that loads the engine and runs `-version`; e2e uses it locally and against the live site. `@ffmpeg/ffmpeg` runs ffmpeg in its own worker, so the main thread never blocks. One instance, one job at a time. Loading starts when a file is chosen (and is pre-warmed on idle if already cached).
 
 **Input files** are mounted read-only with `WORKERFS`, never copied into wasm memory. Outputs are written to `MEMFS`, read out as a `Blob`, then deleted and the mount removed. After any re-encode on class L or iOS the instance is terminated to return memory (wasm memory never shrinks).
 

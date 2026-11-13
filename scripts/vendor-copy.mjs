@@ -2,7 +2,7 @@
 // from its own origin. Runs on `pnpm install` (postinstall).
 //
 //   public/vendor/ffmpeg/<wrapper>_<core>/   small JS files, shipped with the site
-//     class/   the wrapper's worker (an ES module and the two files it imports)
+//     class/   the wrapper (FFmpeg class and its worker) as native ES modules
 //     st/      single-thread core loader
 //     mt/      multi-thread core loader and its thread worker
 //   public/assets/ffmpeg/<core>/{st,mt}/     the ~32 MB wasm files, for `next dev` only.
@@ -33,9 +33,11 @@ const devAssetRoot = path.join(root, 'public', 'assets', 'ffmpeg');
 
 /** [package, file inside dist/esm, destination folder] */
 const VENDOR_FILES = [
-  ['@ffmpeg/ffmpeg', 'worker.js', 'class'],
-  ['@ffmpeg/ffmpeg', 'const.js', 'class'],
-  ['@ffmpeg/ffmpeg', 'errors.js', 'class'],
+  // The whole wrapper, served as native ES modules. It is loaded at runtime, not
+  // bundled: bundlers cannot process the way it starts its worker.
+  ...['index.js', 'classes.js', 'types.js', 'utils.js', 'const.js', 'errors.js', 'worker.js'].map(
+    (file) => ['@ffmpeg/ffmpeg', file, 'class'],
+  ),
   ['@ffmpeg/core', 'ffmpeg-core.js', 'st'],
   ['@ffmpeg/core-mt', 'ffmpeg-core.js', 'mt'],
   ['@ffmpeg/core-mt', 'ffmpeg-core.worker.js', 'mt'],
