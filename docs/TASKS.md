@@ -55,7 +55,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: files exist after install; version folder matches `package.json`.
 - [x] **M1.3 Asset manifest and upload script** — `scripts/assets.mjs`: `manifest` writes `src/engine/assets/manifest.json` (bytes and SHA-256, on install); `seed-local` fills Wrangler's local R2 so `pnpm preview` and e2e serve `/assets/*` exactly as production does; `upload` puts the files in the real bucket.
   - Test: unit test of manifest generation on a temp dir; e2e downloads every manifest entry through `/assets/*` and checks size, SHA-256 and headers (locally, and against the live site after upload).
-- [ ] **M1.4 `fetchAsset` with Cache Storage** — progress, integrity check, abort, quota fallback, old-version cleanup.
+- [x] **M1.4 `fetchAsset` with Cache Storage** — progress, integrity check, abort, quota fallback, old-version cleanup.
   - Test: unit tests with mocked `fetch`/`caches`: miss→store, hit→no fetch, bad hash→error, quota error→still returns, abort rejects.
 - [ ] **M1.5 ffmpeg loader (single-thread)** — `classWorkerURL`, core from `/vendor`, wasm via `fetchAsset`; load, terminate, reload.
   - Test: integration: `-version` runs in Chromium and WebKit; second load makes no network request for the wasm.

@@ -45,6 +45,13 @@ export const en = {
   'browser.feature.workers': 'web workers',
   'browser.feature.cache-storage': 'file caching',
 
+  // One per EngineErrorCode (src/engine/errors.ts): what happened, then what to do.
+  'error.cancelled': 'Cancelled. Nothing was changed.',
+  'error.asset-unknown': 'Part of the editor is missing from this version. Reload the page.',
+  'error.asset-download-failed':
+    'The editor could not finish downloading. Check your connection and try again.',
+  'error.asset-corrupt': 'The editor download was damaged on the way. Try again.',
+
   'home.headline': 'Trim, caption and meme your videos, right in your browser.',
   'home.lede':
     'Pick a file from your device and get to work. Nothing is uploaded, so your video stays yours.',
