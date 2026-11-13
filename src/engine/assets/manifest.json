@@ -1,0 +1,10 @@
+{
+  "ffmpeg/0.12.10/mt/ffmpeg-core.wasm": {
+    "bytes": 32718323,
+    "sha256": "be2c97605366b78f3f13e21b52e81a55a79e1f29c133b03a68ec187b1a2ec41a"
+  },
+  "ffmpeg/0.12.10/st/ffmpeg-core.wasm": {
+    "bytes": 32232419,
+    "sha256": "9f57947a5bd530d8f00c5b3f2cb2a3492faa7e5d823315342d6a8656d0a6b7b7"
+  }
+}
