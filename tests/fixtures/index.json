@@ -1,0 +1,100 @@
+[
+  {
+    "file": "landscape-720p.mp4",
+    "bytes": 97245,
+    "durationSec": 5,
+    "width": 1280,
+    "height": 720,
+    "fps": 30,
+    "videoCodec": "h264",
+    "audioCodec": "aac"
+  },
+  {
+    "file": "portrait-720p.mp4",
+    "bytes": 89407,
+    "durationSec": 5,
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "videoCodec": "h264",
+    "audioCodec": "aac"
+  },
+  {
+    "file": "clip.mov",
+    "bytes": 45221,
+    "durationSec": 3,
+    "width": 640,
+    "height": 360,
+    "fps": 30,
+    "videoCodec": "h264",
+    "audioCodec": "aac"
+  },
+  {
+    "file": "clip.webm",
+    "bytes": 48484,
+    "durationSec": 3,
+    "width": 640,
+    "height": 360,
+    "fps": 30,
+    "videoCodec": "vp9",
+    "audioCodec": "opus"
+  },
+  {
+    "file": "clip.mkv",
+    "bytes": 39929,
+    "durationSec": 3,
+    "width": 640,
+    "height": 360,
+    "fps": 30,
+    "videoCodec": "h264",
+    "audioCodec": "opus"
+  },
+  {
+    "file": "clip.avi",
+    "bytes": 234354,
+    "durationSec": 3,
+    "width": 640,
+    "height": 360,
+    "fps": 30,
+    "videoCodec": "mpeg4",
+    "audioCodec": "mp3"
+  },
+  {
+    "file": "no-audio.mp4",
+    "bytes": 24494,
+    "durationSec": 3,
+    "width": 640,
+    "height": 360,
+    "fps": 30,
+    "videoCodec": "h264",
+    "audioCodec": null
+  },
+  {
+    "file": "long-lowres.mp4",
+    "bytes": 305432,
+    "durationSec": 60,
+    "width": 320,
+    "height": 180,
+    "fps": 15,
+    "videoCodec": "h264",
+    "audioCodec": "aac"
+  },
+  {
+    "file": "rotated.mp4",
+    "bytes": 45166,
+    "durationSec": 3,
+    "width": 640,
+    "height": 360,
+    "fps": 30,
+    "videoCodec": "h264",
+    "audioCodec": "aac",
+    "rotation": 90
+  },
+  {
+    "file": "tone.mp3",
+    "bytes": 24469,
+    "durationSec": 3,
+    "videoCodec": null,
+    "audioCodec": "mp3"
+  }
+]
