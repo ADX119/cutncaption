@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 
 test('home shows the header, headline and privacy footer', async ({ page }) => {
   await page.goto('/');

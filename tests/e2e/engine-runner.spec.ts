@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { callEngine, fixture, openEngine } from './support/engine';
 
 test('a real encode reports progress, can be cancelled, and the next job still works', async ({

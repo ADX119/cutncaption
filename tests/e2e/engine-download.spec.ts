@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { type Page, expect, test } from '@playwright/test';
+import { type Page, expect, test } from './support/test';
 
 const TOOL_URL = '/tools/trim-video/';
 const clip = fs.readFileSync(path.join('tests', 'fixtures', 'clip.mov'));

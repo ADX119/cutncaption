@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { callEngine, fixture, openEngine } from './support/engine';
 
 test('an H.264/AAC MOV is converted to MP4 by stream copy', async ({ page }) => {

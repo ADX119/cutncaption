@@ -22,6 +22,18 @@ describe('no hardcoded UI strings', () => {
   });
 });
 
+describe('e2e privacy guard', () => {
+  it('rejects a spec that imports test straight from Playwright', async () => {
+    const code = "import { test } from '@playwright/test';\ntest('x', async () => {});";
+    expect(await ruleIds('tests/e2e/x.spec.ts', code)).toContain('no-restricted-imports');
+  });
+
+  it('allows the guarded test function', async () => {
+    const code = "import { test } from './support/test';\ntest('x', async () => {});";
+    expect(await ruleIds('tests/e2e/x.spec.ts', code)).not.toContain('no-restricted-imports');
+  });
+});
+
 describe('module boundaries', () => {
   it.each([
     ['components -> engine', 'src/components/x.ts', "import '@/engine/media';"],

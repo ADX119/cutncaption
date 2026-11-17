@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import index from '../fixtures/index.json';
 import { callEngine, fixture, openEngine } from './support/engine';
 

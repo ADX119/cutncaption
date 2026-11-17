@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 
 // Runs only against a deployed site (E2E_BASE_URL). Local and CI builds carry no
 // analytics token, so they never contact Cloudflare.

@@ -90,6 +90,24 @@ export default defineConfig([
       'react/jsx-no-literals': ['error', { noStrings: true, ignoreProps: true }],
     },
   },
+  {
+    // Every e2e spec must run under the privacy guard (tests/e2e/support/test.ts).
+    files: ['tests/e2e/**/*.spec.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: '@playwright/test',
+              importNames: ['test', 'expect'],
+              message: "Import test and expect from './support/test' so the privacy guard runs.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   ...Object.keys(LAYERS).map((layer) => ({
     files: [`src/${layer}/**/*.{ts,tsx}`],
     rules: {

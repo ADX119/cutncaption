@@ -78,7 +78,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: component tests for each state; e2e: download event fires with the expected filename.
 - [x] **M1.14 Engine-load UX** — first-run download panel with size and progress; idle pre-warm when cached. Tool pages now read the chosen file with the engine and show its length and size; stalled engine downloads resume (see ARCHITECTURE §6).
   - Test: e2e: first visit shows the panel, reload does not.
-- [ ] **M1.15 Privacy network guard** — reusable Playwright fixture that fails a test on any request outside the allowlist or any request body > 2 KB.
+- [x] **M1.15 Privacy network guard** — reusable Playwright fixture that fails a test on any request outside the allowlist or any request body > 2 KB, or any sending request whose body the browser hides (WebKit hides Blob/File bodies).
   - Test: the guard fails a deliberately bad spec; it is enabled for all later tool specs.
 
 ## M2 — Core tools

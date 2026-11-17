@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { callEngine, fixture, openEngine } from './support/engine';
 
 test('a mounted input is processed and nothing is left behind, even on error', async ({ page }) => {

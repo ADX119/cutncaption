@@ -87,7 +87,9 @@ ESLint enforces these boundaries. Fix the import, not the rule.
 
 - Write the test first for pure logic (`editor/`, `engine/media/commands/`, `engine/device/`).
 - Every command builder has a unit test asserting the exact argument array.
-- Every tool has a Playwright happy-path spec that re-probes the output (codec, duration, dimensions, size) and runs with the privacy network guard.
+- Every tool has a Playwright happy-path spec that re-probes the output (codec, duration, dimensions, size).
+- Every e2e spec imports `test` and `expect` from `tests/e2e/support/test.ts`, never from `@playwright/test` (lint enforces it). That adds the privacy guard: a test fails on any request to a host outside the allow-list, any body over 2 KB, or any sending request whose body the browser hides. Never loosen the rules in `privacy-rules.ts` to make a test pass.
+- Engine tests drive the real engine through `window.__cncEngine` on `/tools/engine-check/` (`tests/e2e/support/engine.ts`). Run the suite against the live site with `E2E_BASE_URL=https://cutncaption.inyourbrowser.workers.dev` after deploying.
 - UI tests of captions use the fake AI engine; real Whisper runs only in `@slow` specs with the tiny model.
 - Tests never depend on R2 or the network; assets come from the local test server.
 - Do not weaken, skip or delete a failing test to get green. Fix the code or raise it.

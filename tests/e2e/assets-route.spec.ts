@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import manifest from '../../src/engine/assets/manifest.json';
 
 // The Worker behind /assets/* serves large binaries from R2. Object contents are

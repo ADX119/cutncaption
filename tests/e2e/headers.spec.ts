@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { TOOL_PAGES, toolPath } from '../../src/seo/registry';
 
 const TOOL_URL = toolPath('trim-video');

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 
 const TOOL_URL = '/tools/trim-video/';
 const fixture = (name: string) => fs.readFileSync(path.join('tests', 'fixtures', name));

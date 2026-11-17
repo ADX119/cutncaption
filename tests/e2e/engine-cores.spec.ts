@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { callEngine, fixture, openEngine } from './support/engine';
 
 test('both ffmpeg cores encode; report timings and the selection', async ({ page }, info) => {
