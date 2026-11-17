@@ -59,6 +59,7 @@ export class FfmpegSession {
   readonly #ffmpeg: FFmpeg;
   #log: string[] = [];
   #stdout: string[] = [];
+  #onLog: ((line: string) => void) | undefined;
   #terminated = false;
 
   private constructor(ffmpeg: FFmpeg, variant: CoreVariant) {
@@ -67,6 +68,7 @@ export class FfmpegSession {
     ffmpeg.on('log', ({ type, message }) => {
       this.#log.push(message);
       if (type === 'stdout') this.#stdout.push(message);
+      this.#onLog?.(message);
     });
   }
 
@@ -138,13 +140,30 @@ export class FfmpegSession {
     };
   }
 
-  /** Runs one ffmpeg command line (without the leading "ffmpeg"). */
-  async exec(args: readonly string[]): Promise<ExecResult> {
+  /**
+   * Runs one ffmpeg command line (without the leading "ffmpeg").  sees each
+   * line as it arrives, for progress. Prefer runFfmpeg(), which adds progress,
+   * cancellation and error mapping.
+   */
+  async exec(
+    args: readonly string[],
+    options: { readonly onLog?: (line: string) => void } = {},
+  ): Promise<ExecResult> {
     if (this.#terminated) throw new EngineError('engine-load-failed', 'session was terminated');
     this.#log = [];
     this.#stdout = [];
-    const exitCode = await this.#ffmpeg.exec([...args]);
-    return { exitCode, log: this.#log, stdout: this.#stdout };
+    this.#onLog = options.onLog;
+    try {
+      const exitCode = await this.#ffmpeg.exec([...args]);
+      return { exitCode, log: this.#log, stdout: this.#stdout };
+    } finally {
+      this.#onLog = undefined;
+    }
+  }
+
+  /** Log of the most recent command, including a run that threw. */
+  get lastLog(): readonly string[] {
+    return this.#log;
   }
 
   /**

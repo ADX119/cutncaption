@@ -10,6 +10,8 @@ export const ENGINE_ERROR_CODES = [
   'asset-corrupt',
   'engine-load-failed',
   'unreadable-file',
+  'out-of-memory',
+  'job-failed',
 ] as const;
 
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number];

@@ -66,7 +66,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: integration: after a job, the FS lists no leftover files and the mount is gone, including on error.
 - [x] **M1.8 Probe** — `engine/media/probe/`: ffprobe JSON → `MediaInfo` (duration, container, video incl. rotation and display size, audio). `durationSec` is `null` when the file does not say; the UI may fill it from the `<video>` element. No separate `HTMLVideoElement` cross-check: ffprobe proved reliable on every fixture.
   - Test: unit tests on recorded ffprobe JSON for every fixture (incl. rotation, no audio, audio-only); integration probes every fixture with the real engine and refuses a non-media file.
-- [ ] **M1.9 Runner: progress, cancel, errors** — `time=` parser, `AbortSignal` → terminate, `EngineError` mapping.
+- [x] **M1.9 Runner: progress, cancel, errors** — `time=` parser, `AbortSignal` → terminate, `EngineError` mapping.
   - Test: unit tests for the log parser and error mapping; integration: cancel mid-job rejects with `cancelled` and the next job succeeds.
 - [ ] **M1.10 Multi-thread core and path selection** — load `core-mt` when the rule in ARCHITECTURE §5 holds.
   - Test: unit test of the selection function across class/isolation/iOS/job combinations; integration: an encode on Chromium reports `ffmpeg-mt`.

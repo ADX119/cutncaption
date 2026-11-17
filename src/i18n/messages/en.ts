@@ -58,6 +58,11 @@ export const en = {
   'error.unreadable-file':
     'This file could not be read. It may be damaged, or not a video or audio file. Try another file.',
 
+  'error.out-of-memory':
+    'This device ran out of memory for this job. Try a shorter clip or a smaller size, or close other tabs.',
+  'error.job-failed':
+    'Something went wrong while processing. Try again; if it keeps happening, try another file.',
+
   'engineCheck.title': 'Engine check',
   'engineCheck.intro':
     'This loads the video engine in your browser and reports what it finds. Nothing is uploaded.',

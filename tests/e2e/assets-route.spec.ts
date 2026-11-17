@@ -6,6 +6,8 @@ import manifest from '../../src/engine/assets/manifest.json';
 // covered by unit tests (worker/assets.test.ts); this checks the route is wired up.
 
 test('every engine file in the manifest is served intact', async ({ request }) => {
+  // About 62 MB in total; against the live site this is a real internet download.
+  test.setTimeout(120_000);
   for (const [key, expected] of Object.entries(manifest)) {
     const response = await request.get(`/assets/${key}`);
     expect(response.status(), key).toBe(200);

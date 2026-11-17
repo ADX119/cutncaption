@@ -1,4 +1,6 @@
+import { EngineError } from '../errors';
 import { FfmpegSession } from './ffmpeg/loader';
+import { runFfmpeg } from './ffmpeg/run';
 import { withWorkspace } from './ffmpeg/workspace';
 import type { MediaInfo } from './probe/parse';
 import { probeFile } from './probe/probe';
@@ -97,5 +99,83 @@ async function probe(inputs: readonly HarnessFile[]): Promise<(MediaInfo | { err
   }
 }
 
-export const engineHarness = { workspaceCheck, probe };
+/** A real encode: the whole 60 s fixture through x264, so it runs for a few seconds. */
+const encodeArgs = (input: string, output: string) => [
+  '-hide_banner',
+  '-i',
+  input,
+  '-c:v',
+  'libx264',
+  '-preset',
+  'veryfast',
+  '-c:a',
+  'aac',
+  output,
+];
+
+export interface RunnerCheck {
+  readonly progress: readonly number[];
+  readonly outputBytes: number;
+  readonly cancelledWith: string;
+  readonly progressBeforeCancel: number;
+  readonly afterCancelOutputBytes: number;
+}
+
+/** M1.9: progress during a real encode; cancel mid-job; the next job still works. */
+async function runnerCheck(input: HarnessFile): Promise<RunnerCheck> {
+  const file = toFile(input);
+
+  // 1. A full run, collecting progress.
+  const progress: number[] = [];
+  let session = await FfmpegSession.load({ variant: 'st' });
+  const outputBytes = await withWorkspace(session.fs, [file], async (ws) => {
+    await runFfmpeg(session, encodeArgs(ws.input(), ws.path('out.mp4')), {
+      expectedDurationSec: 60,
+      onProgress: (fraction) => progress.push(fraction),
+    });
+    return (await ws.readOutput('out.mp4', 'video/mp4')).size;
+  });
+
+  // 2. Cancel once the encode is a quarter done.
+  const controller = new AbortController();
+  let progressBeforeCancel = 0;
+  let cancelledWith = 'not cancelled';
+  try {
+    await withWorkspace(session.fs, [file], (ws) =>
+      runFfmpeg(session, encodeArgs(ws.input(), ws.path('out.mp4')), {
+        expectedDurationSec: 60,
+        signal: controller.signal,
+        onProgress: (fraction) => {
+          progressBeforeCancel = fraction;
+          if (fraction >= 0.25) controller.abort();
+        },
+      }),
+    );
+  } catch (error) {
+    cancelledWith = error instanceof EngineError ? error.code : String(error);
+  }
+
+  // 3. Cancelling killed that session; a new one must work.
+  session = await FfmpegSession.load({ variant: 'st' });
+  try {
+    const afterCancelOutputBytes = await withWorkspace(session.fs, [file], async (ws) => {
+      await runFfmpeg(session, [
+        '-hide_banner',
+        '-i',
+        ws.input(),
+        '-t',
+        '2',
+        '-c',
+        'copy',
+        ws.path('short.mp4'),
+      ]);
+      return (await ws.readOutput('short.mp4', 'video/mp4')).size;
+    });
+    return { progress, outputBytes, cancelledWith, progressBeforeCancel, afterCancelOutputBytes };
+  } finally {
+    session.terminate();
+  }
+}
+
+export const engineHarness = { workspaceCheck, probe, runnerCheck };
 export type EngineHarness = typeof engineHarness;
