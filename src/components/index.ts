@@ -7,3 +7,6 @@ export { FileSummary } from './file-drop/FileSummary';
 export { MEDIA_ACCEPT, VIDEO_ACCEPT, matchesAccept, pickFile } from './file-drop/accept';
 export type { AcceptSpec, FileRejection } from './file-drop/accept';
 export { AnalyticsBeacon } from './AnalyticsBeacon';
+export { JobProgress } from './job/JobProgress';
+export { ResultCard, sizeChange } from './job/ResultCard';
+export { ErrorPanel } from './job/ErrorPanel';

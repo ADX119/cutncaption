@@ -74,7 +74,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit test with a fake runner that stalls; asserts one retry on st and the flag set.
 - [x] **M1.12 `MediaEngine` public API and planner** — `probe`, `run`, job union, limit checks before run, one job at a time.
   - Test: unit: planner returns `copy` for remuxable jobs; over-limit job rejects with the right code. Integration: remux fixture end to end.
-- [ ] **M1.13 Shared job UI** — `JobProgress` (percent, cancel), `ResultCard` (preview, download, share, size before/after), error panel with "Details".
+- [x] **M1.13 Shared job UI** — `JobProgress` (percent, cancel), `ResultCard` (preview, download, share, size before/after), error panel with "Details". All states are shown on the unlisted, noindex page `/preview/job-states/`, used by e2e and for design review.
   - Test: component tests for each state; e2e: download event fires with the expected filename.
 - [ ] **M1.14 Engine-load UX** — first-run download panel with size and progress; idle pre-warm when cached.
   - Test: e2e: first visit shows the panel, reload does not.

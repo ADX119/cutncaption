@@ -159,6 +159,19 @@
     }
   }
 
+  /* Progress of unknown length: a short segment travels along the track while a job runs. */
+  .progress-indeterminate {
+    animation: progress-travel 1.4s var(--ease-settle) infinite;
+  }
+  @keyframes progress-travel {
+    from {
+      left: -25%;
+    }
+    to {
+      left: 100%;
+    }
+  }
+
   /* Home page strip: the trim handles close in on the selection once, on load. */
   .strip-selection {
     animation: strip-select 700ms var(--ease-settle) 150ms both;

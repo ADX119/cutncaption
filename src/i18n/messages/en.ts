@@ -45,6 +45,19 @@ export const en = {
   'browser.feature.workers': 'web workers',
   'browser.feature.cache-storage': 'file caching',
 
+  'job.working': 'Working…',
+  'job.percent': '{percent}%',
+  'job.cancel': 'Cancel',
+  'job.cancelling': 'Cancelling…',
+  'result.size': '{before} → {after}',
+  'result.smaller': '{percent}% smaller',
+  'result.larger': '{percent}% larger',
+  'result.download': 'Download',
+  'result.share': 'Share',
+  'result.startOver': 'Start over',
+  'errorPanel.details': 'Details',
+  'errorPanel.tryAgain': 'Try again',
+
   // One per EngineErrorCode (src/engine/errors.ts): what happened, then what to do.
   'error.cancelled': 'Cancelled. Nothing was changed.',
   'error.asset-unknown': 'Part of the editor is missing from this version. Reload the page.',
@@ -73,6 +86,9 @@ export const en = {
     'The result would be too large for this device to hold. Choose a smaller size or a shorter clip.',
   'error.caption-audio-too-long':
     'This video is too long for captions on this device. Trim it to a shorter part first.',
+
+  'preview.title': 'Job states',
+  'preview.converting': 'Converting',
 
   'engineCheck.title': 'Engine check',
   'engineCheck.intro':

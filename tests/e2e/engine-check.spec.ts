@@ -2,21 +2,18 @@ import { type Page, expect, test } from '@playwright/test';
 
 const URL = '/tools/engine-check/';
 
-/** Starts the check (retrying until the page is interactive) and waits for an outcome. */
+/** Starts the check once the page is interactive, and waits for this run's outcome. */
 async function runCheck(page: Page) {
-  const run = page.getByRole('button', { name: 'Run the check' });
-  const started = page
-    .getByRole('button', { name: 'Checking…' })
-    .or(page.getByTestId('engine-result'))
-    .or(page.getByTestId('engine-error'));
+  // The page attaches its test hooks after hydration, so this means clicks will work.
+  await page.waitForFunction(() => window.__cncEngine !== undefined, null, { timeout: 60_000 });
 
-  await expect(async () => {
-    if (await run.isVisible()) await run.click();
-    await expect(started.first()).toBeVisible({ timeout: 1_000 });
-  }).toPass({ timeout: 20_000 });
+  const run = page.getByRole('button', { name: 'Run the check' });
+  await run.click();
+  // The button changes while running, so wait for it to come back: this run is over.
+  await expect(run).toBeEnabled({ timeout: 90_000 });
 
   const outcome = page.getByTestId('engine-result').or(page.getByTestId('engine-error'));
-  await expect(outcome.first()).toBeVisible({ timeout: 90_000 });
+  await expect(outcome.first()).toBeVisible();
   // Surface the engine's own error text if it failed.
   await expect(page.getByTestId('engine-error')).toHaveCount(0);
 }

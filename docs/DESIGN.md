@@ -51,10 +51,11 @@ One family: **Anek Latin** (Ek Type), self-hosted through `next/font`. It has a 
 - Phones first: every control is at least 44 px tall, and nothing scrolls sideways.
 - Separate things with space and `rule` lines. Do not put everything in cards; a bordered `sheet` is for something that is genuinely a surface (the video frame, a panel of controls).
 - Corner radius: 8 px on surfaces, fully round on pill buttons and icon buttons.
+- Button ranks: **primary** (filled `accent`, one per surface: Download, Try again, Choose a file), **secondary** (outlined `rule`: Share, Cancel), **quiet** (text only, `graphite`: Start over). The same action always has the same rank.
 
 ## Motion
 
-Motion answers something the person did. Nothing moves on its own, with one exception: the home page strip closes its handles once on load.
+Motion answers something the person did. Nothing moves on its own, with two exceptions: the home page strip closes its handles once on load, and a job of unknown length shows a segment travelling along its progress track (it answers the person starting the job, and stops when the job does).
 
 | Token              | Value                      | Use                                          |
 | ------------------ | -------------------------- | -------------------------------------------- |
