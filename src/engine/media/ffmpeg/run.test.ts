@@ -103,6 +103,14 @@ describe('runFfmpeg', () => {
     expect(sent).toContain('-filter_threads');
   });
 
+  it('ends a silent run as stalled and terminates the session', async () => {
+    const { session, terminate } = fakeSession({ lines: [status(1)], hang: true });
+    const started = Date.now();
+    expect(await codeOf(runFfmpeg(session, [], { stallTimeoutMs: 50 }))).toBe('stalled');
+    expect(terminate).toHaveBeenCalledOnce();
+    expect(Date.now() - started).toBeLessThan(2000);
+  });
+
   it('stops listening to the signal once finished', async () => {
     const { session, terminate } = fakeSession({});
     const controller = new AbortController();

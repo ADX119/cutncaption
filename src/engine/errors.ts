@@ -12,6 +12,7 @@ export const ENGINE_ERROR_CODES = [
   'unreadable-file',
   'out-of-memory',
   'job-failed',
+  'stalled',
 ] as const;
 
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number];

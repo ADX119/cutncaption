@@ -63,6 +63,9 @@ export const en = {
   'error.job-failed':
     'Something went wrong while processing. Try again; if it keeps happening, try another file.',
 
+  'error.stalled':
+    'Processing stopped responding. Try again; if it happens again, try a shorter clip or reload the page.',
+
   'engineCheck.title': 'Engine check',
   'engineCheck.intro':
     'This loads the video engine in your browser and reports what it finds. Nothing is uploaded.',

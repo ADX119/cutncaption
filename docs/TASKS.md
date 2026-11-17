@@ -70,7 +70,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit tests for the log parser and error mapping; integration: cancel mid-job rejects with `cancelled` and the next job succeeds.
 - [x] **M1.10 Multi-thread core and path selection** — load `core-mt` when the rule in ARCHITECTURE §5 holds; the engine caps thread counts on it (see §5).
   - Test: unit test of the selection function across class/isolation/iOS/job combinations; integration: an encode on Chromium reports `ffmpeg-mt`.
-- [ ] **M1.11 Watchdog fallback** — stall detection → rerun on `core-st`, session flag.
+- [x] **M1.11 Watchdog fallback** — stall detection → rerun on `core-st`, session flag.
   - Test: unit test with a fake runner that stalls; asserts one retry on st and the flag set.
 - [ ] **M1.12 `MediaEngine` public API and planner** — `probe`, `run`, job union, limit checks before run, one job at a time.
   - Test: unit: planner returns `copy` for remuxable jobs; over-limit job rejects with the right code. Integration: remux fixture end to end.
