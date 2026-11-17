@@ -1,5 +1,7 @@
+import { classifyDevice, detectCapabilities, isIos, readDeviceEnv } from '../device';
 import { EngineError } from '../errors';
-import { FfmpegSession } from './ffmpeg/loader';
+import { type CoreVariant, FfmpegSession } from './ffmpeg/loader';
+import { chooseCoreVariant } from './ffmpeg/variant';
 import { runFfmpeg } from './ffmpeg/run';
 import { withWorkspace } from './ffmpeg/workspace';
 import type { MediaInfo } from './probe/parse';
@@ -177,5 +179,62 @@ async function runnerCheck(input: HarnessFile): Promise<RunnerCheck> {
   }
 }
 
-export const engineHarness = { workspaceCheck, probe, runnerCheck };
+export interface CoreCheck {
+  /** What chooseCoreVariant picks for a re-encode in this browser. */
+  readonly selected: CoreVariant;
+  readonly results: readonly {
+    readonly variant: CoreVariant;
+    readonly ok: boolean;
+    readonly ms: number;
+    readonly outputBytes: number;
+    readonly error: string;
+  }[];
+}
+
+/** M1.10: the same real encode on each core, timed, plus this browser's selection. */
+async function coreCheck(input: HarnessFile, variants: readonly CoreVariant[]): Promise<CoreCheck> {
+  const file = toFile(input);
+  const results: CoreCheck['results'][number][] = [];
+  for (const variant of variants) {
+    const started = performance.now();
+    let session: FfmpegSession | undefined;
+    try {
+      session = await FfmpegSession.load({ variant });
+      const loaded = session;
+      const outputBytes = await withWorkspace(loaded.fs, [file], async (ws) => {
+        await runFfmpeg(loaded, encodeArgs(ws.input(), ws.path('out.mp4')), {
+          expectedDurationSec: 60,
+        });
+        return (await ws.readOutput('out.mp4', 'video/mp4')).size;
+      });
+      results.push({
+        variant,
+        ok: true,
+        ms: Math.round(performance.now() - started),
+        outputBytes,
+        error: '',
+      });
+    } catch (error) {
+      results.push({
+        variant,
+        ok: false,
+        ms: Math.round(performance.now() - started),
+        outputBytes: 0,
+        error: String(error),
+      });
+    } finally {
+      session?.terminate();
+    }
+  }
+  const env = readDeviceEnv();
+  const selected = chooseCoreVariant({
+    capabilities: detectCapabilities(),
+    deviceClass: classifyDevice(env),
+    ios: isIos(env),
+    reencodesVideo: true,
+  });
+  return { selected, results };
+}
+
+export const engineHarness = { workspaceCheck, probe, runnerCheck, coreCheck };
 export type EngineHarness = typeof engineHarness;

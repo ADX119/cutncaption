@@ -68,7 +68,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit tests on recorded ffprobe JSON for every fixture (incl. rotation, no audio, audio-only); integration probes every fixture with the real engine and refuses a non-media file.
 - [x] **M1.9 Runner: progress, cancel, errors** — `time=` parser, `AbortSignal` → terminate, `EngineError` mapping.
   - Test: unit tests for the log parser and error mapping; integration: cancel mid-job rejects with `cancelled` and the next job succeeds.
-- [ ] **M1.10 Multi-thread core and path selection** — load `core-mt` when the rule in ARCHITECTURE §5 holds.
+- [x] **M1.10 Multi-thread core and path selection** — load `core-mt` when the rule in ARCHITECTURE §5 holds; the engine caps thread counts on it (see §5).
   - Test: unit test of the selection function across class/isolation/iOS/job combinations; integration: an encode on Chromium reports `ffmpeg-mt`.
 - [ ] **M1.11 Watchdog fallback** — stall detection → rerun on `core-st`, session flag.
   - Test: unit test with a fake runner that stalls; asserts one retry on st and the flag set.
@@ -227,7 +227,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [ ] **M5.13 Performance budget** — bundle analysis, lazy-load engines and editors, enforce ≤ 200 KB gzip initial JS per tool route.
   - Test: script that fails the build when a route exceeds the budget.
 - [ ] **M5.14 Real-device calibration** — run the checklist below on one low-end Android (≤ 3 GB), one mid Android, one iPhone, one desktop; update `limits.ts` and ARCHITECTURE §8. _Manual; needs the owner's devices._
-  - Checklist: each core tool on a 100 MB file · compress a 3-minute 1080p clip · meme MP4/GIF/sticker · 2-minute Hindi captions + burn-in · crop · cancel mid-job · five jobs in a row without reload · open `/tools/engine-check/` twice on the iPhone and confirm the second run says "Loaded from this device: Yes" (the WebKit test browser cannot check this).
+  - Checklist: each core tool on a 100 MB file · compress a 3-minute 1080p clip · meme MP4/GIF/sticker · 2-minute Hindi captions + burn-in · crop · cancel mid-job · five jobs in a row without reload · open `/tools/engine-check/` twice on the iPhone and confirm the second run says "Loaded from this device: Yes" (the WebKit test browser cannot check this) · if a Mac is available, run the Engine check in Safari and one real encode, to confirm the multi-thread core does not stall there.
   - AC: results table committed; every _(calibrate)_ marker removed.
 
 ## M6 — SEO and launch

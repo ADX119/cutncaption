@@ -17,6 +17,7 @@ function fakeSession(script: {
   let rejectRun: ((reason: unknown) => void) | undefined;
   const terminate = vi.fn(() => rejectRun?.(new Error('called FFmpeg.terminate()')));
   const session = {
+    variant: 'st',
     lastLog: script.lines ?? [],
     terminate,
     exec: vi.fn(async (_args: readonly string[], options?: { onLog?: (l: string) => void }) => {
@@ -87,6 +88,19 @@ describe('runFfmpeg', () => {
     controller.abort();
     expect(await codeOf(runFfmpeg(session, [], { signal: controller.signal }))).toBe('cancelled');
     expect(session.exec).not.toHaveBeenCalled();
+  });
+
+  it('caps threads on the multi-thread core and leaves single-thread commands alone', async () => {
+    const st = fakeSession({});
+    await runFfmpeg(st.session, ['-i', 'in.mp4', 'out.mp4']);
+    expect(vi.mocked(st.session.exec).mock.calls[0]?.[0]).toEqual(['-i', 'in.mp4', 'out.mp4']);
+
+    const mt = fakeSession({});
+    Object.assign(mt.session, { variant: 'mt' });
+    await runFfmpeg(mt.session, ['-i', 'in.mp4', 'out.mp4']);
+    const sent = vi.mocked(mt.session.exec).mock.calls[0]?.[0] ?? [];
+    expect(sent.filter((arg) => arg === '-threads')).toHaveLength(2);
+    expect(sent).toContain('-filter_threads');
   });
 
   it('stops listening to the signal once finished', async () => {

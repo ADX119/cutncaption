@@ -2,6 +2,7 @@ import { EngineError } from '../../errors';
 import { classifyFailure } from './failure';
 import type { FfmpegSession } from './loader';
 import { createProgressTracker } from './progress';
+import { limitThreads, threadCount } from './variant';
 
 export interface RunOptions {
   /** Duration of the output this command produces, for progress. Omit if unknown. */
@@ -31,7 +32,11 @@ export async function runFfmpeg(
   signal?.addEventListener('abort', onAbort, { once: true });
 
   try {
-    const result = await session.exec(args, {
+    const finalArgs =
+      session.variant === 'mt'
+        ? limitThreads(args, threadCount(globalThis.navigator?.hardwareConcurrency))
+        : args;
+    const result = await session.exec(finalArgs, {
       onLog: (line) => {
         const fraction = track(line);
         if (fraction !== null) onProgress?.(fraction);
