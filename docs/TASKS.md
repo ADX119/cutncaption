@@ -62,7 +62,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [x] **M1.6 Capability check** — assert encoders, filters and muxers listed in ARCHITECTURE §7 exist in the shipped core.
   - AC: any missing item is resolved by updating §7 before continuing.
   - Test: integration test parsing `-encoders`, `-filters`, `-muxers`.
-- [ ] **M1.7 Virtual FS helpers** — WORKERFS mount of the input `File`, MEMFS output read to `Blob`, cleanup in `finally`.
+- [x] **M1.7 Virtual FS helpers** — WORKERFS mount of the input `File`, MEMFS output read to `Blob`, cleanup in `finally`.
   - Test: integration: after a job, the FS lists no leftover files and the mount is gone, including on error.
 - [ ] **M1.8 Probe** — `commands/probe.ts` parser → `MediaInfo`; cross-check with `HTMLVideoElement`.
   - Test: unit tests on recorded stderr for each fixture type (incl. rotation, no audio); integration probe of the MP4 fixture.

@@ -1,7 +1,8 @@
-import type { FFmpeg } from '@ffmpeg/ffmpeg';
+import type { FFFSType, FFmpeg } from '@ffmpeg/ffmpeg';
 import { type AssetLoader, type AssetProgress, assets } from '../../assets';
 import { EngineError, isEngineError } from '../../errors';
 import vendor from './vendor.json';
+import type { WorkspaceFs } from './workspace';
 
 /** `st` = single-thread core (works everywhere), `mt` = multi-thread (needs isolation). */
 export type CoreVariant = 'st' | 'mt';
@@ -108,6 +109,27 @@ export class FfmpegSession {
 
   get terminated(): boolean {
     return this.#terminated;
+  }
+
+  /** ffmpeg's virtual file system, for withWorkspace(). */
+  get fs(): WorkspaceFs {
+    const ffmpeg = this.#ffmpeg;
+    return {
+      createDir: (path) => ffmpeg.createDir(path),
+      deleteDir: (path) => ffmpeg.deleteDir(path),
+      // The enum value is the plain string; the wrapper's enum is not imported at runtime.
+      mountFiles: (files, mountPoint) =>
+        ffmpeg.mount('WORKERFS' as FFFSType, { files: [...files] }, mountPoint),
+      unmount: (mountPoint) => ffmpeg.unmount(mountPoint),
+      writeFile: (path, data) => ffmpeg.writeFile(path, data),
+      readFile: async (path) => {
+        const data = await ffmpeg.readFile(path);
+        if (typeof data === 'string') throw new Error(`readFile ${path}: expected binary`);
+        return data;
+      },
+      deleteFile: (path) => ffmpeg.deleteFile(path),
+      listDir: (path) => ffmpeg.listDir(path),
+    };
   }
 
   /** Runs one ffmpeg command line (without the leading "ffmpeg"). */

@@ -1,9 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { classifyDevice, detectCapabilities, readDeviceEnv } from '@/engine/device';
 import { EngineError } from '@/engine/errors';
-import { type SelfTestResult, runSelfTest } from '@/engine/media';
+import {
+  type EngineHarness,
+  type SelfTestResult,
+  engineHarness,
+  runSelfTest,
+} from '@/engine/media';
+
+declare global {
+  interface Window {
+    /** Browser-test hooks; see src/engine/media/harness.ts. */
+    __cncEngine?: EngineHarness;
+  }
+}
 import { t } from '@/i18n';
 
 type State =
@@ -35,6 +47,13 @@ function Row({ label, value, testId }: { label: string; value: string; testId: s
  */
 export function EngineCheck() {
   const [state, setState] = useState<State>({ status: 'idle' });
+
+  useEffect(() => {
+    window.__cncEngine = engineHarness;
+    return () => {
+      delete window.__cncEngine;
+    };
+  }, []);
 
   async function run() {
     setState({ status: 'running' });
