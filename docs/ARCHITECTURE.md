@@ -88,10 +88,16 @@ Only `engine/` may import `@ffmpeg/*`, `@huggingface/transformers`, `onnxruntime
 
 ```ts
 // engine/media
+// createMediaEngine() in engine/media/engine.ts. One job at a time: a second call while
+// one runs rejects with EngineError 'busy'. Holds at most one ffmpeg instance.
 interface MediaEngine {
-  probe(file: File): Promise<MediaInfo>;   // duration, streams, codecs, w/h, fps, rotation
-  run(job: MediaJob, o: { signal: AbortSignal; onProgress(p: Progress): void }): Promise<JobResult>;
+  probe(file: File, o?: { signal }): Promise<MediaInfo>;   // duration, streams, codecs, display size, rotation
+  assess(job: MediaJob): { path: EnginePath; blocks: LimitIssue[]; warnings: LimitIssue[] };  // before running
+  run(job: MediaJob, o?: { signal; onProgress(fraction: number) }): Promise<JobResult>;     // rejects over hard limits
+  release(): void;                                          // frees the ffmpeg instance
 }
+// Each job is planned by planJob() (engine/media/plan.ts): copy vs re-encode, output
+// name, limit footprint, and the ffmpeg arguments.
 type MediaJob =                             // discriminated union, one per commands/*.ts
   | { kind: 'trim'; file: File; start: number; end: number; mode: 'fast' | 'precise' }
   | { kind: 'compress'; ... } | { kind: 'compressToSize'; ... } | { kind: 'toMp4'; ... }

@@ -36,6 +36,8 @@ test('the engine reads every fixture correctly', async ({ page }) => {
 });
 
 test('a file that is not media is refused with a clear error', async ({ page }) => {
+  // Loads the engine: against the live site that is a fresh 31 MB download per test.
+  test.setTimeout(120_000);
   await openEngine(page);
   const notMedia = {
     name: 'notes.mp4',

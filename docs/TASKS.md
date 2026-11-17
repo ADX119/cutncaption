@@ -72,7 +72,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit test of the selection function across class/isolation/iOS/job combinations; integration: an encode on Chromium reports `ffmpeg-mt`.
 - [x] **M1.11 Watchdog fallback** — stall detection → rerun on `core-st`, session flag.
   - Test: unit test with a fake runner that stalls; asserts one retry on st and the flag set.
-- [ ] **M1.12 `MediaEngine` public API and planner** — `probe`, `run`, job union, limit checks before run, one job at a time.
+- [x] **M1.12 `MediaEngine` public API and planner** — `probe`, `run`, job union, limit checks before run, one job at a time.
   - Test: unit: planner returns `copy` for remuxable jobs; over-limit job rejects with the right code. Integration: remux fixture end to end.
 - [ ] **M1.13 Shared job UI** — `JobProgress` (percent, cancel), `ResultCard` (preview, download, share, size before/after), error panel with "Details".
   - Test: component tests for each state; e2e: download event fires with the expected filename.
@@ -101,7 +101,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit with a fake runner returning an oversize result → one rerun with the scaled bitrate. Integration: 60 s fixture to a small target → size ≤ target and ≥ 85%.
 - [ ] **M2.9 Compress-to-size UI** — MB input, WhatsApp/Discord/Email presets from `sizePresets.ts` (verify values), messages for unreachable/already-small.
   - Test: e2e for the WhatsApp preset path and the already-small path.
-- [ ] **M2.10 Convert to MP4** — remux-or-re-encode decision, builder, UI.
+- [ ] **M2.10 Convert to MP4** — UI. _The remux-or-re-encode decision and both commands were built in M1.12 (`planJob`, `isMp4Compatible`) and are unit- and e2e-tested; this task adds the tool UI and its e2e._
   - Test: unit: decision function for each fixture's `MediaInfo`. e2e: WebM → H.264/AAC MP4; MP4(H.264) → path `copy`; MOV and MKV convert.
 - [ ] **M2.11 Video to MP3** — builder, UI, no-audio error.
   - Test: unit args; e2e: output is `audio/mpeg`, duration matches ±0.1 s; no-audio fixture shows the error.

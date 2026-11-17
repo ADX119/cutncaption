@@ -13,6 +13,11 @@ export const ENGINE_ERROR_CODES = [
   'out-of-memory',
   'job-failed',
   'stalled',
+  'busy',
+  // Device limits (engine/device/limits.ts). Hard limits only; warnings never throw.
+  'input-too-large',
+  'output-too-large',
+  'caption-audio-too-long',
 ] as const;
 
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number];

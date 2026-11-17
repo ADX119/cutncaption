@@ -1,5 +1,6 @@
 import { classifyDevice, detectCapabilities, isIos, readDeviceEnv } from '../device';
 import { EngineError } from '../errors';
+import { createMediaEngine } from './engine';
 import { type CoreVariant, FfmpegSession } from './ffmpeg/loader';
 import { chooseCoreVariant } from './ffmpeg/variant';
 import { runFfmpeg } from './ffmpeg/run';
@@ -236,5 +237,41 @@ async function coreCheck(input: HarnessFile, variants: readonly CoreVariant[]): 
   return { selected, results };
 }
 
-export const engineHarness = { workspaceCheck, probe, runnerCheck, coreCheck };
+export interface EngineRunCheck {
+  readonly path: string;
+  readonly filename: string;
+  readonly mime: string;
+  readonly fellBack: boolean;
+  readonly progressCount: number;
+  readonly output: MediaInfo;
+}
+
+/** M1.12: the public engine, end to end: probe, convert to MP4, re-probe the output. */
+async function engineRun(input: HarnessFile): Promise<EngineRunCheck> {
+  const engine = createMediaEngine();
+  try {
+    const file = toFile(input);
+    const info = await engine.probe(file);
+    let progressCount = 0;
+    const result = await engine.run(
+      { kind: 'toMp4', file, info },
+      { onProgress: () => (progressCount += 1) },
+    );
+    const output = await engine.probe(
+      new File([result.blob], result.filename, { type: result.mime }),
+    );
+    return {
+      path: result.path,
+      filename: result.filename,
+      mime: result.mime,
+      fellBack: result.fellBack,
+      progressCount,
+      output,
+    };
+  } finally {
+    engine.release();
+  }
+}
+
+export const engineHarness = { workspaceCheck, probe, runnerCheck, coreCheck, engineRun };
 export type EngineHarness = typeof engineHarness;
