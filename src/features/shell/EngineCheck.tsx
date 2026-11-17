@@ -79,6 +79,15 @@ export function EngineCheck() {
             testId="engine-version"
           />
           <Row
+            label={t('engineCheck.features')}
+            value={
+              state.result.missing.length === 0
+                ? t('engineCheck.featuresAll', { count: state.result.requiredCount })
+                : t('engineCheck.featuresMissing', { list: state.result.missing.join(', ') })
+            }
+            testId="engine-features"
+          />
+          <Row
             label={t('engineCheck.loadTime')}
             value={t('engineCheck.seconds', { seconds: (state.result.loadMs / 1000).toFixed(1) })}
             testId="engine-load-time"

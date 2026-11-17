@@ -59,7 +59,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit tests with mocked `fetch`/`caches`: miss→store, hit→no fetch, bad hash→error, quota error→still returns, abort rejects.
 - [x] **M1.5 ffmpeg loader (single-thread)** — wrapper and core loaded from `/vendor` as native modules (not bundled), wasm via `fetchAsset`; load, terminate, reload. Exercised through the unlisted diagnostics page `/tools/engine-check/`.
   - Test: integration: `-version` runs in Chromium and WebKit; second load makes no network request for the wasm.
-- [ ] **M1.6 Capability check** — assert encoders, filters and muxers listed in ARCHITECTURE §7 exist in the shipped core.
+- [x] **M1.6 Capability check** — assert encoders, filters and muxers listed in ARCHITECTURE §7 exist in the shipped core.
   - AC: any missing item is resolved by updating §7 before continuing.
   - Test: integration test parsing `-encoders`, `-filters`, `-muxers`.
 - [ ] **M1.7 Virtual FS helpers** — WORKERFS mount of the input `File`, MEMFS output read to `Blob`, cleanup in `finally`.

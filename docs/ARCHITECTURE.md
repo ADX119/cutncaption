@@ -218,19 +218,19 @@ MP4  = -movflags +faststart
 
 `superfast` on class L, `veryfast` otherwise.
 
-| Tool               | Command                                                                                                   |
-| ------------------ | --------------------------------------------------------------------------------------------------------- |
-| Probe              | `-hide_banner -i IN` → parse stderr (`commands/probe.ts`), cross-checked with `HTMLVideoElement` metadata |
-| Trim, fast         | `-ss {start} -i IN -t {dur} -c copy -avoid_negative_ts make_zero MP4 out.{srcExt}`                        |
-| Trim, precise      | `-ss {start} -i IN -t {dur} X264 -crf 20 AAC(128) MP4 out.mp4`                                            |
-| Compress           | `-i IN -vf scale={w}:{h} X264 -crf {23                                                                    | 28  | 32} AAC({128   | 96  | 64}) MP4 out.mp4` — caps 1080/720/480 on the short side |
-| Compress to size   | `-i IN -vf scale={w}:{h} X264 -b:v {v}k -maxrate {v}k -bufsize {2v}k AAC({a}) MP4 out.mp4`                |
-| Convert, remux     | `-i IN -c copy MP4 out.mp4` (when video is H.264 and audio is AAC or absent)                              |
-| Convert, re-encode | `-i IN X264 -crf 22 AAC(128) MP4 out.mp4`                                                                 |
-| Video to MP3       | `-i IN -vn -c:a libmp3lame -b:a {128                                                                      | 192 | 320}k out.mp3` |
-| Mute               | `-i IN -c:v copy -an MP4 out.{srcExt}`                                                                    |
-| 9:16 crop          | `-i IN -vf crop={cw}:{ch}:{x}:{y},scale=1080:1920 X264 -crf 21 AAC(128) MP4 out.mp4`                      |
-| PCM for Whisper    | `-ss {s} -t {≤600} -i IN -vn -ac 1 -ar 16000 -f f32le out.pcm` (in 10-minute windows)                     |
+| Tool               | Command                                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| Probe              | `-hide_banner -i IN` → parse stderr (`commands/probe.ts`), cross-checked with `HTMLVideoElement` metadata         |
+| Trim, fast         | `-ss {start} -i IN -t {dur} -c copy -avoid_negative_ts make_zero MP4 out.{srcExt}`                                |
+| Trim, precise      | `-ss {start} -i IN -t {dur} X264 -crf 20 AAC(128) MP4 out.mp4`                                                    |
+| Compress           | `-i IN -vf scale={w}:{h} X264 -crf {23/28/32} AAC({128/96/64}) MP4 out.mp4` — caps 1080/720/480 on the short side |
+| Compress to size   | `-i IN -vf scale={w}:{h} X264 -b:v {v}k -maxrate {v}k -bufsize {2v}k AAC({a}) MP4 out.mp4`                        |
+| Convert, remux     | `-i IN -c copy MP4 out.mp4` (when video is H.264 and audio is AAC or absent)                                      |
+| Convert, re-encode | `-i IN X264 -crf 22 AAC(128) MP4 out.mp4`                                                                         |
+| Video to MP3       | `-i IN -vn -c:a libmp3lame -b:a {128/192/320}k out.mp3`                                                           |
+| Mute               | `-i IN -c:v copy -an MP4 out.{srcExt}`                                                                            |
+| 9:16 crop          | `-i IN -vf crop={cw}:{ch}:{x}:{y},scale=1080:1920 X264 -crf 21 AAC(128) MP4 out.mp4`                              |
+| PCM for Whisper    | `-ss {s} -t {≤600} -i IN -vn -ac 1 -ar 16000 -f f32le out.pcm` (in 10-minute windows)                             |
 
 **Compress-to-size maths** (`commands/bitrate.ts`): `total = targetBytes × 8 × 0.96 / duration`; audio 96k (64k if total < 400k); `v = total − audio`; refuse if `v < 150k`. Height ladder by `v`: ≥2500k→1080, ≥1200k→720, ≥600k→480, ≥300k→360, else 240. Single pass; if the output exceeds the target, rerun once with `v × (target/actual) × 0.93`.
 
@@ -241,7 +241,7 @@ MP4  = -movflags +faststart
 | Top/bottom text    | `[0:v]scale={w}:{h}[v];[v][1:v]overlay=0:0[out]`                                                                                                                                                                                                                                                                                                                                                        |
 | Caption bar        | `[0:v]scale={w}:{h},pad={w}:{h+bar}:0:{bar}:white[v];[v][1:v]overlay=0:0[out]`                                                                                                                                                                                                                                                                                                                          |
 | Freeze-frame zoom  | `[0:v]scale={w}:{h},split[a0][b0];[a0]trim=0:{f},setpts=PTS-STARTPTS[a];[b0]trim=start={f}:end={f+1/fps},setpts=PTS-STARTPTS,zoompan=z='min(1+{rate}*on,{zmax})':x='{fx}*(iw-iw/zoom)':y='{fy}*(ih-ih/zoom)':d={hold*fps}:s={w}x{h}:fps={fps}[b];[a][b]concat=n=2:v=1:a=0[v];[v][1:v]overlay=0:0:enable='gte(t,{f})'[out]` with audio `[0:a]atrim=0:{f},asetpts=PTS-STARTPTS,apad=pad_dur={hold}[aout]` |
-| → MP4              | `-map [out] -map {0:a                                                                                                                                                                                                                                                                                                                                                                                   | [aout]}? X264 -crf 20 AAC(128) MP4 out.mp4` |
+| → MP4              | `-map [out] -map {0:a or [aout]}? X264 -crf 20 AAC(128) MP4 out.mp4`                                                                                                                                                                                                                                                                                                                                    |
 | → GIF              | append `,fps=12,scale=480:-2:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer:bayer_scale=4` → `-loop 0 out.gif`                                                                                                                                                                                                                                             |
 | → WhatsApp sticker | append `,fps={12},scale=512:512:force_original_aspect_ratio=decrease,format=rgba,pad=512:512:(ow-iw)/2:(oh-ih)/2:color=0x00000000` → `-an -c:v libwebp -q:v {q} -loop 0 out.webp`; retry ladder q 60→45→30, then fps 12→10→8, until ≤ 500 KB                                                                                                                                                            |
 | → Still image      | no ffmpeg: draw the `<video>` frame and caption to a canvas, `toBlob` PNG/JPEG (`canvas` path)                                                                                                                                                                                                                                                                                                          |
@@ -253,7 +253,7 @@ MP4  = -movflags +faststart
   `-i IN -vf subtitles=subs.ass:fontsdir=/fonts X264 -crf 21 -c:a copy MP4 out.mp4`
   Classic = outline style; Box = `BorderStyle=3`; Highlight = one event per word with a colour override on the active word. libass shapes Devanagari via HarfBuzz. Colour emoji are not supported on this path.
 
-**Capability check.** M1 includes a test that runs `-encoders`, `-filters` and `-muxers` on the shipped core and asserts every codec, filter and muxer named above is present. If one is missing, fix the command table here before building the tool.
+**Capability check.** `src/engine/media/ffmpeg/capabilities.ts` lists every encoder, decoder, filter, muxer and demuxer the commands above use (plus the input decoders people will bring, including HEVC from iPhones). The Engine check page runs `-encoders`, `-decoders`, `-filters`, `-muxers` and `-demuxers` on the shipped core and reports anything missing; e2e asserts the list is complete. In a `{a/b/c}` placeholder the slashes separate alternatives. **When a command here gains a codec, filter or format, add it to that list in the same change.**
 
 **Progress** is computed from `time=` in ffmpeg logs against the expected output duration (the built-in progress event is unreliable with filter graphs). **Cancel** terminates the instance; the next job reloads it from cache.
 

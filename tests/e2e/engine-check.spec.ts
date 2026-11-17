@@ -39,6 +39,9 @@ test('ffmpeg loads and runs a command, and the second visit needs no download', 
   await page.goto(URL);
   await runCheck(page);
   await expect(page.getByTestId('engine-version')).toHaveText(/\d+\.\d+/);
+  // M1.6: every codec, filter and format the tools use is in the shipped core.
+  // On failure the received text lists exactly what is missing.
+  await expect(page.getByTestId('engine-features')).toHaveText(/^All \d+ present$/);
   await expect(page.getByTestId('engine-from-cache')).toHaveText('No');
   await expect(page.getByTestId('engine-isolated')).toHaveText('Yes');
   expect(wasmDownloads).toHaveLength(1);
