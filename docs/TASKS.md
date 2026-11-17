@@ -76,7 +76,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit: planner returns `copy` for remuxable jobs; over-limit job rejects with the right code. Integration: remux fixture end to end.
 - [x] **M1.13 Shared job UI** — `JobProgress` (percent, cancel), `ResultCard` (preview, download, share, size before/after), error panel with "Details". All states are shown on the unlisted, noindex page `/preview/job-states/`, used by e2e and for design review.
   - Test: component tests for each state; e2e: download event fires with the expected filename.
-- [ ] **M1.14 Engine-load UX** — first-run download panel with size and progress; idle pre-warm when cached.
+- [x] **M1.14 Engine-load UX** — first-run download panel with size and progress; idle pre-warm when cached. Tool pages now read the chosen file with the engine and show its length and size; stalled engine downloads resume (see ARCHITECTURE §6).
   - Test: e2e: first visit shows the panel, reload does not.
 - [ ] **M1.15 Privacy network guard** — reusable Playwright fixture that fails a test on any request outside the allowlist or any request body > 2 KB.
   - Test: the guard fails a deliberately bad spec; it is enabled for all later tool specs.

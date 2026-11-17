@@ -7,6 +7,9 @@ const remoteBaseUrl = process.env.E2E_BASE_URL;
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
+  // Engine tests start up to 32 wasm threads each; more parallel browsers than this
+  // overloads a typical dev machine and crashes test browsers.
+  workers: process.env.CI ? 2 : 6,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

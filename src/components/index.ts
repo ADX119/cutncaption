@@ -10,3 +10,4 @@ export { AnalyticsBeacon } from './AnalyticsBeacon';
 export { JobProgress } from './job/JobProgress';
 export { ResultCard, sizeChange } from './job/ResultCard';
 export { ErrorPanel } from './job/ErrorPanel';
+export { EngineDownload } from './job/EngineDownload';

@@ -45,6 +45,14 @@ export const en = {
   'browser.feature.workers': 'web workers',
   'browser.feature.cache-storage': 'file caching',
 
+  'engineDownload.title': 'Getting the editor ready',
+  'engineDownload.amount': '{loaded} of {total}',
+  'engineDownload.hint':
+    'This happens once. The editor is kept on this device, so next time it starts straight away.',
+  'file.reading': 'Reading your file…',
+  'file.details': '{duration} · {size}',
+  'file.detailsVideo': '{duration} · {width} × {height} · {size}',
+
   'job.working': 'Working…',
   'job.percent': '{percent}%',
   'job.cancel': 'Cancel',

@@ -3,11 +3,13 @@ import { formatBytes } from '@/lib';
 
 interface FileSummaryProps {
   readonly file: Pick<File, 'name' | 'size'>;
+  /** A line about the file, e.g. "0:05 · 1280 × 720 · 95 KB". Defaults to its size. */
+  readonly details?: string;
   readonly onClear: () => void;
 }
 
 /** The chosen file, with a way to pick a different one. */
-export function FileSummary({ file, onClear }: FileSummaryProps) {
+export function FileSummary({ file, details, onClear }: FileSummaryProps) {
   return (
     <div
       data-testid="file-summary"
@@ -17,7 +19,9 @@ export function FileSummary({ file, onClear }: FileSummaryProps) {
         <span className="block truncate font-medium" title={file.name}>
           {file.name}
         </span>
-        <span className="text-graphite text-sm">{formatBytes(file.size)}</span>
+        <span className="text-graphite text-sm tabular-nums">
+          {details ?? formatBytes(file.size)}
+        </span>
       </p>
       <button
         type="button"

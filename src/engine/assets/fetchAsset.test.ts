@@ -202,6 +202,95 @@ describe('fetchAsset', () => {
   });
 });
 
+/**
+ * A server that goes quiet after `stallAfter` bytes on its first `stalls` responses,
+ * like a mobile connection that drops without an error. Honours Range unless told not to.
+ */
+function flakyFetch(options: { stallAfter: number; stalls: number; ignoreRange?: boolean }) {
+  let calls = 0;
+  const ranges: (string | null)[] = [];
+  const fetch = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    const call = (calls += 1);
+    const signal = init?.signal;
+    const range = new Headers(init?.headers).get('Range');
+    ranges.push(range);
+    const from = range && !options.ignoreRange ? Number(/bytes=(\d+)-/.exec(range)?.[1]) : 0;
+    const body = DATA.slice(from);
+    const stallAt = call <= options.stalls ? options.stallAfter : Infinity;
+    let sent = 0;
+    const stream = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (sent >= stallAt) {
+          // Never answers again; only an abort ends it.
+          return new Promise<void>((_, reject) =>
+            signal?.addEventListener('abort', () => {
+              const error = new DOMException('aborted', 'AbortError');
+              controller.error(error);
+              reject(error);
+            }),
+          );
+        }
+        if (sent >= body.length) return controller.close();
+        const chunk = body.slice(sent, Math.min(sent + 100, stallAt, body.length));
+        sent += chunk.length;
+        controller.enqueue(chunk);
+      },
+    });
+    const partial = Boolean(range) && !options.ignoreRange;
+    return new Response(stream, {
+      status: partial ? 206 : 200,
+      headers: { 'Content-Type': 'application/wasm' },
+    });
+  });
+  return { fetch, ranges };
+}
+
+describe('stalled downloads', () => {
+  it('resumes from where it stopped and still verifies the whole file', async () => {
+    const { fetch, ranges } = flakyFetch({ stallAfter: 400, stalls: 1 });
+    const { loader, store } = setup({ fetch, stallTimeoutMs: 30 });
+    const progress: number[] = [];
+
+    const blob = await loader.fetchAsset(KEY, { onProgress: (p) => progress.push(p.loadedBytes) });
+
+    expect(await bytesOf(blob)).toEqual(DATA);
+    expect(ranges).toEqual([null, 'bytes=400-']);
+    expect(progress.at(-1)).toBe(1000);
+    expect(progress).toEqual([...progress].sort((a, b) => a - b));
+    expect(store.has(URL_PATH)).toBe(true);
+  });
+
+  it('starts over when the server ignores the resume request', async () => {
+    const { fetch, ranges } = flakyFetch({ stallAfter: 400, stalls: 1, ignoreRange: true });
+    const { loader } = setup({ fetch, stallTimeoutMs: 30 });
+    expect(await bytesOf(await loader.fetchAsset(KEY))).toEqual(DATA);
+    expect(ranges).toEqual([null, 'bytes=400-']);
+  });
+
+  it('gives up with a clear error after three quiet attempts', async () => {
+    const { fetch } = flakyFetch({ stallAfter: 200, stalls: 3 });
+    const { loader, store } = setup({ fetch, stallTimeoutMs: 30 });
+    const error = await loader.fetchAsset(KEY).catch((reason: unknown) => reason);
+    expect((error as EngineError).code).toBe('asset-download-failed');
+    expect((error as EngineError).detail).toContain('stalled');
+    expect(fetch).toHaveBeenCalledTimes(3);
+    expect(store.size).toBe(0);
+  });
+
+  it('still cancels promptly while a download is stalled', async () => {
+    const { fetch } = flakyFetch({ stallAfter: 200, stalls: 3 });
+    const { loader } = setup({ fetch, stallTimeoutMs: 60_000 });
+    const controller = new AbortController();
+    const pending = loader.fetchAsset(KEY, {
+      signal: controller.signal,
+      onProgress: ({ loadedBytes }) => {
+        if (loadedBytes >= 200) setTimeout(() => controller.abort(), 10);
+      },
+    });
+    expect(await codeOf(pending)).toBe('cancelled');
+  });
+});
+
 describe('pruneCache', () => {
   it('removes files from older versions and keeps the current ones', async () => {
     const { loader, store } = setup();

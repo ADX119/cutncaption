@@ -22,9 +22,58 @@ function deps(overrides: Partial<MediaEngineDeps> = {}): MediaEngineDeps {
     loadSession: vi.fn(async () => {
       throw new Error('should not load a session in this test');
     }),
+    isCoreCached: vi.fn(async () => false),
     ...overrides,
   };
 }
+
+/** A loadable fake session that records which cores were loaded. */
+function loader() {
+  const loaded: string[] = [];
+  const loadSession = vi.fn(
+    async (
+      variant: 'st' | 'mt',
+      options?: { onDownload?: (p: { loadedBytes: number; totalBytes: number }) => void },
+    ) => {
+      loaded.push(variant);
+      options?.onDownload?.({ loadedBytes: 10, totalBytes: 10 });
+      return { variant, terminated: false, terminate: vi.fn() } as unknown as FfmpegSession;
+    },
+  );
+  return { loaded, loadSession };
+}
+
+describe('prepare and needsDownload', () => {
+  it('loads the core this device will encode with, reporting the download', async () => {
+    const { loaded, loadSession } = loader();
+    const engine = createMediaEngine(deps({ loadSession }));
+    const progress: number[] = [];
+    await engine.prepare({ onDownload: (p) => progress.push(p.loadedBytes) });
+    expect(loaded).toEqual(['mt']);
+    expect(progress).toEqual([10]);
+  });
+
+  it('prepares the single-thread core on iPhone', async () => {
+    const { loaded, loadSession } = loader();
+    await createMediaEngine(deps({ loadSession, ios: true, deviceClass: 'M' })).prepare();
+    expect(loaded).toEqual(['st']);
+  });
+
+  it('does not load anything twice', async () => {
+    const { loaded, loadSession } = loader();
+    const engine = createMediaEngine(deps({ loadSession }));
+    await engine.prepare();
+    await engine.prepare();
+    expect(loaded).toEqual(['mt']);
+  });
+
+  it('asks the cache about the core it would prepare', async () => {
+    const isCoreCached = vi.fn(async (variant: 'st' | 'mt') => variant === 'mt');
+    const engine = createMediaEngine(deps({ isCoreCached }));
+    expect(await engine.needsDownload()).toBe(false);
+    expect(isCoreCached).toHaveBeenCalledWith('mt');
+  });
+});
 
 async function codeOf(promise: Promise<unknown>) {
   const error = await promise.then(

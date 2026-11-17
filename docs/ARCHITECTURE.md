@@ -199,6 +199,8 @@ Why the split: Cloudflare static assets reject files over 25 MiB, and `new Worke
 
 - `scripts/upload-assets.mjs` uploads versioned files to R2 and writes `src/engine/assets/manifest.json` (`path → { bytes, sha256 }`). Paths contain the version; objects are immutable (`Cache-Control: immutable`).
 - `fetchAsset(path, { onProgress, signal })`: look up Cache Storage `cnc-assets-v1`; on miss, stream from R2 with byte progress, verify length and SHA-256, store, return a `Blob`.
+- **Stalled downloads resume.** If no bytes arrive for 20 s, the attempt is dropped and the rest is requested with `Range: bytes=N-` (the `/assets` Worker answers 206); a server that answers 200 instead restarts from zero. Three attempts, then `asset-download-failed` with Try again. Found in M1.14: a download stalled at 28 of 31 MB under load and the page waited forever.
+- **Getting ready.** `engine.needsDownload()` says whether the engine is cached; `engine.prepare()` loads the core this device re-encodes with (multi-thread where allowed, so the first job needs no second download; a loaded multi-thread core also does single-thread work). Tool pages (`features/shell/FileIntake.tsx`) pre-warm on idle only when cached; otherwise nothing is downloaded until a file is chosen, and then `EngineDownload` shows the size and progress.
 - On `QuotaExceededError`, continue without caching and warn once. Call `navigator.storage.persist()` after the first successful job. Old-version entries are deleted on load.
 - Safari may evict script-written storage after 7 days without a visit; the UI must always handle a re-download.
 - No service worker in Phase 1 (added with PWA/Share Target later).

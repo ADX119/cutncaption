@@ -1,4 +1,4 @@
-import { EngineError, isAbortError } from '../errors';
+import { EngineError } from '../errors';
 
 /** Size and fingerprint of one large engine file (see scripts/assets.mjs). */
 export interface AssetEntry {
@@ -25,6 +25,8 @@ export interface AssetLoaderDeps {
   readonly fetch: typeof fetch;
   /** Undefined where Cache Storage does not exist (some private modes). */
   readonly caches: CacheStorage | undefined;
+  /** Silence after which a download attempt is dropped and resumed. Default 20 s. */
+  readonly stallTimeoutMs?: number;
 }
 
 export interface AssetLoader {
@@ -39,12 +41,17 @@ export interface AssetLoader {
 /** Bump the suffix only if the cache layout itself changes; file versions live in the keys. */
 export const ASSET_CACHE_NAME = 'cnc-assets-v1';
 
+const DEFAULT_STALL_TIMEOUT_MS = 20_000;
+/** First try plus two resumes. */
+const MAX_ATTEMPTS = 3;
+
 async function sha256Hex(blob: Blob): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', await blob.arrayBuffer());
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
 export function createAssetLoader(deps: AssetLoaderDeps): AssetLoader {
+  const stallTimeoutMs = deps.stallTimeoutMs ?? DEFAULT_STALL_TIMEOUT_MS;
   const urlFor = (key: string) => `${deps.baseUrl}/${key}`;
 
   function entryFor(key: string): AssetEntry {
@@ -77,48 +84,49 @@ export function createAssetLoader(deps: AssetLoaderDeps): AssetLoader {
     return undefined;
   }
 
+  /**
+   * Downloads a file, resuming where it stopped if the connection goes quiet.
+   *
+   * Mobile connections often stall mid-download without failing. If no bytes arrive
+   * for `stallTimeoutMs`, the attempt is dropped and the rest is requested with a
+   * Range header (the /assets route supports it). A server that answers a resume
+   * with the whole file instead (200) starts the download over. After
+   * MAX_ATTEMPTS the download fails with a clear error the person can retry.
+   */
   async function download(key: string, options: FetchAssetOptions): Promise<Blob> {
     const entry = entryFor(key);
     const url = urlFor(key);
-
-    let response: Response;
-    try {
-      response = await deps.fetch(url, { signal: options.signal });
-    } catch (error) {
-      if (isAbortError(error)) throw new EngineError('cancelled', key, { cause: error });
-      throw new EngineError('asset-download-failed', `${url}: ${String(error)}`, { cause: error });
-    }
-    if (!response.ok) {
-      throw new EngineError('asset-download-failed', `${url}: HTTP ${response.status}`);
-    }
-
-    const type = response.headers.get('Content-Type') ?? 'application/octet-stream';
-    const chunks: BlobPart[] = [];
+    const chunks: Uint8Array[] = [];
     let loadedBytes = 0;
+    let type = 'application/octet-stream';
 
-    try {
-      if (response.body) {
-        const reader = response.body.getReader();
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          loadedBytes += value.byteLength;
+    for (let attempt = 1; ; attempt += 1) {
+      const outcome = await downloadAttempt(
+        url,
+        loadedBytes,
+        options,
+        (chunk) => {
+          chunks.push(chunk);
+          loadedBytes += chunk.byteLength;
           options.onProgress?.({ loadedBytes, totalBytes: entry.bytes });
-        }
-      } else {
-        const buffer = await response.arrayBuffer();
-        chunks.push(buffer);
-        loadedBytes = buffer.byteLength;
+        },
+        () => {
+          chunks.length = 0;
+          loadedBytes = 0;
+        },
+      );
+      if (outcome.type) type = outcome.type;
+      if (outcome.done) break;
+      if (attempt >= MAX_ATTEMPTS) {
+        throw new EngineError(
+          'asset-download-failed',
+          `${url}: stalled at ${loadedBytes} of ${entry.bytes} bytes after ${attempt} attempts`,
+        );
       }
-    } catch (error) {
-      if (isAbortError(error) || options.signal?.aborted) {
-        throw new EngineError('cancelled', key, { cause: error });
-      }
-      throw new EngineError('asset-download-failed', `${url}: ${String(error)}`, { cause: error });
     }
 
-    const blob = new Blob(chunks, { type });
+    // Chunks come straight from fetch, so their buffers are plain ArrayBuffers.
+    const blob = new Blob(chunks as Uint8Array<ArrayBuffer>[], { type });
     if (blob.size !== entry.bytes) {
       throw new EngineError('asset-corrupt', `${key}: ${blob.size} bytes, expected ${entry.bytes}`);
     }
@@ -126,6 +134,59 @@ export function createAssetLoader(deps: AssetLoaderDeps): AssetLoader {
       throw new EngineError('asset-corrupt', `${key}: checksum mismatch`);
     }
     return blob;
+  }
+
+  /**
+   * One request. Resolves done: true when the body ended, done: false when it went
+   * quiet and was dropped. Cancellation and hard failures throw.
+   */
+  async function downloadAttempt(
+    url: string,
+    from: number,
+    options: FetchAssetOptions,
+    onChunk: (chunk: Uint8Array) => void,
+    onRestart: () => void,
+  ): Promise<{ done: boolean; type?: string }> {
+    const quiet = new AbortController();
+    const signal = options.signal ? AbortSignal.any([options.signal, quiet.signal]) : quiet.signal;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const armTimer = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => quiet.abort(), stallTimeoutMs);
+    };
+
+    try {
+      armTimer();
+      const headers = from > 0 ? { Range: `bytes=${from}-` } : undefined;
+      const response = await deps.fetch(url, { signal, headers });
+      if (!response.ok) {
+        throw new EngineError('asset-download-failed', `${url}: HTTP ${response.status}`);
+      }
+      // Asked to resume but got the whole file: start counting from zero again.
+      if (from > 0 && response.status !== 206) onRestart();
+
+      const type = response.headers.get('Content-Type') ?? undefined;
+      if (!response.body) {
+        onChunk(new Uint8Array(await response.arrayBuffer()));
+        return { done: true, type };
+      }
+      const reader = response.body.getReader();
+      for (;;) {
+        armTimer();
+        const { done, value } = await reader.read();
+        if (done) return { done: true, type };
+        onChunk(value);
+      }
+    } catch (error) {
+      if (options.signal?.aborted) throw new EngineError('cancelled', url, { cause: error });
+      if (quiet.signal.aborted) return { done: false };
+      if (error instanceof EngineError) throw error;
+      throw new EngineError('asset-download-failed', `${url}: ${String(error)}`, {
+        cause: error,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   async function store(cache: Cache | undefined, key: string, blob: Blob): Promise<void> {

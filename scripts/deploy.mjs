@@ -46,7 +46,19 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 async function waitUntilServed() {
   const urls = [...new Set(CHECK_PAGES.flatMap(scriptsOf))].map((p) => `${SITE}${p}`);
   const deadline = Date.now() + READY_TIMEOUT_MS;
-  process.stdout.write(`\nWaiting for ${urls.length} new files to be served`);
+  process.stdout.write(`\nWaiting for ${urls.length} new files and ${CHECK_PAGES.length} pages`);
+
+  /** The live page refers to exactly the scripts of this build (not the old HTML). */
+  const pageIsNew = async (page) => {
+    try {
+      const html = await (await fetch(`${SITE}${page}`, { cache: 'no-store' })).text();
+      const live = new Set(html.match(/\/_next\/static\/[^"']+\.js/g) ?? []);
+      return scriptsOf(page).every((script) => live.has(script));
+    } catch {
+      return false;
+    }
+  };
+
   for (;;) {
     const statuses = await Promise.all(
       urls.map((url) =>
@@ -56,7 +68,8 @@ async function waitUntilServed() {
         ),
       ),
     );
-    if (statuses.every((status) => status === 200)) {
+    const pagesNew = await Promise.all(CHECK_PAGES.map(pageIsNew));
+    if (statuses.every((status) => status === 200) && pagesNew.every(Boolean)) {
       console.log(' ready.');
       return;
     }

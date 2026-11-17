@@ -1,21 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import { FileDrop, FileSummary, MEDIA_ACCEPT } from '@/components';
-import { t } from '@/i18n';
+import { FileIntake } from '@/features/shell';
 
-/** Stands in for a tool until it is built: takes a file and shows what was chosen. */
+/** Stands in for a tool until it is built: takes a file and reads it with the engine. */
 export function ToolPlaceholder() {
-  const [file, setFile] = useState<File | null>(null);
-
-  if (file) return <FileSummary file={file} onClear={() => setFile(null)} />;
-
-  return (
-    <FileDrop
-      accept={MEDIA_ACCEPT}
-      onFile={setFile}
-      title={t('file.drop.title')}
-      hint={t('file.drop.hint')}
-    />
-  );
+  return <FileIntake />;
 }

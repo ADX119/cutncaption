@@ -9,9 +9,10 @@ import {
   isIos,
   readDeviceEnv,
 } from '../device';
+import { type AssetProgress, assets } from '../assets';
 import { EngineError } from '../errors';
 import { type CorePolicy, runOnCore } from './ffmpeg/fallback';
-import { type CoreVariant, FfmpegSession } from './ffmpeg/loader';
+import { type CoreVariant, FfmpegSession, coreLocation } from './ffmpeg/loader';
 import { runFfmpeg } from './ffmpeg/run';
 import { chooseCoreVariant } from './ffmpeg/variant';
 import { withWorkspace } from './ffmpeg/workspace';
@@ -51,6 +52,19 @@ export interface MediaEngine {
   assess(job: MediaJob): Assessment;
   /** Runs a job. One at a time: a second call while one runs rejects with "busy". */
   run(job: MediaJob, options?: RunJobOptions): Promise<JobResult>;
+  /**
+   * Whether getting ready will download the engine (first visit, or the cache was
+   * cleared). Use it to decide whether to show download progress.
+   */
+  needsDownload(): Promise<boolean>;
+  /**
+   * Loads the core this device will use for re-encoding, so the first job starts at
+   * once. Reports download progress when the engine is not cached yet.
+   */
+  prepare(options?: {
+    readonly signal?: AbortSignal;
+    readonly onDownload?: (progress: AssetProgress) => void;
+  }): Promise<void>;
   /** Frees the ffmpeg instance and its memory. The engine reloads it when next needed. */
   release(): void;
 }
@@ -59,7 +73,12 @@ export interface MediaEngineDeps {
   readonly deviceClass: DeviceClass;
   readonly capabilities: Pick<Capabilities, 'crossOriginIsolated' | 'sharedArrayBuffer'>;
   readonly ios: boolean;
-  readonly loadSession: (variant: CoreVariant, signal?: AbortSignal) => Promise<FfmpegSession>;
+  readonly loadSession: (
+    variant: CoreVariant,
+    options?: { readonly signal?: AbortSignal; readonly onDownload?: (p: AssetProgress) => void },
+  ) => Promise<FfmpegSession>;
+  /** Whether a core's wasm is already on this device, so loading needs no download. */
+  readonly isCoreCached: (variant: CoreVariant) => Promise<boolean>;
 }
 
 function defaultDeps(): MediaEngineDeps {
@@ -68,7 +87,10 @@ function defaultDeps(): MediaEngineDeps {
     deviceClass: classifyDevice(env),
     capabilities: detectCapabilities(),
     ios: isIos(env),
-    loadSession: (variant, signal) => FfmpegSession.load({ variant, signal }),
+    loadSession: (variant, options = {}) =>
+      FfmpegSession.load({ variant, signal: options.signal, onProgress: options.onDownload }),
+    isCoreCached: (variant) =>
+      assets().isCached(coreLocation(variant, globalThis.location.origin).wasmKey),
   };
 }
 
@@ -81,10 +103,17 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
    * A live session of the requested core. Only one is ever held: switching cores
    * frees the other, and a cancelled or stalled session is replaced.
    */
-  async function getSession(variant: CoreVariant, signal?: AbortSignal) {
-    if (session && !session.terminated && session.variant === variant) return session;
-    session?.terminate();
-    session = await deps.loadSession(variant, signal);
+  async function getSession(
+    variant: CoreVariant,
+    signal?: AbortSignal,
+    onDownload?: (p: AssetProgress) => void,
+  ) {
+    const live = session && !session.terminated ? session : undefined;
+    // A loaded multi-thread core can do single-thread work too (threads are capped),
+    // so never download the single-thread core just for that.
+    if (live && (live.variant === variant || variant === 'st')) return live;
+    live?.terminate();
+    session = await deps.loadSession(variant, { signal, onDownload });
     return session;
   }
 
@@ -162,6 +191,16 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
           ms: Math.round(performance.now() - started),
           fellBack,
         };
+      });
+    },
+
+    async needsDownload() {
+      return !(await deps.isCoreCached(variantFor(true)));
+    },
+
+    prepare(options = {}) {
+      return exclusive(async () => {
+        await getSession(variantFor(true), options.signal, options.onDownload);
       });
     },
 
