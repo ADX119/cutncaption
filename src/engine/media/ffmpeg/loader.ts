@@ -46,6 +46,8 @@ export interface ExecResult {
   readonly exitCode: number;
   /** Everything ffmpeg printed during this run, in order. */
   readonly log: readonly string[];
+  /** Only what the program wrote to standard output (ffprobe's report). */
+  readonly stdout: readonly string[];
 }
 
 /**
@@ -56,12 +58,16 @@ export class FfmpegSession {
   readonly variant: CoreVariant;
   readonly #ffmpeg: FFmpeg;
   #log: string[] = [];
+  #stdout: string[] = [];
   #terminated = false;
 
   private constructor(ffmpeg: FFmpeg, variant: CoreVariant) {
     this.#ffmpeg = ffmpeg;
     this.variant = variant;
-    ffmpeg.on('log', ({ message }) => this.#log.push(message));
+    ffmpeg.on('log', ({ type, message }) => {
+      this.#log.push(message);
+      if (type === 'stdout') this.#stdout.push(message);
+    });
   }
 
   static async load(options: LoadFfmpegOptions): Promise<FfmpegSession> {
@@ -136,8 +142,22 @@ export class FfmpegSession {
   async exec(args: readonly string[]): Promise<ExecResult> {
     if (this.#terminated) throw new EngineError('engine-load-failed', 'session was terminated');
     this.#log = [];
+    this.#stdout = [];
     const exitCode = await this.#ffmpeg.exec([...args]);
-    return { exitCode, log: this.#log };
+    return { exitCode, log: this.#log, stdout: this.#stdout };
+  }
+
+  /**
+   * Runs one ffprobe command line (without the leading "ffprobe").
+   * In this build ffprobe returns -1 even on success and ignores -o, so callers must
+   * judge success by the report it prints on stdout, not by the exit code.
+   */
+  async ffprobe(args: readonly string[]): Promise<ExecResult> {
+    if (this.#terminated) throw new EngineError('engine-load-failed', 'session was terminated');
+    this.#log = [];
+    this.#stdout = [];
+    const exitCode = await this.#ffmpeg.ffprobe([...args]);
+    return { exitCode, log: this.#log, stdout: this.#stdout };
   }
 
   /** Stops the worker and frees its memory. The session cannot be used afterwards. */

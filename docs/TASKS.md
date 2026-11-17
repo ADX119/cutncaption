@@ -64,8 +64,8 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: integration test parsing `-encoders`, `-filters`, `-muxers`.
 - [x] **M1.7 Virtual FS helpers** — WORKERFS mount of the input `File`, MEMFS output read to `Blob`, cleanup in `finally`.
   - Test: integration: after a job, the FS lists no leftover files and the mount is gone, including on error.
-- [ ] **M1.8 Probe** — `commands/probe.ts` parser → `MediaInfo`; cross-check with `HTMLVideoElement`.
-  - Test: unit tests on recorded stderr for each fixture type (incl. rotation, no audio); integration probe of the MP4 fixture.
+- [x] **M1.8 Probe** — `engine/media/probe/`: ffprobe JSON → `MediaInfo` (duration, container, video incl. rotation and display size, audio). `durationSec` is `null` when the file does not say; the UI may fill it from the `<video>` element. No separate `HTMLVideoElement` cross-check: ffprobe proved reliable on every fixture.
+  - Test: unit tests on recorded ffprobe JSON for every fixture (incl. rotation, no audio, audio-only); integration probes every fixture with the real engine and refuses a non-media file.
 - [ ] **M1.9 Runner: progress, cancel, errors** — `time=` parser, `AbortSignal` → terminate, `EngineError` mapping.
   - Test: unit tests for the log parser and error mapping; integration: cancel mid-job rejects with `cancelled` and the next job succeeds.
 - [ ] **M1.10 Multi-thread core and path selection** — load `core-mt` when the rule in ARCHITECTURE §5 holds.

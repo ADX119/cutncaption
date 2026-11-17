@@ -9,6 +9,7 @@ export const ENGINE_ERROR_CODES = [
   'asset-download-failed',
   'asset-corrupt',
   'engine-load-failed',
+  'unreadable-file',
 ] as const;
 
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number];

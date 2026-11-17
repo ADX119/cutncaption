@@ -55,6 +55,9 @@ export const en = {
   'error.engine-load-failed':
     'The editor could not start in this browser. Reload the page, or try another browser.',
 
+  'error.unreadable-file':
+    'This file could not be read. It may be damaged, or not a video or audio file. Try another file.',
+
   'engineCheck.title': 'Engine check',
   'engineCheck.intro':
     'This loads the video engine in your browser and reports what it finds. Nothing is uploaded.',

@@ -220,19 +220,19 @@ MP4  = -movflags +faststart
 
 `superfast` on class L, `veryfast` otherwise.
 
-| Tool               | Command                                                                                                           |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Probe              | `-hide_banner -i IN` → parse stderr (`commands/probe.ts`), cross-checked with `HTMLVideoElement` metadata         |
-| Trim, fast         | `-ss {start} -i IN -t {dur} -c copy -avoid_negative_ts make_zero MP4 out.{srcExt}`                                |
-| Trim, precise      | `-ss {start} -i IN -t {dur} X264 -crf 20 AAC(128) MP4 out.mp4`                                                    |
-| Compress           | `-i IN -vf scale={w}:{h} X264 -crf {23/28/32} AAC({128/96/64}) MP4 out.mp4` — caps 1080/720/480 on the short side |
-| Compress to size   | `-i IN -vf scale={w}:{h} X264 -b:v {v}k -maxrate {v}k -bufsize {2v}k AAC({a}) MP4 out.mp4`                        |
-| Convert, remux     | `-i IN -c copy MP4 out.mp4` (when video is H.264 and audio is AAC or absent)                                      |
-| Convert, re-encode | `-i IN X264 -crf 22 AAC(128) MP4 out.mp4`                                                                         |
-| Video to MP3       | `-i IN -vn -c:a libmp3lame -b:a {128/192/320}k out.mp3`                                                           |
-| Mute               | `-i IN -c:v copy -an MP4 out.{srcExt}`                                                                            |
-| 9:16 crop          | `-i IN -vf crop={cw}:{ch}:{x}:{y},scale=1080:1920 X264 -crf 21 AAC(128) MP4 out.mp4`                              |
-| PCM for Whisper    | `-ss {s} -t {≤600} -i IN -vn -ac 1 -ar 16000 -f f32le out.pcm` (in 10-minute windows)                             |
+| Tool               | Command                                                                                                                                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Probe              | ffprobe `-v error -print_format json -show_format -show_streams IN`; the report is read from stdout (this build ignores `-o` and returns -1 even on success, so success means a valid report came back). Parsed by `engine/media/probe/parse.ts` |
+| Trim, fast         | `-ss {start} -i IN -t {dur} -c copy -avoid_negative_ts make_zero MP4 out.{srcExt}`                                                                                                                                                               |
+| Trim, precise      | `-ss {start} -i IN -t {dur} X264 -crf 20 AAC(128) MP4 out.mp4`                                                                                                                                                                                   |
+| Compress           | `-i IN -vf scale={w}:{h} X264 -crf {23/28/32} AAC({128/96/64}) MP4 out.mp4` — caps 1080/720/480 on the short side                                                                                                                                |
+| Compress to size   | `-i IN -vf scale={w}:{h} X264 -b:v {v}k -maxrate {v}k -bufsize {2v}k AAC({a}) MP4 out.mp4`                                                                                                                                                       |
+| Convert, remux     | `-i IN -c copy MP4 out.mp4` (when video is H.264 and audio is AAC or absent)                                                                                                                                                                     |
+| Convert, re-encode | `-i IN X264 -crf 22 AAC(128) MP4 out.mp4`                                                                                                                                                                                                        |
+| Video to MP3       | `-i IN -vn -c:a libmp3lame -b:a {128/192/320}k out.mp3`                                                                                                                                                                                          |
+| Mute               | `-i IN -c:v copy -an MP4 out.{srcExt}`                                                                                                                                                                                                           |
+| 9:16 crop          | `-i IN -vf crop={cw}:{ch}:{x}:{y},scale=1080:1920 X264 -crf 21 AAC(128) MP4 out.mp4`                                                                                                                                                             |
+| PCM for Whisper    | `-ss {s} -t {≤600} -i IN -vn -ac 1 -ar 16000 -f f32le out.pcm` (in 10-minute windows)                                                                                                                                                            |
 
 **Compress-to-size maths** (`commands/bitrate.ts`): `total = targetBytes × 8 × 0.96 / duration`; audio 96k (64k if total < 400k); `v = total − audio`; refuse if `v < 150k`. Height ladder by `v`: ≥2500k→1080, ≥1200k→720, ≥600k→480, ≥300k→360, else 240. Single pass; if the output exceeds the target, rerun once with `v × (target/actual) × 0.93`.
 

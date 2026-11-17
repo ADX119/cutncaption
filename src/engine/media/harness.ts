@@ -1,5 +1,7 @@
 import { FfmpegSession } from './ffmpeg/loader';
 import { withWorkspace } from './ffmpeg/workspace';
+import type { MediaInfo } from './probe/parse';
+import { probeFile } from './probe/probe';
 
 /**
  * Hooks for the browser tests, attached to `window.__cncEngine` on the Engine check
@@ -77,5 +79,23 @@ async function workspaceCheck(input: HarnessFile): Promise<WorkspaceCheck> {
   }
 }
 
-export const engineHarness = { workspaceCheck };
+/** M1.8: what the engine reads from each file. Probes them all in one session. */
+async function probe(inputs: readonly HarnessFile[]): Promise<(MediaInfo | { error: string })[]> {
+  const session = await FfmpegSession.load({ variant: 'st' });
+  try {
+    const results: (MediaInfo | { error: string })[] = [];
+    for (const input of inputs) {
+      try {
+        results.push(await probeFile(session, toFile(input)));
+      } catch (error) {
+        results.push({ error: error instanceof Error ? error.message : String(error) });
+      }
+    }
+    return results;
+  } finally {
+    session.terminate();
+  }
+}
+
+export const engineHarness = { workspaceCheck, probe };
 export type EngineHarness = typeof engineHarness;
