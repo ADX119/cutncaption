@@ -53,6 +53,16 @@ One family: **Anek Latin** (Ek Type), self-hosted through `next/font`. It has a 
 - Corner radius: 8 px on surfaces, fully round on pill buttons and icon buttons.
 - Button ranks: **primary** (filled `accent`, one per surface: Download, Try again, Choose a file), **secondary** (outlined `rule`: Share, Cancel), **quiet** (text only, `graphite`: Start over). The same action always has the same rank.
 
+### Navigation
+
+Until M6.9a the header carries a few tool links and the home page lists the rest. After it, tools live in a sidebar, as the owner asked:
+
+- Each area (Trim and compress, Meme studio, Auto captions, Crop) is a heading in sentence case, with its tool pages listed under it: Trim and compress holds Trim, Compress, Compress to a size, For WhatsApp, For Discord, Convert to MP4, MOV to MP4, Video to MP3, Mute.
+- Built from the tool registry, so a new page appears without editing the nav. An area shows only once it has a working tool.
+- The current page gets `accent` text and an `accent-wash` background; the rest are `graphite`, turning `ink` on hover. No icons per item, no badges, no promotions.
+- From `lg` it is a fixed left column on every page, separated by a `rule` line, scrolling on its own. Below `lg` the header shows a Tools button that opens the same list as a sheet; it closes on Escape, on choosing a page, and on tapping outside.
+- Links stay plain `<a>` (isolation boundary).
+
 ## Motion
 
 Motion answers something the person did. Nothing moves on its own, with two exceptions: the home page strip closes its handles once on load, and a job of unknown length shows a segment travelling along its progress track (it answers the person starting the job, and stops when the job does).

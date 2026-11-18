@@ -250,6 +250,8 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: the test itself, plus a failing fixture.
 - [ ] **M6.9 Home page** — value proposition, tool grid grouped by job, privacy statement.
   - Test: e2e: all 20 tools linked with plain anchors.
+- [ ] **M6.9a Tool sidebar** — replaces the header's tool links (docs/DESIGN.md, Navigation). Areas as headings with their tool pages nested under them, built from the registry; the current page marked; areas with no working tool left out. From `lg` a fixed left column; below it, a Tools button in the header opens the same list as a sheet.
+  - Test: e2e: desktop sidebar lists every working tool page under its area with plain anchors and marks the current one; on a phone the Tools button opens the list, Escape closes it and returns focus; keyboard reachable; no sideways scroll at 390 px.
 - [ ] **M6.10 `sitemap.xml` and `robots.txt`**.
   - Test: e2e: sitemap lists home, 20 tool URLs, privacy, about with absolute URLs; robots references the sitemap.
 - [ ] **M6.11 Privacy and About pages** — what stays on device, every analytics field, open-source licence, ffmpeg and model credits with source links.
