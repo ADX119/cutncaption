@@ -104,6 +104,12 @@ export const en = {
   'size.tooSmall':
     'That is too small for this video to stay watchable. The smallest that works is about {size}. Trim the video first, or use that size.',
   'size.useSmallest': 'Use the smallest size',
+  'convert.copy':
+    'This video is already H.264 with AAC sound, so it is repackaged as MP4 at once, with no loss of quality.',
+  'convert.reencode':
+    'This video is converted to H.264 MP4 with AAC sound, the format every phone, browser and app plays.',
+  'convert.run': 'Convert to MP4',
+  'convert.running': 'Converting',
   'limits.slowWarning':
     'This is a long job for this device. It may take a while; keep this tab open until it finishes.',
 

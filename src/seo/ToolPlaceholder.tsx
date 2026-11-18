@@ -3,6 +3,7 @@
 import {
   CompressTool,
   CompressToSizeTool,
+  ConvertTool,
   type SizePresetId,
   TrimTool,
 } from '@/features/core-tools';
@@ -40,6 +41,8 @@ export function ToolPlaceholder({
           {(ready) => <CompressToSizeTool {...ready} initialPreset={sizePreset(preset.target)} />}
         </FileIntake>
       );
+    case 'convert':
+      return <FileIntake accept={VIDEO_ACCEPT}>{(ready) => <ConvertTool {...ready} />}</FileIntake>;
     default:
       return <FileIntake />;
   }
