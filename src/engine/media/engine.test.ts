@@ -88,7 +88,13 @@ describe('assess', () => {
   it('reports copy for a remuxable file', () => {
     const engine = createMediaEngine(deps());
     const job: MediaJob = { kind: 'toMp4', file: fakeFile(1000), info: info('clip.mov') };
-    expect(engine.assess(job)).toEqual({ blocks: [], warnings: [], path: 'copy' });
+    // A remux copies the file, so the estimate is the input size.
+    expect(engine.assess(job)).toEqual({
+      blocks: [],
+      warnings: [],
+      path: 'copy',
+      estimatedOutputBytes: 1000,
+    });
   });
 
   it('reports the multi-thread core for a re-encode on a capable desktop', () => {

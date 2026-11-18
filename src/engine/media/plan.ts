@@ -2,6 +2,7 @@ import type { JobFootprint } from '../device';
 import type { Workspace } from './ffmpeg/workspace';
 import { type MediaJob, outputFilename } from './jobs';
 import type { MediaInfo } from './probe/parse';
+import { type FrameSize, displaySize, outputFps, scaleToShortSide } from './sizing';
 
 /** How the engine will carry out a job, worked out before anything runs. */
 export interface Plan {
@@ -76,11 +77,87 @@ export function sourceContainer(fileName: string, info: MediaInfo): Container {
   return 'mp4';
 }
 
+/** Device facts the planner needs (engine/device/limits.ts). */
+export interface PlanContext {
+  /** Re-encodes are scaled so the short side is at most this. */
+  readonly maxShortSide: number;
+}
+
+export const DEFAULT_PLAN_CONTEXT: PlanContext = { maxShortSide: 1080 };
+
+/** Compress presets (docs/ARCHITECTURE.md §7). */
+export const COMPRESS_PRESETS = {
+  light: { maxShortSide: 1080, crf: 23, audioKbps: 128, bitsPerPixel: 0.07 },
+  balanced: { maxShortSide: 720, crf: 28, audioKbps: 96, bitsPerPixel: 0.045 },
+  small: { maxShortSide: 480, crf: 32, audioKbps: 64, bitsPerPixel: 0.03 },
+} as const;
+export type CompressQuality = keyof typeof COMPRESS_PRESETS;
+
+/**
+ * Expected size of a CRF encode: pixels per second times a typical bits-per-pixel
+ * for the preset, plus audio. Shown to the person before running, so it aims to be
+ * in the right range for phone footage, not exact.
+ */
+export function estimateCompressedBytes(
+  info: MediaInfo,
+  size: FrameSize | null,
+  quality: CompressQuality,
+): number {
+  const preset = COMPRESS_PRESETS[quality];
+  const seconds = info.durationSec ?? 0;
+  const videoBps = size ? size.width * size.height * outputFps(info) * preset.bitsPerPixel : 0;
+  const audioBps = info.audio ? preset.audioKbps * 1000 : 0;
+  return Math.round(((videoBps + audioBps) * seconds) / 8);
+}
+
+/**
+ * The scale filter for a re-encode capped at `maxShortSide`, or nothing when the
+ * picture already fits (no needless resampling).
+ */
+function scaleArgs(info: MediaInfo, maxShortSide: number): string[] {
+  const display = displaySize(info);
+  if (!display) return [];
+  const target = scaleToShortSide(display, maxShortSide);
+  if (target.width === display.width && target.height === display.height) return [];
+  return ['-vf', `scale=${target.width}:${target.height}`];
+}
+
 /** Seconds as ffmpeg should see them: millisecond precision, no trailing zeros. */
 const secs = (seconds: number) => String(Math.round(seconds * 1000) / 1000);
 
-export function planJob(job: MediaJob): Plan {
+export function planJob(job: MediaJob, context: PlanContext = DEFAULT_PLAN_CONTEXT): Plan {
+  const deviceScale = (info: MediaInfo) => scaleArgs(info, context.maxShortSide);
   switch (job.kind) {
+    case 'compress': {
+      const { file, info, quality } = job;
+      const preset = COMPRESS_PRESETS[quality];
+      const cap = Math.min(preset.maxShortSide, context.maxShortSide);
+      const display = displaySize(info);
+      const size = display ? scaleToShortSide(display, cap) : null;
+      const seconds = info.durationSec ?? undefined;
+      return {
+        path: 'ffmpeg',
+        reencodesVideo: info.video !== null,
+        outputName: 'out.mp4',
+        mime: 'video/mp4',
+        filename: outputFilename(file.name, 'compressed', 'mp4'),
+        expectedDurationSec: seconds,
+        footprint: {
+          inputBytes: file.size,
+          estimatedOutputBytes: estimateCompressedBytes(info, size, quality),
+          reencodeSeconds: seconds ?? 0,
+        },
+        args: (ws) => [
+          '-hide_banner',
+          '-i',
+          ws.input(),
+          ...(info.video ? [...scaleArgs(info, cap), ...x264(preset.crf)] : ['-vn']),
+          ...(info.audio ? aac(preset.audioKbps) : ['-an']),
+          ...MP4,
+          ws.path('out.mp4'),
+        ],
+      };
+    }
     case 'trim': {
       const { file, info, start, end } = job;
       const length = Math.max(0, end - start);
@@ -143,6 +220,7 @@ export function planJob(job: MediaJob): Plan {
           ws.input(),
           '-t',
           secs(length),
+          ...deviceScale(info),
           ...x264(20),
           ...(info.audio ? aac(128) : ['-an']),
           ...MP4,
@@ -173,6 +251,7 @@ export function planJob(job: MediaJob): Plan {
                 '-hide_banner',
                 '-i',
                 ws.input(),
+                ...deviceScale(info),
                 ...x264(22),
                 ...(info.audio ? aac(128) : ['-an']),
                 ...MP4,

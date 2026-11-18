@@ -2,6 +2,7 @@ import {
   type Capabilities,
   type DeviceClass,
   type LimitCheck,
+  LIMITS,
   type LimitIssue,
   checkLimits,
   classifyDevice,
@@ -37,6 +38,8 @@ function limitError(issue: LimitIssue): EngineError {
 
 export interface Assessment extends LimitCheck {
   readonly path: EnginePath;
+  /** Rough size of the result, for showing before the job runs. */
+  readonly estimatedOutputBytes: number | undefined;
 }
 
 export interface RunJobOptions {
@@ -96,6 +99,7 @@ function defaultDeps(): MediaEngineDeps {
 
 export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaEngine {
   const policy: CorePolicy = { multiThreadDisabled: false };
+  const planContext = { maxShortSide: LIMITS[deps.deviceClass].maxEncodeShortSide };
   let session: FfmpegSession | undefined;
   let busy = false;
 
@@ -149,17 +153,17 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
     },
 
     assess(job) {
-      const plan = planJob(job);
+      const plan = planJob(job, planContext);
       const limits = checkLimits(deps.deviceClass, plan.footprint);
       const path: EnginePath =
         plan.path === 'copy' ? 'copy' : `ffmpeg-${variantFor(plan.reencodesVideo)}`;
-      return { ...limits, path };
+      return { ...limits, path, estimatedOutputBytes: plan.footprint.estimatedOutputBytes };
     },
 
     run(job, options = {}) {
       return exclusive(async () => {
         const started = performance.now();
-        const plan = planJob(job);
+        const plan = planJob(job, planContext);
 
         const [block] = checkLimits(deps.deviceClass, plan.footprint).blocks;
         if (block) throw limitError(block);

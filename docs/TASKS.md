@@ -91,7 +91,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: e2e: precise trim 1.0–3.0 s of the fixture → output duration 2.0 ± 0.1 s; fast trim completes and plays.
 - [x] **M2.4 Scale and preset maths** — even dimensions, short-side caps, rotation aware, never upscale.
   - Test: unit table tests (landscape, portrait, odd sizes, rotated).
-- [ ] **M2.5 Compress builder and size estimate**.
+- [x] **M2.5 Compress builder and size estimate**.
   - Test: unit: arg arrays per preset; estimate within a sane range for fixtures.
 - [ ] **M2.6 Compress tool UI** — presets, estimate, "output larger than input" handling.
   - Test: e2e: Balanced on the 720p fixture yields H.264/AAC, smaller file, correct dimensions.
