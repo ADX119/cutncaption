@@ -95,7 +95,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit: arg arrays per preset; estimate within a sane range for fixtures.
 - [x] **M2.6 Compress tool UI** — presets, estimate, "output larger than input" handling.
   - Test: e2e: Balanced on the 720p fixture yields H.264/AAC, smaller file, correct dimensions.
-- [ ] **M2.7 Bitrate calculator for compress-to-size** — per ARCHITECTURE §7, incl. refusal and ladder.
+- [x] **M2.7 Bitrate calculator for compress-to-size** — per ARCHITECTURE §7, incl. refusal and ladder.
   - Test: unit table tests incl. boundary bitrates, unreachable target, source already under target.
 - [ ] **M2.8 Compress-to-size job with retry** — single pass + one corrective rerun.
   - Test: unit with a fake runner returning an oversize result → one rerun with the scaled bitrate. Integration: 60 s fixture to a small target → size ≤ target and ≥ 85%.
