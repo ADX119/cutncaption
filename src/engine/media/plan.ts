@@ -3,6 +3,7 @@ import type { Workspace } from './ffmpeg/workspace';
 import { type MediaJob, outputFilename } from './jobs';
 import type { MediaInfo } from './probe/parse';
 import { type FrameSize, displaySize, outputFps, scaleToShortSide } from './sizing';
+import { correctedVideoKbps, planBitrate } from './bitrate';
 
 /** How the engine will carry out a job, worked out before anything runs. */
 export interface Plan {
@@ -17,7 +18,18 @@ export interface Plan {
   readonly footprint: JobFootprint;
   /** The ffmpeg command, given the job's workspace. */
   readonly args: (ws: Workspace) => string[];
+  /**
+   * Set when the job should not run at all; the engine rejects with this error and
+   * assess() reports it so the tool can explain before anything starts.
+   */
+  readonly refusal?: Refusal;
+  /** A corrected plan if the output came out too big, or null when it is fine. */
+  readonly retry?: (outputBytes: number) => Plan | null;
 }
+
+export type Refusal =
+  | { readonly code: 'already-under-target' }
+  | { readonly code: 'target-unreachable'; readonly smallestBytes: number };
 
 // Common output settings (docs/ARCHITECTURE.md §7).
 const MP4 = ['-movflags', '+faststart'];
@@ -128,6 +140,80 @@ const secs = (seconds: number) => String(Math.round(seconds * 1000) / 1000);
 export function planJob(job: MediaJob, context: PlanContext = DEFAULT_PLAN_CONTEXT): Plan {
   const deviceScale = (info: MediaInfo) => scaleArgs(info, context.maxShortSide);
   switch (job.kind) {
+    case 'compressToSize': {
+      const { file, info, targetBytes } = job;
+      const seconds = info.durationSec ?? 0;
+      const base = {
+        reencodesVideo: info.video !== null,
+        outputName: 'out.mp4',
+        mime: 'video/mp4',
+        filename: outputFilename(file.name, 'compressed', 'mp4'),
+        expectedDurationSec: seconds || undefined,
+      } as const;
+      const bitrate = planBitrate({
+        targetBytes,
+        durationSec: seconds,
+        sourceBytes: file.size,
+        hasAudio: info.audio !== null,
+      });
+      if (bitrate.kind !== 'ok') {
+        return {
+          ...base,
+          path: 'ffmpeg',
+          footprint: { inputBytes: file.size },
+          args: () => [],
+          refusal:
+            bitrate.kind === 'already-small'
+              ? { code: 'already-under-target' }
+              : { code: 'target-unreachable', smallestBytes: bitrate.smallestBytes },
+        };
+      }
+      const cap = Math.min(bitrate.maxShortSide, context.maxShortSide);
+      const encodeAt = (videoKbps: number, isRetry: boolean): Plan => ({
+        ...base,
+        path: 'ffmpeg',
+        footprint: {
+          inputBytes: file.size,
+          estimatedOutputBytes: targetBytes,
+          reencodeSeconds: seconds,
+        },
+        args: (ws) => [
+          '-hide_banner',
+          '-i',
+          ws.input(),
+          ...(info.video
+            ? [
+                ...scaleArgs(info, cap),
+                '-c:v',
+                'libx264',
+                '-preset',
+                'veryfast',
+                '-b:v',
+                `${videoKbps}k`,
+                '-maxrate',
+                `${videoKbps}k`,
+                '-bufsize',
+                `${videoKbps * 2}k`,
+                '-pix_fmt',
+                'yuv420p',
+                '-fpsmax',
+                '30',
+              ]
+            : ['-vn']),
+          ...(info.audio ? aac(bitrate.audioKbps) : ['-an']),
+          ...MP4,
+          ws.path('out.mp4'),
+        ],
+        // One corrective pass if the encoder overshot; never a third.
+        retry: isRetry
+          ? undefined
+          : (outputBytes) =>
+              outputBytes > targetBytes
+                ? encodeAt(correctedVideoKbps(videoKbps, targetBytes, outputBytes), true)
+                : null,
+      });
+      return encodeAt(bitrate.videoKbps, false);
+    }
     case 'compress': {
       const { file, info, quality } = job;
       const preset = COMPRESS_PRESETS[quality];

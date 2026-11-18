@@ -18,7 +18,7 @@ import { runFfmpeg } from './ffmpeg/run';
 import { chooseCoreVariant } from './ffmpeg/variant';
 import { withWorkspace } from './ffmpeg/workspace';
 import type { EnginePath, JobResult, MediaJob } from './jobs';
-import { planJob } from './plan';
+import { type Plan, type Refusal, planJob } from './plan';
 import type { MediaInfo } from './probe/parse';
 import { probeFile } from './probe/probe';
 
@@ -36,8 +36,16 @@ function limitError(issue: LimitIssue): EngineError {
   }
 }
 
+function describeRefusal(refusal: Refusal): string {
+  return refusal.code === 'target-unreachable'
+    ? `smallest workable size ${refusal.smallestBytes} bytes`
+    : 'source already under target';
+}
+
 export interface Assessment extends LimitCheck {
   readonly path: EnginePath;
+  /** Why the job would not run at all (compress to size: already small, or target too small). */
+  readonly refusal: Refusal | undefined;
   /** Rough size of the result, for showing before the job runs. */
   readonly estimatedOutputBytes: number | undefined;
 }
@@ -157,13 +165,19 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
       const limits = checkLimits(deps.deviceClass, plan.footprint);
       const path: EnginePath =
         plan.path === 'copy' ? 'copy' : `ffmpeg-${variantFor(plan.reencodesVideo)}`;
-      return { ...limits, path, estimatedOutputBytes: plan.footprint.estimatedOutputBytes };
+      return {
+        ...limits,
+        path,
+        estimatedOutputBytes: plan.footprint.estimatedOutputBytes,
+        refusal: plan.refusal,
+      };
     },
 
     run(job, options = {}) {
       return exclusive(async () => {
         const started = performance.now();
         const plan = planJob(job, planContext);
+        if (plan.refusal) throw new EngineError(plan.refusal.code, describeRefusal(plan.refusal));
 
         const [block] = checkLimits(deps.deviceClass, plan.footprint).blocks;
         if (block) throw limitError(block);
@@ -178,12 +192,20 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
           getSession: (v) => getSession(v, options.signal),
           job: (live) =>
             withWorkspace(live.fs, [job.file], async (ws) => {
-              await runFfmpeg(live, plan.args(ws), {
-                expectedDurationSec: plan.expectedDurationSec,
-                signal: options.signal,
-                onProgress: options.onProgress,
-              });
-              return ws.readOutput(plan.outputName, plan.mime);
+              // A plan may ask for one corrective pass (compress to size overshot).
+              let current: Plan | null = plan;
+              let output: Blob | undefined;
+              while (current) {
+                await runFfmpeg(live, current.args(ws), {
+                  expectedDurationSec: current.expectedDurationSec,
+                  signal: options.signal,
+                  onProgress: options.onProgress,
+                });
+                output = await ws.readOutput(current.outputName, current.mime);
+                current = current.retry?.(output.size) ?? null;
+              }
+              if (!output) throw new EngineError('job-failed', 'no output');
+              return output;
             }),
         });
 

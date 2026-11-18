@@ -97,7 +97,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: e2e: Balanced on the 720p fixture yields H.264/AAC, smaller file, correct dimensions.
 - [x] **M2.7 Bitrate calculator for compress-to-size** — per ARCHITECTURE §7, incl. refusal and ladder.
   - Test: unit table tests incl. boundary bitrates, unreachable target, source already under target.
-- [ ] **M2.8 Compress-to-size job with retry** — single pass + one corrective rerun.
+- [x] **M2.8 Compress-to-size job with retry** — single pass + one corrective rerun.
   - Test: unit with a fake runner returning an oversize result → one rerun with the scaled bitrate. Integration: 60 s fixture to a small target → size ≤ target and ≥ 85%.
 - [ ] **M2.9 Compress-to-size UI** — MB input, WhatsApp/Discord/Email presets from `sizePresets.ts` (verify values), messages for unreachable/already-small.
   - Test: e2e for the WhatsApp preset path and the already-small path.

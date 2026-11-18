@@ -1,9 +1,17 @@
 export { createMediaEngine } from './engine';
 export type { Assessment, MediaEngine, RunJobOptions } from './engine';
 export { outputFilename } from './jobs';
-export type { CompressJob, EnginePath, JobResult, MediaJob, ToMp4Job, TrimJob } from './jobs';
+export type {
+  CompressJob,
+  CompressToSizeJob,
+  EnginePath,
+  JobResult,
+  MediaJob,
+  ToMp4Job,
+  TrimJob,
+} from './jobs';
 export { COMPRESS_PRESETS } from './plan';
-export type { CompressQuality } from './plan';
+export type { CompressQuality, Refusal } from './plan';
 export { runSelfTest } from './selfTest';
 export type { SelfTestResult } from './selfTest';
 export type { CoreVariant } from './ffmpeg/loader';

@@ -136,6 +136,11 @@ export const en = {
   'preview.title': 'Job states',
   'preview.converting': 'Converting',
 
+  'error.already-under-target':
+    'This video is already under that size, so there is nothing to do. Keep your original.',
+  'error.target-unreachable':
+    'That size is too small for this video to stay watchable. Choose a larger size, or trim the video first.',
+
   'engineCheck.title': 'Engine check',
   'engineCheck.intro':
     'This loads the video engine in your browser and reports what it finds. Nothing is uploaded.',

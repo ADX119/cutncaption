@@ -18,6 +18,9 @@ export const ENGINE_ERROR_CODES = [
   'input-too-large',
   'output-too-large',
   'caption-audio-too-long',
+  // Compress to size.
+  'already-under-target',
+  'target-unreachable',
 ] as const;
 
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number];

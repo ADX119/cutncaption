@@ -1,6 +1,7 @@
 import { classifyDevice, detectCapabilities, isIos, readDeviceEnv } from '../device';
 import { EngineError } from '../errors';
 import { createMediaEngine } from './engine';
+import type { MediaJob } from './jobs';
 import { type CoreVariant, FfmpegSession } from './ffmpeg/loader';
 import { chooseCoreVariant } from './ffmpeg/variant';
 import { runFfmpeg } from './ffmpeg/run';
@@ -273,5 +274,42 @@ async function engineRun(input: HarnessFile): Promise<EngineRunCheck> {
   }
 }
 
-export const engineHarness = { workspaceCheck, probe, runnerCheck, coreCheck, engineRun };
+/** Any job's own settings, without the file and probe the harness supplies. */
+export type JobSpec = MediaJob extends infer J
+  ? J extends MediaJob
+    ? Omit<J, 'file' | 'info'>
+    : never
+  : never;
+
+export interface EngineJobCheck {
+  readonly path: string;
+  readonly filename: string;
+  readonly bytes: number;
+  readonly output: MediaInfo;
+}
+
+/** Runs any engine job on a test file and reads the output back with ffprobe. */
+async function engineJob(input: HarnessFile, spec: JobSpec): Promise<EngineJobCheck> {
+  const engine = createMediaEngine();
+  try {
+    const file = toFile(input);
+    const info = await engine.probe(file);
+    const result = await engine.run({ ...spec, file, info } as MediaJob);
+    const output = await engine.probe(
+      new File([result.blob], result.filename, { type: result.mime }),
+    );
+    return { path: result.path, filename: result.filename, bytes: result.blob.size, output };
+  } finally {
+    engine.release();
+  }
+}
+
+export const engineHarness = {
+  workspaceCheck,
+  probe,
+  runnerCheck,
+  coreCheck,
+  engineRun,
+  engineJob,
+};
 export type EngineHarness = typeof engineHarness;
