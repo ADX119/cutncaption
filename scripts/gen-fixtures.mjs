@@ -152,6 +152,27 @@ const FIXTURES = [
     },
   },
   {
+    // A high-bitrate 1080p clip, like a phone recording, so compression has
+    // something to save. The other fixtures are already squeezed small.
+    // Balanced compression saves about 70% on it.
+    file: 'hq-1080p.mp4',
+    args: [
+      ...['-f', 'lavfi', '-i', 'testsrc2=size=1920x1080:rate=15:duration=1'],
+      ...tone(1),
+      ...['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '30', '-pix_fmt', 'yuv420p'],
+      ...aac(128),
+      ...['-movflags', '+faststart'],
+    ],
+    expect: {
+      durationSec: 1,
+      width: 1920,
+      height: 1080,
+      fps: 15,
+      videoCodec: 'h264',
+      audioCodec: 'aac',
+    },
+  },
+  {
     // Long enough for compress-to-size and progress tests, small enough to commit.
     file: 'long-lowres.mp4',
     args: [

@@ -14,6 +14,7 @@ describe('media fixtures (scripts/gen-fixtures.mjs)', () => {
         'clip.mkv',
         'clip.mov',
         'clip.webm',
+        'hq-1080p.mp4',
         'landscape-720p.mp4',
         'long-lowres.mp4',
         'no-audio.mp4',

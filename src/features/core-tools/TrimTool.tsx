@@ -10,25 +10,13 @@ import {
   SegmentedControl,
 } from '@/components';
 import { type TimeRange, clampRange, initialRange } from '@/editor/timeline';
-import type { LimitCode } from '@/engine/device';
 import type { TrimJob } from '@/engine/media';
 import { RangeTimeline, TimeField, VideoPreview } from '@/features/editing';
 import { type ReadyFile, describeFile, getEngine, useJob } from '@/features/shell';
 import { t } from '@/i18n';
+import { LimitNotice } from './shared';
 
 type Mode = TrimJob['mode'];
-
-/** The message for a hard device limit. Warnings never block, so they have none. */
-function blockMessage(code: LimitCode | undefined): string {
-  switch (code) {
-    case 'input-too-large':
-    case 'output-too-large':
-    case 'caption-audio-too-long':
-      return t(`error.${code}`);
-    default:
-      return t('error.job-failed');
-  }
-}
 
 /** Trim: choose a stretch of the video and save just that part. */
 export function TrimTool({ file, info, startOver }: ReadyFile) {
@@ -134,16 +122,7 @@ export function TrimTool({ file, info, startOver }: ReadyFile) {
         />
       </div>
 
-      {assessment.warnings.length > 0 && (
-        <p className="text-graphite max-w-[60ch] text-sm" data-testid="limit-warning">
-          {t('limits.slowWarning')}
-        </p>
-      )}
-      {blocked && (
-        <p className="text-danger max-w-[60ch]" role="alert" data-testid="limit-block">
-          {blockMessage(assessment.blocks[0]?.code)}
-        </p>
-      )}
+      <LimitNotice assessment={assessment} />
 
       <div>
         <button

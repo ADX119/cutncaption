@@ -70,6 +70,24 @@ export const en = {
     'Instant, keeps the original quality and format. The start may move to the nearest keyframe, up to a few seconds early.',
   'trim.run': 'Trim video',
   'trim.running': 'Trimming',
+  'compress.quality': 'Size',
+  'compress.light': 'Light',
+  'compress.lightHint': 'Keeps the most detail, up to 1080p. A modest saving.',
+  'compress.balanced': 'Balanced',
+  'compress.balancedHint': 'Good for sharing, up to 720p. A big saving with little visible loss.',
+  'compress.small': 'Small',
+  'compress.smallHint': 'Smallest file, up to 480p. Best for messaging apps.',
+  'compress.estimate': 'About {size}',
+  'compress.from': ' from {size}',
+  'compress.alreadySmall':
+    'This video is already compact, so this setting may not make it much smaller. Try Small.',
+  'compress.run': 'Compress video',
+  'compress.running': 'Compressing',
+  'compress.notSmallerTitle': 'Your original is already smaller',
+  'compress.notSmallerBody':
+    'Compressing did not make this video any smaller, so there is nothing to gain. Keep your original, or try the Small setting.',
+  'compress.trySmall': 'Try Small',
+  'compress.keepOriginal': 'Keep original',
   'limits.slowWarning':
     'This is a long job for this device. It may take a while; keep this tab open until it finishes.',
 

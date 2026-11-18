@@ -93,7 +93,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit table tests (landscape, portrait, odd sizes, rotated).
 - [x] **M2.5 Compress builder and size estimate**.
   - Test: unit: arg arrays per preset; estimate within a sane range for fixtures.
-- [ ] **M2.6 Compress tool UI** — presets, estimate, "output larger than input" handling.
+- [x] **M2.6 Compress tool UI** — presets, estimate, "output larger than input" handling.
   - Test: e2e: Balanced on the 720p fixture yields H.264/AAC, smaller file, correct dimensions.
 - [ ] **M2.7 Bitrate calculator for compress-to-size** — per ARCHITECTURE §7, incl. refusal and ladder.
   - Test: unit table tests incl. boundary bitrates, unreachable target, source already under target.

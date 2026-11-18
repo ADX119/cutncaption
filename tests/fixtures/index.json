@@ -70,6 +70,16 @@
     "audioCodec": null
   },
   {
+    "file": "hq-1080p.mp4",
+    "bytes": 218842,
+    "durationSec": 1,
+    "width": 1920,
+    "height": 1080,
+    "fps": 15,
+    "videoCodec": "h264",
+    "audioCodec": "aac"
+  },
+  {
     "file": "long-lowres.mp4",
     "bytes": 305432,
     "durationSec": 60,
