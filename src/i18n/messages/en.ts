@@ -62,6 +62,17 @@ export const en = {
   'preview.timeline': 'Timeline',
   'preview.video': 'Your video',
 
+  'trim.mode': 'How to cut',
+  'trim.precise': 'Precise',
+  'trim.preciseHint': 'Cuts exactly where you chose and saves an MP4. Takes a little longer.',
+  'trim.fast': 'Fast',
+  'trim.fastHint':
+    'Instant, keeps the original quality and format. The start may move to the nearest keyframe, up to a few seconds early.',
+  'trim.run': 'Trim video',
+  'trim.running': 'Trimming',
+  'limits.slowWarning':
+    'This is a long job for this device. It may take a while; keep this tab open until it finishes.',
+
   'job.working': 'Working…',
   'job.percent': '{percent}%',
   'job.cancel': 'Cancel',

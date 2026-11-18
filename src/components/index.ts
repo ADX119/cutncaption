@@ -2,6 +2,8 @@ export { SiteHeader } from './SiteHeader';
 export type { NavLink } from './SiteHeader';
 export { SiteFooter } from './SiteFooter';
 export { ThemeToggle } from './ThemeToggle';
+export { SegmentedControl } from './SegmentedControl';
+export type { Segment } from './SegmentedControl';
 export { FileDrop } from './file-drop/FileDrop';
 export { FileSummary } from './file-drop/FileSummary';
 export { MEDIA_ACCEPT, VIDEO_ACCEPT, matchesAccept, pickFile } from './file-drop/accept';

@@ -1,1 +1,1 @@
-export {};
+export { TrimTool } from './TrimTool';

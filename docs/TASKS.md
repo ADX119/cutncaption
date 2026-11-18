@@ -87,7 +87,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: component tests for handle clamping and keyboard steps.
 - [x] **M2.2 Trim command builders** — fast and precise.
   - Test: unit: exact arg arrays for sample inputs; extension follows source for fast mode.
-- [ ] **M2.3 Trim tool UI** — mode switch with explanation, runs job, shows result.
+- [x] **M2.3 Trim tool UI** — mode switch with explanation, runs job, shows result.
   - Test: e2e: precise trim 1.0–3.0 s of the fixture → output duration 2.0 ± 0.1 s; fast trim completes and plays.
 - [ ] **M2.4 Scale and preset maths** — even dimensions, short-side caps, rotation aware, never upscale.
   - Test: unit table tests (landscape, portrait, odd sizes, rotated).

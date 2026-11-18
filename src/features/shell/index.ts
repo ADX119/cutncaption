@@ -1,7 +1,10 @@
 export { BrowserGate } from './BrowserGate';
 export { EngineCheck } from './EngineCheck';
 export { FileIntake, describeFile } from './FileIntake';
+export type { ReadyFile } from './FileIntake';
 export { ensureEngineReady, getEngine, prewarmEngine } from './engineInstance';
+export { useJob } from './useJob';
+export type { JobState } from './useJob';
 export { JobStatesPreview } from './JobStatesPreview';
 export { InAppNotice } from './InAppNotice';
 export { UnsupportedNotice } from './UnsupportedNotice';

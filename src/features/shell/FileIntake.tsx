@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import {
+  type AcceptSpec,
   EngineDownload,
   ErrorPanel,
   FileDrop,
@@ -51,7 +52,26 @@ export function describeFile(file: File, info: MediaInfo): string {
  * this device does not have it yet (with progress), then probe the file.
  * Tools build on the "ready" state; until they exist, tool pages stop there.
  */
-export function FileIntake() {
+export interface ReadyFile {
+  readonly file: File;
+  readonly info: MediaInfo;
+  /** Back to choosing a file. */
+  readonly startOver: () => void;
+}
+
+/** Renders the tool for a ready file; a component so the tool is not built during intake's render. */
+function ReadyTool({ render, ...ready }: ReadyFile & { render: (ready: ReadyFile) => ReactNode }) {
+  return render(ready);
+}
+
+export function FileIntake({
+  accept = MEDIA_ACCEPT,
+  children,
+}: {
+  readonly accept?: AcceptSpec;
+  /** The tool, once a file is chosen and read. Without it, only the file summary shows. */
+  readonly children?: (ready: ReadyFile) => ReactNode;
+}) {
   const [state, setState] = useState<State>({ step: 'pick' });
   // Ignores results for a file the person has already moved on from.
   const current = useRef<File | null>(null);
@@ -96,7 +116,7 @@ export function FileIntake() {
     case 'pick':
       return (
         <FileDrop
-          accept={MEDIA_ACCEPT}
+          accept={accept}
           onFile={(file) => void intake(file)}
           title={t('file.drop.title')}
           hint={t('file.drop.hint')}
@@ -107,6 +127,11 @@ export function FileIntake() {
     case 'reading':
       return <JobProgress label={t('file.reading')} fraction={null} onCancel={startOver} />;
     case 'ready':
+      if (children) {
+        return (
+          <ReadyTool render={children} file={state.file} info={state.info} startOver={startOver} />
+        );
+      }
       return (
         <FileSummary
           file={state.file}
