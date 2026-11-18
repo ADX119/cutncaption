@@ -34,7 +34,8 @@ src/
     meme-studio/
     captions/
     shorts-crop/
-    shell/                  cross-tool UI that needs the engine: BrowserGate and its notices
+    shell/                  cross-tool UI that needs the engine: BrowserGate, FileIntake, engine instance
+    editing/                widgets shared by tools that need editor/ maths: VideoPreview, RangeTimeline, TimeField
   components/               shared UI: FileDrop, VideoPreview, Timeline, JobProgress, ResultCard
   engine/                   no React. The only code that touches wasm, workers, models
     media/

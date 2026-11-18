@@ -53,6 +53,15 @@ export const en = {
   'file.details': '{duration} · {size}',
   'file.detailsVideo': '{duration} · {width} × {height} · {size}',
 
+  'timeline.start': 'Start of selection',
+  'timeline.end': 'End of selection',
+  'timeline.length': '{length} selected',
+  'timeline.invalidTime': 'Type a time like 1:05.2',
+  'timeline.startField': 'Start',
+  'timeline.endField': 'End',
+  'preview.timeline': 'Timeline',
+  'preview.video': 'Your video',
+
   'job.working': 'Working…',
   'job.percent': '{percent}%',
   'job.cancel': 'Cancel',
