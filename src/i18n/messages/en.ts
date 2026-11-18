@@ -121,6 +121,10 @@ export const en = {
     '320 kbps. The highest MP3 quality; about two and a half times the size of Standard.',
   'mp3.run': 'Save as MP3',
   'mp3.running': 'Saving the audio',
+  'mute.explain':
+    'Removes the sound and keeps the picture exactly as it is, in the same format. It takes a moment.',
+  'mute.run': 'Remove sound',
+  'mute.running': 'Removing the sound',
   'limits.slowWarning':
     'This is a long job for this device. It may take a while; keep this tab open until it finishes.',
 
@@ -174,6 +178,8 @@ export const en = {
   'error.target-unreachable':
     'That size is too small for this video to stay watchable. Choose a larger size, or trim the video first.',
 
+  'error.no-video': 'This file has no picture. Choose a video file.',
+  'error.already-silent': 'This video already has no sound, so there is nothing to remove.',
   'error.no-audio': 'This video has no sound, so there is nothing to save as audio.',
 
   'engineCheck.title': 'Engine check',

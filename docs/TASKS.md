@@ -105,7 +105,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit: decision function for each fixture's `MediaInfo`. e2e: WebM → H.264/AAC MP4; MP4(H.264) → path `copy`; MOV and MKV convert.
 - [x] **M2.11 Video to MP3** — builder, UI, no-audio error.
   - Test: unit args; e2e: output is `audio/mpeg`, duration matches ±0.1 s; no-audio fixture shows the error.
-- [ ] **M2.12 Mute** — builder, UI.
+- [x] **M2.12 Mute** — builder, UI.
   - Test: e2e: output has no audio stream; path is `copy`.
 - [ ] **M2.13 Wire tools into the registry** — slugs 1–9 mount the real tools with presets.
   - Test: e2e smoke: each of the 9 URLs accepts a file and reaches the ready state.

@@ -23,6 +23,8 @@ export const ENGINE_ERROR_CODES = [
   'target-unreachable',
   // Audio tools.
   'no-audio',
+  'no-video',
+  'already-silent',
 ] as const;
 
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number];

@@ -6,6 +6,7 @@ import {
   ConvertTool,
   Mp3Tool,
   mp3Bitrate,
+  MuteTool,
   type SizePresetId,
   TrimTool,
 } from '@/features/core-tools';
@@ -51,6 +52,8 @@ export function ToolPlaceholder({
           {(ready) => <Mp3Tool {...ready} initialBitrate={mp3Bitrate(preset.bitrateKbps)} />}
         </FileIntake>
       );
+    case 'mute':
+      return <FileIntake accept={VIDEO_ACCEPT}>{(ready) => <MuteTool {...ready} />}</FileIntake>;
     default:
       return <FileIntake />;
   }

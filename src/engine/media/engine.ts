@@ -44,6 +44,10 @@ function describeRefusal(refusal: Refusal): string {
       return 'source already under target';
     case 'no-audio':
       return 'source has no audio stream';
+    case 'no-video':
+      return 'source has no video stream';
+    case 'already-silent':
+      return 'source already has no audio';
   }
 }
 

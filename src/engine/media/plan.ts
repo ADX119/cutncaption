@@ -30,7 +30,9 @@ export interface Plan {
 export type Refusal =
   | { readonly code: 'already-under-target' }
   | { readonly code: 'target-unreachable'; readonly smallestBytes: number }
-  | { readonly code: 'no-audio' };
+  | { readonly code: 'no-audio' }
+  | { readonly code: 'no-video' }
+  | { readonly code: 'already-silent' };
 
 // Common output settings (docs/ARCHITECTURE.md §7).
 const MP4 = ['-movflags', '+faststart'];
@@ -141,6 +143,39 @@ const secs = (seconds: number) => String(Math.round(seconds * 1000) / 1000);
 export function planJob(job: MediaJob, context: PlanContext = DEFAULT_PLAN_CONTEXT): Plan {
   const deviceScale = (info: MediaInfo) => scaleArgs(info, context.maxShortSide);
   switch (job.kind) {
+    case 'mute': {
+      const { file, info } = job;
+      const container = sourceContainer(file.name, info);
+      const output = `out.${container}`;
+      const refusal: Refusal | undefined = !info.video
+        ? { code: 'no-video' }
+        : !info.audio
+          ? { code: 'already-silent' }
+          : undefined;
+      return {
+        path: 'copy',
+        reencodesVideo: false,
+        outputName: output,
+        mime: CONTAINERS[container],
+        filename: outputFilename(file.name, 'muted', container),
+        expectedDurationSec: info.durationSec ?? undefined,
+        footprint: { inputBytes: file.size, estimatedOutputBytes: file.size },
+        refusal,
+        args: (ws) => [
+          '-hide_banner',
+          '-i',
+          ws.input(),
+          // The picture is copied untouched; every sound track is left out.
+          '-map',
+          '0:v:0',
+          '-c:v',
+          'copy',
+          '-an',
+          ...(container === 'mp4' || container === 'mov' ? MP4 : []),
+          ws.path(output),
+        ],
+      };
+    }
     case 'toMp3': {
       const { file, info, bitrateKbps } = job;
       const seconds = info.durationSec ?? undefined;

@@ -5,7 +5,7 @@ import type { MediaInfo } from './probe/parse';
  * MediaInfo from an earlier probe(), so the file is not read twice. Kinds are added
  * here as their tools are built (docs/ARCHITECTURE.md §3 lists the full set).
  */
-export type MediaJob = ToMp4Job | TrimJob | CompressJob | CompressToSizeJob | ToMp3Job;
+export type MediaJob = ToMp4Job | TrimJob | CompressJob | CompressToSizeJob | ToMp3Job | MuteJob;
 
 export interface ToMp4Job {
   readonly kind: 'toMp4';
@@ -34,6 +34,12 @@ export interface ToMp3Job {
   readonly file: File;
   readonly info: MediaInfo;
   readonly bitrateKbps: 128 | 192 | 320;
+}
+
+export interface MuteJob {
+  readonly kind: 'mute';
+  readonly file: File;
+  readonly info: MediaInfo;
 }
 
 export interface TrimJob {

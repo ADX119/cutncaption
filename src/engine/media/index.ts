@@ -7,6 +7,7 @@ export type {
   EnginePath,
   JobResult,
   MediaJob,
+  MuteJob,
   ToMp3Job,
   ToMp4Job,
   TrimJob,
