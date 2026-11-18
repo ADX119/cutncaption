@@ -1,6 +1,6 @@
 import { BrowserGate } from '@/features/shell';
 import type { ToolPageEntry } from './registry';
-import { ToolPlaceholder } from './ToolPlaceholder';
+import { ToolMount } from './ToolMount';
 
 /** Placeholder until each tool lands (M2–M5) and the full template (M6.1). */
 export function ToolPage({ entry }: { entry: ToolPageEntry }) {
@@ -13,7 +13,7 @@ export function ToolPage({ entry }: { entry: ToolPageEntry }) {
       <h1 className="display text-4xl">{entry.slug}</h1>
       <div className="mt-8">
         <BrowserGate>
-          <ToolPlaceholder tool={entry.tool} preset={entry.preset} />
+          <ToolMount tool={entry.tool} preset={entry.preset} />
         </BrowserGate>
       </div>
     </main>
