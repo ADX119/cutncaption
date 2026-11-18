@@ -23,6 +23,7 @@ test('home links to every working tool and marks the rest as coming soon', async
       '/tools/compress-video-for-whatsapp/',
       '/tools/compress-video-for-discord/',
       '/tools/convert-to-mp4/',
+      '/tools/mov-to-mp4/',
       '/tools/video-to-mp3/',
       '/tools/mute-video/',
     ].sort(),

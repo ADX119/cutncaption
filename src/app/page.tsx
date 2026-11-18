@@ -19,6 +19,7 @@ const AREAS: readonly Area[] = [
       { slug: 'compress-video-for-whatsapp', label: t('home.tool.whatsapp') },
       { slug: 'compress-video-for-discord', label: t('home.tool.discord') },
       { slug: 'convert-to-mp4', label: t('home.tool.convert') },
+      { slug: 'mov-to-mp4', label: t('home.tool.mov') },
       { slug: 'video-to-mp3', label: t('home.tool.mp3') },
       { slug: 'mute-video', label: t('home.tool.mute') },
     ],

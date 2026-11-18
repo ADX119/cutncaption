@@ -214,6 +214,7 @@ export const en = {
   'home.tool.whatsapp': 'For WhatsApp',
   'home.tool.discord': 'For Discord',
   'home.tool.convert': 'Convert to MP4',
+  'home.tool.mov': 'MOV to MP4',
   'home.tool.mp3': 'Video to MP3',
   'home.tool.mute': 'Mute',
   'home.soon': 'Coming soon',
