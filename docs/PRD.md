@@ -63,7 +63,7 @@ Decisions already taken (do not reopen without the owner):
 
 **Compress to size**
 
-- Target in MB with presets: WhatsApp 16 MB, Discord 10 MB, Email 25 MB, custom.
+- Target in MB with presets: WhatsApp 16 MB, Discord 20 MB, Email 18 MB (Gmail counts encoding, so 25 MB attachments bounce above about 18 MB), custom. Values checked November 2026; see `src/features/core-tools/sizePresets.ts`.
 - AC: output ≤ target, and ≥ 85% of target when the source is larger than the target. If the target is unreachable at ≥ 150 kbps video, the user is told to trim first. If the source is already under target, no processing happens and the user is told.
 
 **Convert to MP4**

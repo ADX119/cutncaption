@@ -88,6 +88,22 @@ export const en = {
     'Compressing did not make this video any smaller, so there is nothing to gain. Keep your original, or try the Small setting.',
   'compress.trySmall': 'Try Small',
   'compress.keepOriginal': 'Keep original',
+  'size.fitFor': 'Make it fit',
+  'size.whatsapp': 'WhatsApp',
+  'size.whatsappHint': 'Under {mb} MB, the size WhatsApp accepts for a video on every phone.',
+  'size.discord': 'Discord',
+  'size.discordHint': 'Under {mb} MB, the upload limit for free Discord accounts.',
+  'size.email': 'Email',
+  'size.emailHint':
+    'Under {mb} MB. Gmail allows 25 MB, but encoding adds about a third, so larger files bounce.',
+  'size.custom': 'Custom',
+  'size.customHint': 'Type the size you need.',
+  'size.customLabel': 'Size in MB',
+  'size.invalid': 'Type a size in MB, like 10 or 2.5.',
+  'size.under': 'Under {size}',
+  'size.tooSmall':
+    'That is too small for this video to stay watchable. The smallest that works is about {size}. Trim the video first, or use that size.',
+  'size.useSmallest': 'Use the smallest size',
   'limits.slowWarning':
     'This is a long job for this device. It may take a while; keep this tab open until it finishes.',
 

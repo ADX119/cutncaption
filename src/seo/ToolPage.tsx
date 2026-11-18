@@ -13,7 +13,7 @@ export function ToolPage({ entry }: { entry: ToolPageEntry }) {
       <h1 className="display text-4xl">{entry.slug}</h1>
       <div className="mt-8">
         <BrowserGate>
-          <ToolPlaceholder tool={entry.tool} />
+          <ToolPlaceholder tool={entry.tool} preset={entry.preset} />
         </BrowserGate>
       </div>
     </main>

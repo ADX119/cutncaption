@@ -99,7 +99,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit table tests incl. boundary bitrates, unreachable target, source already under target.
 - [x] **M2.8 Compress-to-size job with retry** — single pass + one corrective rerun.
   - Test: unit with a fake runner returning an oversize result → one rerun with the scaled bitrate. Integration: 60 s fixture to a small target → size ≤ target and ≥ 85%.
-- [ ] **M2.9 Compress-to-size UI** — MB input, WhatsApp/Discord/Email presets from `sizePresets.ts` (verify values), messages for unreachable/already-small.
+- [x] **M2.9 Compress-to-size UI** — MB input, WhatsApp/Discord/Email presets from `sizePresets.ts` (verify values), messages for unreachable/already-small.
   - Test: e2e for the WhatsApp preset path and the already-small path.
 - [ ] **M2.10 Convert to MP4** — UI. _The remux-or-re-encode decision and both commands were built in M1.12 (`planJob`, `isMp4Compatible`) and are unit- and e2e-tested; this task adds the tool UI and its e2e._
   - Test: unit: decision function for each fixture's `MediaInfo`. e2e: WebM → H.264/AAC MP4; MP4(H.264) → path `copy`; MOV and MKV convert.
@@ -227,7 +227,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 - [ ] **M5.13 Performance budget** — bundle analysis, lazy-load engines and editors, enforce ≤ 200 KB gzip initial JS per tool route.
   - Test: script that fails the build when a route exceeds the budget.
 - [ ] **M5.14 Real-device calibration** — run the checklist below on one low-end Android (≤ 3 GB), one mid Android, one iPhone, one desktop; update `limits.ts` and ARCHITECTURE §8. _Manual; needs the owner's devices._
-  - Checklist: each core tool on a 100 MB file · compress a 3-minute 1080p clip · meme MP4/GIF/sticker · 2-minute Hindi captions + burn-in · crop · cancel mid-job · five jobs in a row without reload · open `/tools/engine-check/` twice on the iPhone and confirm the second run says "Loaded from this device: Yes" (the WebKit test browser cannot check this) · if a Mac is available, run the Engine check in Safari and one real encode, to confirm the multi-thread core does not stall there.
+  - Checklist: each core tool on a 100 MB file · compress a 3-minute 1080p clip · meme MP4/GIF/sticker · 2-minute Hindi captions + burn-in · crop · cancel mid-job · five jobs in a row without reload · in WhatsApp, send a 30 MB video and note whether it goes as a video or is refused (decides whether the 16 MB WhatsApp preset can be raised) · open `/tools/engine-check/` twice on the iPhone and confirm the second run says "Loaded from this device: Yes" (the WebKit test browser cannot check this) · if a Mac is available, run the Engine check in Safari and one real encode, to confirm the multi-thread core does not stall there.
   - AC: results table committed; every _(calibrate)_ marker removed.
 
 ## M6 — SEO and launch
