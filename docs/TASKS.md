@@ -89,7 +89,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit: exact arg arrays for sample inputs; extension follows source for fast mode.
 - [x] **M2.3 Trim tool UI** — mode switch with explanation, runs job, shows result.
   - Test: e2e: precise trim 1.0–3.0 s of the fixture → output duration 2.0 ± 0.1 s; fast trim completes and plays.
-- [ ] **M2.4 Scale and preset maths** — even dimensions, short-side caps, rotation aware, never upscale.
+- [x] **M2.4 Scale and preset maths** — even dimensions, short-side caps, rotation aware, never upscale.
   - Test: unit table tests (landscape, portrait, odd sizes, rotated).
 - [ ] **M2.5 Compress builder and size estimate**.
   - Test: unit: arg arrays per preset; estimate within a sane range for fixtures.
