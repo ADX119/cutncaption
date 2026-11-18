@@ -9,6 +9,33 @@ test('home shows the header, headline and privacy footer', async ({ page }) => {
   await expect(page.getByRole('contentinfo')).toContainText('never uploaded');
 });
 
+test('home links to every working tool and marks the rest as coming soon', async ({ page }) => {
+  await page.goto('/');
+  const hrefs = await page
+    .getByRole('main')
+    .getByRole('link')
+    .evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+  expect(hrefs.sort()).toEqual(
+    [
+      '/tools/trim-video/',
+      '/tools/compress-video/',
+      '/tools/compress-video-to-size/',
+      '/tools/compress-video-for-whatsapp/',
+      '/tools/compress-video-for-discord/',
+      '/tools/convert-to-mp4/',
+      '/tools/video-to-mp3/',
+      '/tools/mute-video/',
+    ].sort(),
+  );
+  await expect(page.getByTestId('home-area').filter({ hasText: 'Coming soon' })).toHaveCount(3);
+
+  // Every header link is a working tool too.
+  const nav = page.getByRole('navigation', { name: 'Tools' }).getByRole('link');
+  for (const href of await nav.evaluateAll((links) => links.map((l) => l.getAttribute('href')))) {
+    expect(hrefs).toContain(href);
+  }
+});
+
 test('header links cross the isolation boundary with a full page load', async ({ page }) => {
   await page.goto('/');
   expect(await page.evaluate(() => self.crossOriginIsolated)).toBe(false);

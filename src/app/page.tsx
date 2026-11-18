@@ -1,19 +1,31 @@
 import { t } from '@/i18n';
 import { toolPath } from '@/seo';
 
-const AREAS = [
-  { href: toolPath('trim-video'), title: t('home.trim.title'), body: t('home.trim.body') },
-  { href: toolPath('video-meme-maker'), title: t('home.meme.title'), body: t('home.meme.body') },
+interface Area {
+  readonly title: string;
+  readonly body: string;
+  /** Working tools in this area; an area without any is shown as coming soon. */
+  readonly tools: readonly { readonly slug: string; readonly label: string }[];
+}
+
+const AREAS: readonly Area[] = [
   {
-    href: toolPath('auto-captions'),
-    title: t('home.captions.title'),
-    body: t('home.captions.body'),
+    title: t('home.trim.title'),
+    body: t('home.trim.body'),
+    tools: [
+      { slug: 'trim-video', label: t('home.tool.trim') },
+      { slug: 'compress-video', label: t('home.tool.compress') },
+      { slug: 'compress-video-to-size', label: t('home.tool.size') },
+      { slug: 'compress-video-for-whatsapp', label: t('home.tool.whatsapp') },
+      { slug: 'compress-video-for-discord', label: t('home.tool.discord') },
+      { slug: 'convert-to-mp4', label: t('home.tool.convert') },
+      { slug: 'video-to-mp3', label: t('home.tool.mp3') },
+      { slug: 'mute-video', label: t('home.tool.mute') },
+    ],
   },
-  {
-    href: toolPath('crop-video-for-reels'),
-    title: t('home.crop.title'),
-    body: t('home.crop.body'),
-  },
+  { title: t('home.meme.title'), body: t('home.meme.body'), tools: [] },
+  { title: t('home.captions.title'), body: t('home.captions.body'), tools: [] },
+  { title: t('home.crop.title'), body: t('home.crop.body'), tools: [] },
 ];
 
 /** A timeline with a selected range: the one thing every tool here does. */
@@ -52,17 +64,37 @@ export default function HomePage() {
 
       <ul className="divide-rule border-rule mt-12 divide-y border-y">
         {AREAS.map((area) => (
-          <li key={area.href}>
-            {/* Plain <a>: tool routes are cross-origin isolated (docs/ARCHITECTURE.md §4). */}
-            <a
-              href={area.href}
-              className="group hover:bg-accent-wash -mx-4 grid gap-1 px-4 py-5 transition-colors duration-200 sm:-mx-6 sm:grid-cols-[16rem_1fr] sm:gap-8 sm:px-6"
-            >
-              <span className="display text-xl">{area.title}</span>
-              <span className="text-graphite group-hover:text-ink max-w-[56ch] transition-colors duration-200">
-                {area.body}
-              </span>
-            </a>
+          <li
+            key={area.title}
+            className="grid gap-1 py-5 sm:grid-cols-[16rem_1fr] sm:gap-8"
+            data-testid="home-area"
+          >
+            <h2 className={`display text-xl ${area.tools.length ? '' : 'text-graphite'}`}>
+              {area.title}
+            </h2>
+            <div>
+              <p className="text-graphite max-w-[56ch]">{area.body}</p>
+              {area.tools.length ? (
+                <ul
+                  aria-label={t('home.tools.label', { area: area.title })}
+                  className="mt-3 -ml-3 flex flex-wrap gap-1"
+                >
+                  {area.tools.map((tool) => (
+                    <li key={tool.slug}>
+                      {/* Plain <a>: tool routes are cross-origin isolated (docs/ARCHITECTURE.md §4). */}
+                      <a
+                        href={toolPath(tool.slug)}
+                        className="pressable text-accent hover:bg-accent-wash flex min-h-11 items-center rounded-full px-3 font-medium underline-offset-4 hover:underline"
+                      >
+                        {tool.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-graphite mt-2 text-sm">{t('home.soon')}</p>
+              )}
+            </div>
           </li>
         ))}
       </ul>

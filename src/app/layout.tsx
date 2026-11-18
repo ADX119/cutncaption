@@ -28,10 +28,11 @@ export const viewport: Viewport = {
 };
 
 const NAV = [
+  // Only tools that work today; meme, captions and crop join as they ship.
   { href: toolPath('trim-video'), label: t('nav.trim') },
-  { href: toolPath('video-meme-maker'), label: t('nav.meme') },
-  { href: toolPath('auto-captions'), label: t('nav.captions') },
-  { href: toolPath('crop-video-for-reels'), label: t('nav.crop') },
+  { href: toolPath('compress-video'), label: t('nav.compress') },
+  { href: toolPath('convert-to-mp4'), label: t('nav.convert') },
+  { href: toolPath('video-to-mp3'), label: t('nav.mp3') },
 ];
 
 export default function RootLayout({ children }: { children: ReactNode }) {
