@@ -52,8 +52,104 @@ export function isMp4Compatible(info: MediaInfo): boolean {
   return info.audio === null || info.audio.codec === 'aac';
 }
 
+/** Containers a stream copy can keep, by output extension. */
+const CONTAINERS = {
+  mp4: 'video/mp4',
+  mov: 'video/quicktime',
+  webm: 'video/webm',
+  mkv: 'video/x-matroska',
+  avi: 'video/x-msvideo',
+} as const;
+type Container = keyof typeof CONTAINERS;
+
+/**
+ * The container a stream copy should write, so the output plays like the input.
+ * The file's own extension decides (ffprobe reports MP4 and MOV alike); otherwise
+ * ffprobe's container name; MP4 as the last resort.
+ */
+export function sourceContainer(fileName: string, info: MediaInfo): Container {
+  const extension = fileName.slice(fileName.lastIndexOf('.') + 1).toLowerCase();
+  if (extension === 'm4v') return 'mp4';
+  if (extension in CONTAINERS) return extension as Container;
+  if (info.container.includes('matroska')) return 'mkv';
+  if (info.container.includes('avi')) return 'avi';
+  return 'mp4';
+}
+
+/** Seconds as ffmpeg should see them: millisecond precision, no trailing zeros. */
+const secs = (seconds: number) => String(Math.round(seconds * 1000) / 1000);
+
 export function planJob(job: MediaJob): Plan {
   switch (job.kind) {
+    case 'trim': {
+      const { file, info, start, end } = job;
+      const length = Math.max(0, end - start);
+      const total = info.durationSec ?? length;
+      const share = total > 0 ? Math.min(1, length / total) : 1;
+      const select = ['-ss', secs(start), '-i'];
+
+      if (job.mode === 'fast') {
+        const container = sourceContainer(file.name, info);
+        const output = `out.${container}`;
+        const faststart = container === 'mp4' || container === 'mov' ? MP4 : [];
+        return {
+          path: 'copy',
+          reencodesVideo: false,
+          outputName: output,
+          mime: CONTAINERS[container],
+          filename: outputFilename(file.name, 'trimmed', container),
+          expectedDurationSec: length,
+          footprint: {
+            inputBytes: file.size,
+            estimatedOutputBytes: Math.round(file.size * share),
+          },
+          args: (ws) => [
+            '-hide_banner',
+            ...select,
+            ws.input(),
+            '-t',
+            secs(length),
+            // The main picture and every audio track; extra data tracks some cameras
+            // add can make a copy fail.
+            '-map',
+            '0:v:0?',
+            '-map',
+            '0:a?',
+            '-c',
+            'copy',
+            '-avoid_negative_ts',
+            'make_zero',
+            ...faststart,
+            ws.path(output),
+          ],
+        };
+      }
+
+      return {
+        path: 'ffmpeg',
+        reencodesVideo: true,
+        outputName: 'out.mp4',
+        mime: 'video/mp4',
+        filename: outputFilename(file.name, 'trimmed', 'mp4'),
+        expectedDurationSec: length,
+        footprint: {
+          inputBytes: file.size,
+          estimatedOutputBytes: estimateEncodedBytes({ ...info, durationSec: length }),
+          reencodeSeconds: length,
+        },
+        args: (ws) => [
+          '-hide_banner',
+          ...select,
+          ws.input(),
+          '-t',
+          secs(length),
+          ...x264(20),
+          ...(info.audio ? aac(128) : ['-an']),
+          ...MP4,
+          ws.path('out.mp4'),
+        ],
+      };
+    }
     case 'toMp4': {
       const { file, info } = job;
       const copy = isMp4Compatible(info);

@@ -5,12 +5,27 @@ import type { MediaInfo } from './probe/parse';
  * MediaInfo from an earlier probe(), so the file is not read twice. Kinds are added
  * here as their tools are built (docs/ARCHITECTURE.md §3 lists the full set).
  */
-export type MediaJob = ToMp4Job;
+export type MediaJob = ToMp4Job | TrimJob;
 
 export interface ToMp4Job {
   readonly kind: 'toMp4';
   readonly file: File;
   readonly info: MediaInfo;
+}
+
+export interface TrimJob {
+  readonly kind: 'trim';
+  readonly file: File;
+  readonly info: MediaInfo;
+  /** Seconds. */
+  readonly start: number;
+  readonly end: number;
+  /**
+   * 'fast' copies the streams: near-instant, keeps the format, but cuts at the
+   * nearest keyframe so the start can be up to a few seconds early.
+   * 'precise' re-encodes to MP4 for exact cut points.
+   */
+  readonly mode: 'fast' | 'precise';
 }
 
 /** How a job's output was produced. */

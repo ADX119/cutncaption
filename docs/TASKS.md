@@ -85,7 +85,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 
 - [x] **M2.1 `VideoPreview` and `Timeline`** — playback, scrubbing, range handles, keyboard nudging, time inputs.
   - Test: component tests for handle clamping and keyboard steps.
-- [ ] **M2.2 Trim command builders** — fast and precise.
+- [x] **M2.2 Trim command builders** — fast and precise.
   - Test: unit: exact arg arrays for sample inputs; extension follows source for fast mode.
 - [ ] **M2.3 Trim tool UI** — mode switch with explanation, runs job, shows result.
   - Test: e2e: precise trim 1.0–3.0 s of the fixture → output duration 2.0 ± 0.1 s; fast trim completes and plays.
