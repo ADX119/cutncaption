@@ -7,6 +7,7 @@ export type {
   EnginePath,
   JobResult,
   MediaJob,
+  ToMp3Job,
   ToMp4Job,
   TrimJob,
 } from './jobs';

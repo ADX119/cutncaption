@@ -29,7 +29,8 @@ export interface Plan {
 
 export type Refusal =
   | { readonly code: 'already-under-target' }
-  | { readonly code: 'target-unreachable'; readonly smallestBytes: number };
+  | { readonly code: 'target-unreachable'; readonly smallestBytes: number }
+  | { readonly code: 'no-audio' };
 
 // Common output settings (docs/ARCHITECTURE.md §7).
 const MP4 = ['-movflags', '+faststart'];
@@ -140,6 +141,34 @@ const secs = (seconds: number) => String(Math.round(seconds * 1000) / 1000);
 export function planJob(job: MediaJob, context: PlanContext = DEFAULT_PLAN_CONTEXT): Plan {
   const deviceScale = (info: MediaInfo) => scaleArgs(info, context.maxShortSide);
   switch (job.kind) {
+    case 'toMp3': {
+      const { file, info, bitrateKbps } = job;
+      const seconds = info.durationSec ?? undefined;
+      return {
+        path: 'ffmpeg',
+        reencodesVideo: false,
+        outputName: 'out.mp3',
+        mime: 'audio/mpeg',
+        filename: outputFilename(file.name, 'audio', 'mp3'),
+        expectedDurationSec: seconds,
+        footprint: {
+          inputBytes: file.size,
+          estimatedOutputBytes: Math.round(((bitrateKbps * 1000) / 8) * (seconds ?? 0)),
+        },
+        refusal: info.audio ? undefined : { code: 'no-audio' },
+        args: (ws) => [
+          '-hide_banner',
+          '-i',
+          ws.input(),
+          '-vn',
+          '-c:a',
+          'libmp3lame',
+          '-b:a',
+          `${bitrateKbps}k`,
+          ws.path('out.mp3'),
+        ],
+      };
+    }
     case 'compressToSize': {
       const { file, info, targetBytes } = job;
       const seconds = info.durationSec ?? 0;

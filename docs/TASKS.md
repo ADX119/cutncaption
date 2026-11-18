@@ -103,7 +103,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: e2e for the WhatsApp preset path and the already-small path.
 - [x] **M2.10 Convert to MP4** — UI. _The remux-or-re-encode decision and both commands were built in M1.12 (`planJob`, `isMp4Compatible`) and are unit- and e2e-tested; this task adds the tool UI and its e2e._
   - Test: unit: decision function for each fixture's `MediaInfo`. e2e: WebM → H.264/AAC MP4; MP4(H.264) → path `copy`; MOV and MKV convert.
-- [ ] **M2.11 Video to MP3** — builder, UI, no-audio error.
+- [x] **M2.11 Video to MP3** — builder, UI, no-audio error.
   - Test: unit args; e2e: output is `audio/mpeg`, duration matches ±0.1 s; no-audio fixture shows the error.
 - [ ] **M2.12 Mute** — builder, UI.
   - Test: e2e: output has no audio stream; path is `copy`.

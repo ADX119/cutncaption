@@ -37,9 +37,14 @@ function limitError(issue: LimitIssue): EngineError {
 }
 
 function describeRefusal(refusal: Refusal): string {
-  return refusal.code === 'target-unreachable'
-    ? `smallest workable size ${refusal.smallestBytes} bytes`
-    : 'source already under target';
+  switch (refusal.code) {
+    case 'target-unreachable':
+      return `smallest workable size ${refusal.smallestBytes} bytes`;
+    case 'already-under-target':
+      return 'source already under target';
+    case 'no-audio':
+      return 'source has no audio stream';
+  }
 }
 
 export interface Assessment extends LimitCheck {

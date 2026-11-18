@@ -21,6 +21,8 @@ export const ENGINE_ERROR_CODES = [
   // Compress to size.
   'already-under-target',
   'target-unreachable',
+  // Audio tools.
+  'no-audio',
 ] as const;
 
 export type EngineErrorCode = (typeof ENGINE_ERROR_CODES)[number];

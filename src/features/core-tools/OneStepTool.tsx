@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { ErrorPanel, FileSummary, JobProgress, ResultCard } from '@/components';
 import type { MediaJob } from '@/engine/media';
 import { type ReadyFile, describeFile, getEngine, useJob } from '@/features/shell';
+import { t } from '@/i18n';
 import { LimitNotice } from './shared';
 
 interface OneStepToolProps extends ReadyFile {
@@ -76,11 +77,16 @@ export function OneStepTool({
         {explain(assessment.path)}
       </p>
       {options}
+      {assessment.refusal && (
+        <p className="text-danger max-w-[60ch]" role="alert" data-testid="tool-refusal">
+          {t(`error.${assessment.refusal.code}`)}
+        </p>
+      )}
       <LimitNotice assessment={assessment} />
       <div>
         <button
           type="button"
-          disabled={assessment.blocks.length > 0}
+          disabled={assessment.blocks.length > 0 || assessment.refusal !== undefined}
           onClick={() => void run(job)}
           className="pressable bg-accent text-on-accent hover:bg-accent-strong min-h-12 rounded-full px-7 font-medium disabled:opacity-50"
         >

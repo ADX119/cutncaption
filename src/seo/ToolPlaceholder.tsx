@@ -4,6 +4,8 @@ import {
   CompressTool,
   CompressToSizeTool,
   ConvertTool,
+  Mp3Tool,
+  mp3Bitrate,
   type SizePresetId,
   TrimTool,
 } from '@/features/core-tools';
@@ -43,6 +45,12 @@ export function ToolPlaceholder({
       );
     case 'convert':
       return <FileIntake accept={VIDEO_ACCEPT}>{(ready) => <ConvertTool {...ready} />}</FileIntake>;
+    case 'video-to-mp3':
+      return (
+        <FileIntake>
+          {(ready) => <Mp3Tool {...ready} initialBitrate={mp3Bitrate(preset.bitrateKbps)} />}
+        </FileIntake>
+      );
     default:
       return <FileIntake />;
   }

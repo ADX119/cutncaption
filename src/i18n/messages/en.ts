@@ -110,6 +110,17 @@ export const en = {
     'This video is converted to H.264 MP4 with AAC sound, the format every phone, browser and app plays.',
   'convert.run': 'Convert to MP4',
   'convert.running': 'Converting',
+  'mp3.explain': 'Saves the sound from this video as an MP3 that plays anywhere.',
+  'mp3.quality': 'Quality',
+  'mp3.standard': 'Standard',
+  'mp3.standardHint': '128 kbps. Fine for speech and voice notes; the smallest file.',
+  'mp3.high': 'High',
+  'mp3.highHint': '192 kbps. Sounds right for music on phones and headphones.',
+  'mp3.best': 'Best',
+  'mp3.bestHint':
+    '320 kbps. The highest MP3 quality; about two and a half times the size of Standard.',
+  'mp3.run': 'Save as MP3',
+  'mp3.running': 'Saving the audio',
   'limits.slowWarning':
     'This is a long job for this device. It may take a while; keep this tab open until it finishes.',
 
@@ -162,6 +173,8 @@ export const en = {
     'This video is already under that size, so there is nothing to do. Keep your original.',
   'error.target-unreachable':
     'That size is too small for this video to stay watchable. Choose a larger size, or trim the video first.',
+
+  'error.no-audio': 'This video has no sound, so there is nothing to save as audio.',
 
   'engineCheck.title': 'Engine check',
   'engineCheck.intro':
