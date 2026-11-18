@@ -164,9 +164,9 @@ export const en = {
 
   'error.busy': 'Another job is still running. Wait for it to finish, or cancel it.',
   'error.input-too-large':
-    'This file is too large for this device. Trim it on another device first, or try a shorter clip.',
+    'This file is too large for this device to open. Use a computer for this one, or a shorter clip.',
   'error.output-too-large':
-    'The result would be too large for this device to hold. Choose a smaller size or a shorter clip.',
+    'The result would be too large for this device to hold. Choose a shorter part, a smaller size, or the Fast option where there is one.',
   'error.caption-audio-too-long':
     'This video is too long for captions on this device. Trim it to a shorter part first.',
 

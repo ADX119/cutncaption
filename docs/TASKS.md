@@ -109,7 +109,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: e2e: output has no audio stream; path is `copy`.
 - [x] **M2.13 Wire tools into the registry** — slugs 1–9 mount the real tools with presets.
   - Test: e2e smoke: each of the 9 URLs accepts a file and reaches the ready state.
-- [ ] **M2.14 Limits and errors pass** — every core tool blocks/warns per `limits.ts`; error copy reviewed.
+- [x] **M2.14 Limits and errors pass** — every core tool blocks/warns per `limits.ts`; error copy reviewed.
   - Test: e2e with a mocked class L and an oversize fixture stub shows the block message; a forced engine error shows the friendly message.
 
 ## M3 — Meme Studio

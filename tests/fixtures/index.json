@@ -90,6 +90,16 @@
     "audioCodec": "aac"
   },
   {
+    "file": "long-tiny.mp4",
+    "bytes": 33935,
+    "durationSec": 1200,
+    "width": 64,
+    "height": 64,
+    "fps": 1,
+    "videoCodec": "h264",
+    "audioCodec": null
+  },
+  {
     "file": "rotated.mp4",
     "bytes": 45166,
     "durationSec": 3,

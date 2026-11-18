@@ -192,6 +192,24 @@ const FIXTURES = [
     },
   },
   {
+    // A stand-in for a huge file: 20 minutes long but only a few KB. Its length trips
+    // the low-end-phone limits (estimated output, re-encode time) in limit tests.
+    file: 'long-tiny.mp4',
+    args: [
+      ...['-f', 'lavfi', '-i', 'color=c=gray:size=64x64:rate=1:duration=1200'],
+      ...x264(40, 300),
+      ...['-movflags', '+faststart'],
+    ],
+    expect: {
+      durationSec: 1200,
+      width: 64,
+      height: 64,
+      fps: 1,
+      videoCodec: 'h264',
+      audioCodec: null,
+    },
+  },
+  {
     // Stored landscape with a 90° display rotation, as phones record portrait video.
     file: 'rotated.mp4',
     from: 'clip.mov',

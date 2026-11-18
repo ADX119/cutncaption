@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: true,
   // Engine tests start up to 32 wasm threads each; more parallel browsers than this
   // overloads a typical dev machine and crashes test browsers.
-  workers: process.env.CI ? 2 : 6,
+  workers: process.env.CI ? 2 : 4,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

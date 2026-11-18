@@ -17,6 +17,7 @@ describe('media fixtures (scripts/gen-fixtures.mjs)', () => {
         'hq-1080p.mp4',
         'landscape-720p.mp4',
         'long-lowres.mp4',
+        'long-tiny.mp4',
         'no-audio.mp4',
         'portrait-720p.mp4',
         'rotated.mp4',
@@ -37,10 +38,10 @@ describe('media fixtures (scripts/gen-fixtures.mjs)', () => {
     expect(fs.readdirSync(DIR).filter((name) => !listed.has(name))).toEqual([]);
   });
 
-  it('includes one video with no audio and one audio-only file', () => {
-    expect(index.filter((f) => f.videoCodec && !f.audioCodec).map((f) => f.file)).toEqual([
+  it('includes silent videos and an audio-only file', () => {
+    expect(index.filter((f) => f.videoCodec && !f.audioCodec).map((f) => f.file)).toContain(
       'no-audio.mp4',
-    ]);
+    );
     expect(index.filter((f) => !f.videoCodec && f.audioCodec).map((f) => f.file)).toEqual([
       'tone.mp3',
     ]);
