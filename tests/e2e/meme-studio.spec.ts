@@ -21,6 +21,16 @@ function inkBetween(page: Page, from: number, to: number) {
   );
 }
 
+/**
+ * Types into a caption field and checks it took. If this ever fails, the typing never
+ * reached the field; a later failure means the studio lost text it had.
+ */
+async function typeCaption(page: Page, label: string, text: string) {
+  const field = page.getByRole('textbox', { name: label });
+  await field.fill(text);
+  await expect(field).toHaveValue(text);
+}
+
 const size = (page: Page) =>
   overlay(page).evaluate((canvas: HTMLCanvasElement) => ({
     width: canvas.width,
@@ -33,11 +43,11 @@ test('typing draws the caption over the video, where the layout puts it', async 
   await expect(overlay(page)).toBeVisible();
   expect(await inkBetween(page, 0, 1)).toBe(0);
 
-  await page.getByRole('textbox', { name: 'Top text' }).fill('when the preview');
+  await typeCaption(page, 'Top text', 'when the preview');
   await expect.poll(() => inkBetween(page, 0, 0.3)).toBeGreaterThan(200);
   expect(await inkBetween(page, 0.3, 1)).toBe(0);
 
-  await page.getByRole('textbox', { name: 'Bottom text' }).fill('matches the export');
+  await typeCaption(page, 'Bottom text', 'matches the export');
   await expect.poll(() => inkBetween(page, 0.7, 1)).toBeGreaterThan(200);
   // The middle of the picture stays clear.
   expect(await inkBetween(page, 0.35, 0.65)).toBe(0);
@@ -51,7 +61,7 @@ test('typing draws the caption over the video, where the layout puts it', async 
 test('the caption bar adds a white bar above the video and keeps the text', async ({ page }) => {
   test.setTimeout(120_000);
   await openToolWith(page, '/tools/video-meme-maker/', 'landscape-720p.mp4', 'meme-studio');
-  await page.getByRole('textbox', { name: 'Top text' }).fill('me explaining memes');
+  await typeCaption(page, 'Top text', 'me explaining memes');
   const plain = await size(page);
   expect(plain.width / plain.height).toBeCloseTo(16 / 9, 1);
 
@@ -62,10 +72,11 @@ test('the caption bar adds a white bar above the video and keeps the text', asyn
     .poll(async () => (await size(page)).height / (await size(page)).width)
     .toBeGreaterThan(9 / 16 + 0.05);
 
-  // The bar is opaque across its whole width; the video area below it stays clear.
-  const barShare =
-    1 - (plain.height * ((await size(page)).width / plain.width)) / (await size(page)).height;
-  expect(await inkBetween(page, 0, barShare * 0.9)).toBeGreaterThan(0);
+  // The bar is drawn (once the fonts are in, which on a first visit takes a moment);
+  // the video area below it stays clear.
+  const frame = await size(page);
+  const barShare = 1 - (plain.height * (frame.width / plain.width)) / frame.height;
+  await expect.poll(() => inkBetween(page, 0, barShare * 0.9)).toBeGreaterThan(0);
   expect(await inkBetween(page, barShare + 0.05, 1)).toBe(0);
 });
 
@@ -74,8 +85,8 @@ test('Make meme saves the moment as an MP4, then returns to the studio with the 
 }) => {
   test.setTimeout(180_000);
   await openToolWith(page, '/tools/video-meme-maker/', 'landscape-720p.mp4', 'meme-studio');
-  await page.getByRole('textbox', { name: 'Top text' }).fill('when the export');
-  await page.getByRole('textbox', { name: 'Bottom text' }).fill('matches the preview');
+  await typeCaption(page, 'Top text', 'when the export');
+  await typeCaption(page, 'Bottom text', 'matches the preview');
   await page.getByRole('button', { name: 'Make meme' }).click();
 
   const result = await downloadAndProbe(page);
