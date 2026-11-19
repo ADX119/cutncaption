@@ -12,6 +12,7 @@ export {
   zoomScale,
   zoomWindow,
 } from './layouts';
+export { MOMENT, frameDuration, initialMoment, momentLimits, stepFrame } from './moment';
 export type {
   CaptionBarGeometry,
   FreezeZoomGeometry,

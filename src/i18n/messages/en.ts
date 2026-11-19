@@ -59,6 +59,12 @@ export const en = {
   'timeline.invalidTime': 'Type a time like 1:05.2',
   'timeline.startField': 'Start',
   'timeline.endField': 'End',
+
+  'moment.hint': 'Choose a moment of 2 to 15 seconds.',
+  'moment.previousFrame': 'Previous frame',
+  'moment.nextFrame': 'Next frame',
+  'moment.startHere': 'Start here',
+  'moment.endHere': 'End here',
   'preview.timeline': 'Timeline',
   'preview.video': 'Your video',
 

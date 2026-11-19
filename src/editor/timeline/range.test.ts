@@ -79,6 +79,16 @@ describe('formatClock', () => {
   ])('%d -> %s', (seconds, expected) => {
     expect(formatClock(seconds)).toBe(expected);
   });
+
+  it.each([
+    [0, '0:00.00'],
+    [1.04, '0:01.04'],
+    [1.034, '0:01.03'],
+    [59.996, '1:00.00'],
+    [3723.05, '1:02:03.05'],
+  ])('%d -> %s with hundredths', (seconds, expected) => {
+    expect(formatClock(seconds, 2)).toBe(expected);
+  });
 });
 
 describe('parseClock', () => {

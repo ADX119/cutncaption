@@ -120,7 +120,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit tests for wrapping/fit maths with a mocked `measureText`; Playwright screenshot test for Latin and Devanagari samples.
 - [x] **M3.3 Layout geometry** — `editor/meme/layouts.ts`: output frame size, text boxes, bar height, zoom parameters for the 3 layouts.
   - Test: unit table tests across aspect ratios.
-- [ ] **M3.4 Moment picker** — scrub and select 2–15 s with snapping; frame stepping.
+- [x] **M3.4 Moment picker** — scrub and select 2–15 s with snapping; frame stepping.
   - Test: component tests for min/max enforcement.
 - [ ] **M3.5 Studio shell and store** — layout switcher, text inputs, size control, export-format picker, live canvas preview over the video.
   - Test: component tests for store transitions; e2e: typing updates the preview canvas (pixel check in the text region).

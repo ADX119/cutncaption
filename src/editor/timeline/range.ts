@@ -66,14 +66,18 @@ export function timeAt(x: number, width: number, duration: number): number {
   return round(clamp(x / width, 0, 1) * duration);
 }
 
-/** "0:05.3", "1:02.0", "1:02:03.5": tenths of a second, for trim points. */
-export function formatClock(seconds: number): string {
-  const tenths = Math.round(Math.max(0, seconds) * 10);
-  const h = Math.floor(tenths / 36000);
-  const m = Math.floor((tenths % 36000) / 600);
-  const s = Math.floor((tenths % 600) / 10);
-  const t = tenths % 10;
-  const ss = `${String(s).padStart(2, '0')}.${t}`;
+/**
+ * "0:05.3", "1:02.0", "1:02:03.5": tenths of a second, for trim points. With
+ * `decimals = 2`, hundredths ("0:01.04"), so stepping frame by frame shows a change.
+ */
+export function formatClock(seconds: number, decimals: 1 | 2 = 1): string {
+  const unit = decimals === 2 ? 100 : 10;
+  const ticks = Math.round(Math.max(0, seconds) * unit);
+  const h = Math.floor(ticks / (3600 * unit));
+  const m = Math.floor((ticks % (3600 * unit)) / (60 * unit));
+  const s = Math.floor((ticks % (60 * unit)) / unit);
+  const fraction = String(ticks % unit).padStart(decimals, '0');
+  const ss = `${String(s).padStart(2, '0')}.${fraction}`;
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
 }
 

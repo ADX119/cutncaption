@@ -20,9 +20,11 @@ interface RangeTimelineProps {
   readonly onRangeChange: (range: TimeRange) => void;
   /** Called when the person clicks the track or lets go of a handle. */
   readonly onSeek: (seconds: number) => void;
+  /** Seconds an arrow key moves a handle; Meme Studio uses one frame. Default 0.1. */
+  readonly step?: number;
 }
 
-/** Arrow keys move 0.1 s, with Shift 1 s; Home and End jump to the limits. */
+/** Arrow keys move `step`, with Shift 1 s; Home and End jump to the limits. */
 const STEP = 0.1;
 const BIG_STEP = 1;
 
@@ -36,6 +38,7 @@ export function RangeTimeline({
   playhead,
   onRangeChange,
   onSeek,
+  step: smallStep = STEP,
 }: RangeTimelineProps) {
   const track = useRef<HTMLDivElement>(null);
   const dragging = useRef<RangeEdge | null>(null);
@@ -67,7 +70,7 @@ export function RangeTimeline({
   }
 
   function onKey(edge: RangeEdge, event: KeyboardEvent) {
-    const step = event.shiftKey ? BIG_STEP : STEP;
+    const step = event.shiftKey ? BIG_STEP : smallStep;
     let next: TimeRange | null = null;
     if (event.key === 'ArrowLeft' || event.key === 'ArrowDown')
       next = nudgeRange(range, edge, -step, limits);
