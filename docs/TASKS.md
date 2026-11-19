@@ -118,7 +118,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit: loader resolves once per font; e2e: `document.fonts.check` true for each.
 - [x] **M3.2 Text renderer** — `editor/render/text.ts`: wrap, auto-fit, outline, alignment, on a passed-in 2D context.
   - Test: unit tests for wrapping/fit maths with a mocked `measureText`; Playwright screenshot test for Latin and Devanagari samples.
-- [ ] **M3.3 Layout geometry** — `editor/meme/layouts.ts`: output frame size, text boxes, bar height, zoom parameters for the 3 layouts.
+- [x] **M3.3 Layout geometry** — `editor/meme/layouts.ts`: output frame size, text boxes, bar height, zoom parameters for the 3 layouts.
   - Test: unit table tests across aspect ratios.
 - [ ] **M3.4 Moment picker** — scrub and select 2–15 s with snapping; frame stepping.
   - Test: component tests for min/max enforcement.

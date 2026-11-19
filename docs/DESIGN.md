@@ -63,6 +63,15 @@ Until M6.9a the header carries a few tool links and the home page lists the rest
 - From `lg` it is a fixed left column on every page, separated by a `rule` line, scrolling on its own. Below `lg` the header shows a Tools button that opens the same list as a sheet; it closes on Escape, on choosing a page, and on tapping outside.
 - Links stay plain `<a>` (isolation boundary).
 
+## Meme output
+
+What the studio draws into a meme is the meme's own look, not the interface's, so it uses fixed colours rather than tokens. Numbers live in `src/editor/meme/layouts.ts`; all are proportions of the video frame.
+
+- **Top/bottom text**: Anton in capitals, white with a black outline (stroke 0.14 em, round joins), centred, in boxes covering the top and bottom 28% of the frame. Size 13% of the frame height, at most 11% of its width; wraps, then shrinks to 35%.
+- **Caption bar**: Noto Sans Bold, black on a white bar above the video, centred, as typed. Size 5% of the video width. The bar fits the lines (one line minimum, half the video height maximum).
+- **Freeze-frame zoom**: the caption uses the bottom box in meme text style; the zoom eases from 1× to 1.8× toward the chosen point over a 1–3 s hold.
+- Devanagari falls back to Noto Sans Devanagari Bold in every layout. A size control scales all text from 0.5× to 1.6×.
+
 ## Motion
 
 Motion answers something the person did. Nothing moves on its own, with two exceptions: the home page strip closes its handles once on load, and a job of unknown length shows a segment travelling along its progress track (it answers the person starting the job, and stops when the job does).

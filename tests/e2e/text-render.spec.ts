@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 import { expect, test } from './support/test';
 
-const SAMPLES = ['latin', 'hindi', 'bar', 'fit'] as const;
+const SAMPLES = ['latin', 'hindi', 'bar', 'fit', 'portrait'] as const;
 
 async function openSamples(page: Page) {
   await page.goto('/preview/text/');

@@ -184,6 +184,7 @@ export const en = {
   'textPreview.hindi.bottom': 'ट्रेन: क्षमा करें श्रीमान्',
   'textPreview.bar.label': 'Caption bar, mixed scripts',
   'textPreview.bar.text': 'me explaining Hinglish captions to my नानी, who understood them first',
+  'textPreview.portrait.label': 'Top and bottom text, portrait video',
   'textPreview.fit.label': 'Long text shrinks to fit its box',
   'textPreview.fit.text':
     'nobody: absolutely nobody: me at 3 am rewriting the same caption for the ninth time',
