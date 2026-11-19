@@ -53,7 +53,7 @@ src/
     device/                 capability detection, device class, limits
   editor/                   pure domain logic. No React, no engine imports
     captions/               model, line splitter, SRT/VTT, transliteration, ASS emitter
-    meme/                   layout geometry for the 3 layouts
+    meme/                   layout geometry for the 3 layouts, moment limits, caption overlay (planOverlay)
     crop/                   crop-rect maths, platform presets
     render/                 canvas text/caption renderer (takes a 2D context)
   seo/                      tool registry, page template, JSON-LD builders, content/en/*

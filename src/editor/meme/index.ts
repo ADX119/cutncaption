@@ -13,6 +13,8 @@ export {
   zoomWindow,
 } from './layouts';
 export { MOMENT, frameDuration, initialMoment, momentLimits, stepFrame } from './moment';
+export { planOverlay } from './overlay';
+export type { MemeText, OverlayCanvas, OverlayPlan, OverlaySpec } from './overlay';
 export type {
   CaptionBarGeometry,
   FreezeZoomGeometry,

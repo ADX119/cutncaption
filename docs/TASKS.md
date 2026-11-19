@@ -122,7 +122,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
   - Test: unit table tests across aspect ratios.
 - [x] **M3.4 Moment picker** — scrub and select 2–15 s with snapping; frame stepping.
   - Test: component tests for min/max enforcement.
-- [ ] **M3.5 Studio shell and store** — layout switcher, text inputs, size control, export-format picker, live canvas preview over the video.
+- [x] **M3.5 Studio shell and store** — layout switcher, text inputs, size control, export-format picker, live canvas preview over the video.
   - Test: component tests for store transitions; e2e: typing updates the preview canvas (pixel check in the text region).
 - [ ] **M3.6 Overlay PNG export** — render the caption layer at output resolution to a PNG blob.
   - Test: integration: PNG has the expected dimensions and non-transparent pixels only inside the text boxes.

@@ -12,6 +12,7 @@ import {
   TrimTool,
   mp3Bitrate,
 } from '@/features/core-tools';
+import { EXPORT_FORMATS, type ExportFormat, MemeStudio } from '@/features/meme-studio';
 import { FileIntake } from '@/features/shell';
 import type { ToolId, ToolPageEntry } from './registry';
 
@@ -25,7 +26,7 @@ function oneOf<T extends string>(allowed: readonly string[], value: unknown): T 
 
 /**
  * The working tool for a tool page, started with the page's preset. Tools not built
- * yet (meme, captions, crop) take a file and read it with the engine.
+ * yet (captions, crop) take a file and read it with the engine.
  */
 export function ToolMount({ tool, preset }: { tool: ToolId; preset: ToolPageEntry['preset'] }) {
   switch (tool) {
@@ -64,6 +65,16 @@ export function ToolMount({ tool, preset }: { tool: ToolId; preset: ToolPageEntr
     case 'mute':
       return <FileIntake accept={VIDEO_ACCEPT}>{(ready) => <MuteTool {...ready} />}</FileIntake>;
     case 'meme':
+      return (
+        <FileIntake accept={VIDEO_ACCEPT}>
+          {(ready) => (
+            <MemeStudio
+              {...ready}
+              initialFormat={oneOf<ExportFormat>(EXPORT_FORMATS, preset.format)}
+            />
+          )}
+        </FileIntake>
+      );
     case 'captions':
     case 'crop':
       return <FileIntake />;

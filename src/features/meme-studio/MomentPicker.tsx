@@ -13,6 +13,24 @@ interface MomentPickerProps {
   readonly onRangeChange: (range: TimeRange) => void;
   readonly playhead: number;
   readonly onSeek: (seconds: number) => void;
+  /** Adds a play/pause button between the frame buttons. */
+  readonly playing?: boolean;
+  readonly onTogglePlay?: () => void;
+}
+
+function PlayIcon({ playing }: { playing: boolean }) {
+  return (
+    <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor" aria-hidden="true">
+      {playing ? (
+        <>
+          <rect x="5" y="4" width="3.5" height="12" rx="1" />
+          <rect x="11.5" y="4" width="3.5" height="12" rx="1" />
+        </>
+      ) : (
+        <path d="M6.5 4.2v11.6a.8.8 0 0 0 1.2.7l9-5.8a.8.8 0 0 0 0-1.4l-9-5.8a.8.8 0 0 0-1.2.7Z" />
+      )}
+    </svg>
+  );
 }
 
 function Chevron({ direction }: { direction: 'left' | 'right' }) {
@@ -46,6 +64,8 @@ export function MomentPicker({
   onRangeChange,
   playhead,
   onSeek,
+  playing = false,
+  onTogglePlay,
 }: MomentPickerProps) {
   const limits = momentLimits(duration);
 
@@ -77,6 +97,16 @@ export function MomentPicker({
           >
             <Chevron direction="left" />
           </button>
+          {onTogglePlay ? (
+            <button
+              type="button"
+              aria-label={playing ? t('moment.pause') : t('moment.play')}
+              onClick={onTogglePlay}
+              className={QUIET_ICON}
+            >
+              <PlayIcon playing={playing} />
+            </button>
+          ) : null}
           <span
             className="min-w-[6ch] text-center text-[0.9375rem] tabular-nums"
             data-testid="moment-playhead"
