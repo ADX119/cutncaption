@@ -114,7 +114,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 
 ## M3 — Meme Studio
 
-- [ ] **M3.1 Fonts** — add Anton, Noto Sans, Noto Sans Devanagari to `public/fonts`; loader that registers `FontFace` and returns bytes for ffmpeg.
+- [x] **M3.1 Fonts** — add Anton, Noto Sans, Noto Sans Devanagari to `public/fonts`; loader that registers `FontFace` and returns bytes for ffmpeg.
   - Test: unit: loader resolves once per font; e2e: `document.fonts.check` true for each.
 - [ ] **M3.2 Text renderer** — `editor/render/text.ts`: wrap, auto-fit, outline, alignment, on a passed-in 2D context.
   - Test: unit tests for wrapping/fit maths with a mocked `measureText`; Playwright screenshot test for Latin and Devanagari samples.

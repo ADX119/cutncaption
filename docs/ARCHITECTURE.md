@@ -49,6 +49,7 @@ src/
       models.ts             model registry (ids, dtypes, sizes)
       index.ts              public AiEngine API
     assets/                 fetch-with-cache, manifest, integrity
+    fonts/                  font registry; loads /fonts/*, registers FontFace, hands bytes to ffmpeg
     device/                 capability detection, device class, limits
   editor/                   pure domain logic. No React, no engine imports
     captions/               model, line splitter, SRT/VTT, transliteration, ASS emitter
@@ -63,7 +64,8 @@ worker/assets.ts            streams R2 objects (GET/HEAD, Range)
 wrangler.jsonc              deploy config: static assets dir, run_worker_first, R2 binding
 public/
   _headers                  COOP/COEP, CSP, cache rules
-  fonts/                    Anton, Noto Sans, Noto Sans Devanagari (OFL)
+  fonts/                    Anton, Noto Sans Bold, Noto Sans Devanagari Bold (OFL), TrueType
+                            (ffmpeg's FreeType has no Brotli, so no WOFF2); hash in each name
   vendor/ffmpeg/<ver>/      small ffmpeg JS glue files (copied by script)
 scripts/                    vendor-copy.mjs, upload-assets.mjs, gen-fixtures.mjs
 tests/  e2e/  fixtures/

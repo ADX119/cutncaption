@@ -1,5 +1,6 @@
 import { classifyDevice, detectCapabilities, isIos, readDeviceEnv } from '../device';
 import { EngineError } from '../errors';
+import { fonts } from '../fonts';
 import { createMediaEngine } from './engine';
 import type { MediaJob } from './jobs';
 import { type CoreVariant, FfmpegSession } from './ffmpeg/loader';
@@ -304,6 +305,50 @@ async function engineJob(input: HarnessFile, spec: JobSpec): Promise<EngineJobCh
   }
 }
 
+export interface FontCheck {
+  readonly family: string;
+  readonly file: string;
+  readonly bytes: number;
+  /** document.fonts.check for the face's family and weight. */
+  readonly check: boolean;
+  /** A face with this family is in document.fonts and has loaded. */
+  readonly faceLoaded: boolean;
+  /** Canvas text measures differently with the font than with the fallback alone. */
+  readonly drawsWithFont: boolean;
+}
+
+/** M3.1: every studio font loads once, registers with the page and draws on a canvas. */
+async function fontsCheck(): Promise<readonly FontCheck[]> {
+  const loaded = await fonts().loadAll();
+  // A second round must reuse the first: same objects, no new downloads.
+  const again = await fonts().loadAll();
+  if (again.some((font, index) => font !== loaded[index])) {
+    throw new Error('fonts loaded twice');
+  }
+
+  const context = document.createElement('canvas').getContext('2d');
+  if (!context) throw new Error('no 2D canvas');
+  const faces = [...document.fonts];
+  return loaded.map(({ spec, bytes }) => {
+    const sample = spec.id === 'noto-sans-devanagari' ? 'क्षत्रिय श्री हिन्दी' : 'Hamburgefonstiv';
+    const width = (font: string) => {
+      context.font = font;
+      return context.measureText(sample).width;
+    };
+    const size = `${spec.weight} 40px`;
+    return {
+      family: spec.family,
+      file: spec.file,
+      bytes: bytes().byteLength,
+      check: document.fonts.check(`${size} "${spec.family}"`, sample),
+      faceLoaded: faces.some(
+        (face) => face.family.replace(/["']/g, '') === spec.family && face.status === 'loaded',
+      ),
+      drawsWithFont: width(`${size} "${spec.family}", monospace`) !== width(`${size} monospace`),
+    };
+  });
+}
+
 export const engineHarness = {
   workspaceCheck,
   probe,
@@ -311,5 +356,6 @@ export const engineHarness = {
   coreCheck,
   engineRun,
   engineJob,
+  fontsCheck,
 };
 export type EngineHarness = typeof engineHarness;
