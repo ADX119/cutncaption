@@ -4,7 +4,7 @@ import { fonts } from '../fonts';
 import { type OverlaySpec, type Rect, freezeZoomGeometry, topBottomGeometry } from '@/editor/meme';
 import { renderOverlay } from './overlay';
 import { createMediaEngine } from './engine';
-import type { MediaJob } from './jobs';
+import type { MediaJob, MemeJob } from './jobs';
 import { type CoreVariant, FfmpegSession } from './ffmpeg/loader';
 import { chooseCoreVariant } from './ffmpeg/variant';
 import { runFfmpeg } from './ffmpeg/run';
@@ -452,7 +452,120 @@ async function overlayCheck(spec: OverlaySpec): Promise<OverlayCheck> {
   };
 }
 
+/** A meme job's own settings; the harness supplies the file and probe. */
+export type MemeSpec = Omit<MemeJob, 'kind' | 'file' | 'info'>;
+
+export interface MemeFrameCheck {
+  readonly filename: string;
+  readonly bytes: number;
+  readonly output: MediaInfo;
+  /**
+   * Mean difference (0–255, over R, G and B) between the meme's frame and the source's
+   * frame at the same moment: inside the text boxes, and everywhere else.
+   */
+  readonly diffInside: number;
+  readonly diffOutside: number;
+}
+
+/** Decodes a PNG to pixels. */
+async function pixels(png: Blob): Promise<ImageData> {
+  const bitmap = await createImageBitmap(png);
+  const canvas = document.createElement('canvas');
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('no 2D canvas');
+  context.drawImage(bitmap, 0, 0);
+  return context.getImageData(0, 0, bitmap.width, bitmap.height);
+}
+
+/**
+ * M3.7: makes a real meme, then pulls the frame `at` seconds in from the meme and the
+ * matching frame from the source (scaled to the same size) with ffmpeg, and compares
+ * them inside and outside the layout's text boxes. Decoding is done by ffmpeg, so it
+ * works in browsers whose own player cannot decode H.264.
+ */
+async function memeFrameCheck(
+  input: HarnessFile,
+  spec: MemeSpec,
+  at: number,
+): Promise<MemeFrameCheck> {
+  const engine = createMediaEngine();
+  const source = toFile(input);
+  let result;
+  let output: MediaInfo;
+  try {
+    const info = await engine.probe(source);
+    result = await engine.run({ kind: 'meme', file: source, info, ...spec });
+    output = await engine.probe(new File([result.blob], 'meme.mp4', { type: result.mime }));
+  } finally {
+    engine.release();
+  }
+  const width = output.video?.displayWidth ?? 0;
+  const height = output.video?.displayHeight ?? 0;
+
+  const session = await FfmpegSession.load({ variant: 'st' });
+  let frames: [Blob, Blob];
+  try {
+    const meme = new File([result.blob], 'meme.mp4', { type: 'video/mp4' });
+    frames = await withWorkspace(session.fs, [source, meme], async (ws) => {
+      const grab = async (inputIndex: number, seconds: number, name: string) => {
+        await runFfmpeg(session, [
+          '-hide_banner',
+          '-ss',
+          String(seconds),
+          '-i',
+          ws.input(inputIndex),
+          '-frames:v',
+          '1',
+          '-vf',
+          `scale=${width}:${height}`,
+          ws.path(name),
+        ]);
+        return ws.readOutput(name, 'image/png');
+      };
+      return [await grab(1, at, 'meme.png'), await grab(0, spec.start + at, 'source.png')];
+    });
+  } finally {
+    session.terminate();
+  }
+
+  const [memeFrame, sourceFrame] = [await pixels(frames[0]), await pixels(frames[1])];
+  const boxes = allowedBoxes(
+    { layout: spec.layout, video: { width, height }, text: spec.text, textScale: spec.textScale },
+    { x: 0, y: 0, width, height },
+  );
+  const sums = { inside: 0, insideCount: 0, outside: 0, outsideCount: 0 };
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const i = (y * width + x) * 4;
+      let difference = 0;
+      for (let c = 0; c < 3; c += 1) {
+        difference += Math.abs((memeFrame.data[i + c] ?? 0) - (sourceFrame.data[i + c] ?? 0));
+      }
+      const inside = boxes.some(
+        (box) => x >= box.x && x < box.x + box.width && y >= box.y && y < box.y + box.height,
+      );
+      if (inside) {
+        sums.inside += difference / 3;
+        sums.insideCount += 1;
+      } else {
+        sums.outside += difference / 3;
+        sums.outsideCount += 1;
+      }
+    }
+  }
+  return {
+    filename: result.filename,
+    bytes: result.blob.size,
+    output,
+    diffInside: sums.inside / Math.max(1, sums.insideCount),
+    diffOutside: sums.outside / Math.max(1, sums.outsideCount),
+  };
+}
+
 export const engineHarness = {
+  memeFrameCheck,
   overlayCheck,
   workspaceCheck,
   probe,

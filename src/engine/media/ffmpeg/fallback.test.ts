@@ -19,6 +19,21 @@ function setup(behaviour: Partial<Record<CoreVariant, 'ok' | 'stall' | 'fail'>>)
 }
 
 describe('runOnCore', () => {
+  it('reports the core it was given when multi-thread would not start', async () => {
+    const s = setup({ st: 'stall' });
+    s.getSession.mockImplementation(async () => sessionFor('st'));
+    const ok = setup({});
+    ok.getSession.mockImplementation(async () => sessionFor('st'));
+    expect(await runOnCore({ variant: 'mt', ...ok })).toEqual({
+      value: 'done on st',
+      variant: 'st',
+      fellBack: false,
+    });
+    // A single-thread stall has nothing to fall back to.
+    await expect(runOnCore({ variant: 'mt', ...s })).rejects.toMatchObject({ code: 'stalled' });
+    expect(s.job).toHaveBeenCalledOnce();
+  });
+
   it('runs once on the chosen core when it works', async () => {
     const s = setup({});
     const result = await runOnCore({ variant: 'mt', ...s });

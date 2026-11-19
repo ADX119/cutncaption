@@ -33,6 +33,26 @@ export function coreLocation(variant: CoreVariant, origin: string): CoreLocation
   };
 }
 
+/**
+ * How long the multi-thread core may take to start once its wasm is here. It normally
+ * starts in a second or two; in WebKit under heavy load it has been seen never to
+ * start. The single-thread core gets no limit: it has nothing to fall back to, and a
+ * slow phone may need a while.
+ */
+export const MT_START_TIMEOUT_MS = 30_000;
+
+/** Settles with `start`, or rejects with "stalled" if that takes longer than `ms`. */
+export function startWithin<T>(start: Promise<T>, ms: number, what: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new EngineError('stalled', `${what} did not start within ${ms / 1000} s`)),
+      ms,
+    );
+  });
+  return Promise.race([start, timeout]).finally(() => clearTimeout(timer));
+}
+
 export interface LoadFfmpegOptions {
   readonly variant: CoreVariant;
   readonly signal?: AbortSignal;
@@ -96,7 +116,7 @@ export class FfmpegSession {
     // The worker reads the wasm from this object URL; it is only needed during load.
     const wasmURL = URL.createObjectURL(wasm);
     try {
-      await ffmpeg.load(
+      const loading = ffmpeg.load(
         {
           coreURL: location.coreURL,
           wasmURL,
@@ -104,6 +124,11 @@ export class FfmpegSession {
         },
         { signal },
       );
+      // After a timeout, terminate() makes this reject too; nobody is waiting for it then.
+      loading.catch(() => undefined);
+      await (variant === 'mt'
+        ? startWithin(loading, MT_START_TIMEOUT_MS, 'the multi-thread core')
+        : loading);
     } catch (error) {
       ffmpeg.terminate();
       if (isEngineError(error)) throw error;

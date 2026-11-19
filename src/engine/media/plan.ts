@@ -1,4 +1,6 @@
+import type { OverlaySpec, Rect, Size } from '@/editor/meme';
 import type { JobFootprint } from '../device';
+import { EngineError } from '../errors';
 import type { Workspace } from './ffmpeg/workspace';
 import { type MediaJob, outputFilename } from './jobs';
 import type { MediaInfo } from './probe/parse';
@@ -16,8 +18,16 @@ export interface Plan {
   readonly expectedDurationSec: number | undefined;
   /** For the device limit check (engine/device/limits.ts). */
   readonly footprint: JobFootprint;
-  /** The ffmpeg command, given the job's workspace. */
-  readonly args: (ws: Workspace) => string[];
+  /**
+   * The ffmpeg command, given the job's workspace and, for plans with an overlay, where
+   * the drawn caption layer put the video.
+   */
+  readonly args: (ws: Workspace, overlay?: OverlayGeometry) => string[];
+  /**
+   * A caption layer the engine draws (renderOverlay) and writes as `ov.png` before
+   * running. Text is never drawn by ffmpeg.
+   */
+  readonly overlay?: OverlaySpec;
   /**
    * Set when the job should not run at all; the engine rejects with this error and
    * assess() reports it so the tool can explain before anything starts.
@@ -26,6 +36,15 @@ export interface Plan {
   /** A corrected plan if the output came out too big, or null when it is fine. */
   readonly retry?: (outputBytes: number) => Plan | null;
 }
+
+/** What a drawn caption layer measured: its full size and where the video sits in it. */
+export interface OverlayGeometry {
+  readonly frame: Size;
+  readonly video: Rect;
+}
+
+/** The caption layer's name in the job's workspace. */
+export const OVERLAY_FILE = 'ov.png';
 
 export type Refusal =
   | { readonly code: 'already-under-target' }
@@ -143,6 +162,58 @@ const secs = (seconds: number) => String(Math.round(seconds * 1000) / 1000);
 export function planJob(job: MediaJob, context: PlanContext = DEFAULT_PLAN_CONTEXT): Plan {
   const deviceScale = (info: MediaInfo) => scaleArgs(info, context.maxShortSide);
   switch (job.kind) {
+    case 'meme': {
+      const { file, info, start, end, layout, text, textScale } = job;
+      const length = Math.max(0, end - start);
+      const display = displaySize(info);
+      const video = display
+        ? scaleToShortSide(display, context.maxShortSide)
+        : { width: 2, height: 2 };
+      return {
+        path: 'ffmpeg',
+        reencodesVideo: true,
+        outputName: 'out.mp4',
+        mime: 'video/mp4',
+        filename: outputFilename(file.name, 'meme', 'mp4'),
+        expectedDurationSec: length,
+        footprint: {
+          inputBytes: file.size,
+          estimatedOutputBytes: estimateEncodedBytes({ ...info, durationSec: length }),
+          reencodeSeconds: length,
+        },
+        refusal: info.video ? undefined : { code: 'no-video' },
+        overlay: { layout, video, text, textScale },
+        args: (ws) => {
+          if (layout !== 'top-bottom') {
+            // Caption bar arrives in M3.8, freeze-frame zoom in M3.9; the studio does not
+            // offer saving them before then.
+            throw new EngineError('job-failed', `meme layout ${layout} cannot be saved yet`);
+          }
+          // The caption layer is exactly the video's size: lay it on top at the origin.
+          const filter = `[0:v]scale=${video.width}:${video.height},setsar=1[v];[v][1:v]overlay=0:0[out]`;
+          return [
+            '-hide_banner',
+            '-ss',
+            secs(start),
+            '-t',
+            secs(length),
+            '-i',
+            ws.input(),
+            '-i',
+            ws.path(OVERLAY_FILE),
+            '-filter_complex',
+            filter,
+            '-map',
+            '[out]',
+            ...(info.audio ? ['-map', '0:a:0'] : []),
+            ...x264(20),
+            ...(info.audio ? aac(128) : ['-an']),
+            ...MP4,
+            ws.path('out.mp4'),
+          ];
+        },
+      };
+    }
     case 'mute': {
       const { file, info } = job;
       const container = sourceContainer(file.name, info);

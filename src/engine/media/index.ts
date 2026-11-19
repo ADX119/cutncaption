@@ -9,6 +9,7 @@ export type {
   MediaJob,
   MuteJob,
   ToMp3Job,
+  MemeJob,
   ToMp4Job,
   TrimJob,
 } from './jobs';

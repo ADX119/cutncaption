@@ -67,6 +67,32 @@ describe('prepare and needsDownload', () => {
     expect(loaded).toEqual(['mt']);
   });
 
+  it('switches to single-thread for the visit when the multi-thread core will not start', async () => {
+    const loaded: string[] = [];
+    const loadSession = vi.fn(async (variant: 'st' | 'mt') => {
+      loaded.push(variant);
+      if (variant === 'mt') throw new EngineError('stalled', 'did not start');
+      return { variant, terminated: false, terminate: vi.fn() } as unknown as FfmpegSession;
+    });
+    const engine = createMediaEngine(deps({ loadSession }));
+    await engine.prepare();
+    expect(loaded).toEqual(['mt', 'st']);
+
+    const job: MediaJob = { kind: 'toMp4', file: fakeFile(1000), info: info('clip.webm') };
+    expect(engine.assess(job).path).toBe('ffmpeg-st');
+    await engine.prepare();
+    expect(loaded).toEqual(['mt', 'st']);
+  });
+
+  it('passes other load failures through', async () => {
+    const loadSession = vi.fn(async () => {
+      throw new EngineError('engine-load-failed', 'broken');
+    });
+    const engine = createMediaEngine(deps({ loadSession }));
+    await expect(engine.prepare()).rejects.toMatchObject({ code: 'engine-load-failed' });
+    expect(loadSession).toHaveBeenCalledOnce();
+  });
+
   it('asks the cache about the core it would prepare', async () => {
     const isCoreCached = vi.fn(async (variant: 'st' | 'mt') => variant === 'mt');
     const engine = createMediaEngine(deps({ isCoreCached }));

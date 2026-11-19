@@ -1,3 +1,4 @@
+import type { MemeLayoutId, MemeText } from '@/editor/meme';
 import type { MediaInfo } from './probe/parse';
 
 /**
@@ -5,7 +6,23 @@ import type { MediaInfo } from './probe/parse';
  * MediaInfo from an earlier probe(), so the file is not read twice. Kinds are added
  * here as their tools are built (docs/ARCHITECTURE.md §3 lists the full set).
  */
-export type MediaJob = ToMp4Job | TrimJob | CompressJob | CompressToSizeJob | ToMp3Job | MuteJob;
+export type MediaJob =
+  ToMp4Job | TrimJob | CompressJob | CompressToSizeJob | ToMp3Job | MuteJob | MemeJob;
+
+/** A meme: the moment from `start` to `end` with the caption layer drawn over it. */
+export interface MemeJob {
+  readonly kind: 'meme';
+  readonly file: File;
+  readonly info: MediaInfo;
+  /** Seconds. */
+  readonly start: number;
+  readonly end: number;
+  readonly layout: MemeLayoutId;
+  readonly text: MemeText;
+  readonly textScale: number;
+  /** GIF and sticker follow in M3.11 and M3.12; still images never reach the engine. */
+  readonly format: 'mp4';
+}
 
 export interface ToMp4Job {
   readonly kind: 'toMp4';

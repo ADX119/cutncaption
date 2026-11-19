@@ -2,10 +2,19 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useStore } from 'zustand';
-import { FileSummary, type Segment, SegmentedControl } from '@/components';
+import {
+  ErrorPanel,
+  FileSummary,
+  JobProgress,
+  ResultCard,
+  type Segment,
+  SegmentedControl,
+} from '@/components';
 import { TEXT_SCALE } from '@/editor/meme';
 import { fonts } from '@/engine/fonts';
-import { type ReadyFile, describeFile } from '@/features/shell';
+import type { MemeJob } from '@/engine/media';
+import { LimitNotice } from '@/features/core-tools';
+import { type ReadyFile, describeFile, getEngine, useJob } from '@/features/shell';
 import { t } from '@/i18n';
 import { LayoutPicker } from './LayoutPicker';
 import { MemeStage } from './MemeStage';
@@ -52,6 +61,7 @@ export function MemeStudio({
   const [playhead, setPlayhead] = useState(0);
   const [playing, setPlaying] = useState(false);
   const video = useRef<HTMLVideoElement>(null);
+  const job = useJob();
 
   useEffect(() => {
     let live = true;
@@ -86,6 +96,55 @@ export function MemeStudio({
     hint: t(`meme.format.${format}.hint`),
   }));
   const single = state.layout !== 'top-bottom';
+
+  // Caption bar (M3.8), freeze-frame zoom (M3.9), GIF (M3.11), sticker (M3.12) and
+  // image (M3.13) are not saved yet.
+  const canSave = state.layout === 'top-bottom' && state.format === 'mp4';
+  const memeJob: MemeJob = {
+    kind: 'meme',
+    file,
+    info,
+    start: state.range.start,
+    end: state.range.end,
+    layout: state.layout,
+    text: state.text,
+    textScale: state.textScale,
+    format: 'mp4',
+  };
+  const assessment = getEngine().assess(memeJob);
+
+  if (job.state.status === 'running') {
+    return (
+      <JobProgress
+        label={t('meme.saving')}
+        fraction={job.state.fraction}
+        onCancel={job.cancel}
+        cancelling={job.state.cancelling}
+      />
+    );
+  }
+  if (job.state.status === 'done') {
+    // Back to the studio with everything kept, to adjust and save again.
+    return (
+      <ResultCard
+        blob={job.state.result.blob}
+        filename={job.state.result.filename}
+        inputBytes={file.size}
+        onStartOver={job.reset}
+      />
+    );
+  }
+  if (job.state.status === 'error') {
+    const failed = job.state.job;
+    return (
+      <ErrorPanel
+        message={job.state.message}
+        detail={job.state.detail}
+        onRetry={() => void job.run(failed)}
+        onStartOver={job.reset}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6" data-testid="meme-studio">
@@ -157,6 +216,24 @@ export function MemeStudio({
             value={state.format}
             onChange={state.setFormat}
           />
+
+          {canSave ? (
+            <div className="flex flex-col gap-3">
+              <LimitNotice assessment={assessment} />
+              <button
+                type="button"
+                disabled={assessment.blocks.length > 0}
+                onClick={() => void job.run(memeJob)}
+                className="pressable bg-accent text-on-accent hover:bg-accent-strong min-h-12 w-fit rounded-full px-7 font-medium disabled:opacity-50"
+              >
+                {t('meme.save')}
+              </button>
+            </div>
+          ) : (
+            <p className="text-graphite max-w-[56ch] text-sm" data-testid="meme-not-yet">
+              {t('meme.notYet')}
+            </p>
+          )}
         </div>
       </div>
     </div>

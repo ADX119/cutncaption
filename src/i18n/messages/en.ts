@@ -92,6 +92,10 @@ export const en = {
   'meme.format.sticker.hint': 'An animated WhatsApp sticker, up to 6 seconds.',
   'meme.format.still': 'Image',
   'meme.format.still.hint': 'The frame you are on, with your caption, as a picture.',
+  'meme.save': 'Make meme',
+  'meme.saving': 'Making your meme',
+  'meme.notYet':
+    'Saving this layout or format comes in an update soon. For now, choose Top and bottom with MP4.',
   'preview.timeline': 'Timeline',
   'preview.video': 'Your video',
 

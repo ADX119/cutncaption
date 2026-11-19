@@ -37,11 +37,13 @@ export async function runOnCore<T>(options: {
   const { policy, getSession, job } = options;
   const first: CoreVariant = policy.multiThreadDisabled ? 'st' : options.variant;
 
+  // getSession may hand back single-thread if the multi-thread core would not start.
+  const session = await getSession(first);
   try {
-    return { value: await job(await getSession(first)), variant: first, fellBack: false };
+    return { value: await job(session), variant: session.variant, fellBack: false };
   } catch (error) {
     const stalled = error instanceof EngineError && error.code === 'stalled';
-    if (!stalled || first !== 'mt') throw error;
+    if (!stalled || session.variant !== 'mt') throw error;
   }
 
   policy.multiThreadDisabled = true;

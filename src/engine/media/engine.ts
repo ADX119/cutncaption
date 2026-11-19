@@ -18,7 +18,8 @@ import { runFfmpeg } from './ffmpeg/run';
 import { chooseCoreVariant } from './ffmpeg/variant';
 import { withWorkspace } from './ffmpeg/workspace';
 import type { EnginePath, JobResult, MediaJob } from './jobs';
-import { type Plan, type Refusal, planJob } from './plan';
+import { renderOverlay } from './overlay';
+import { OVERLAY_FILE, type Plan, type Refusal, planJob } from './plan';
 import type { MediaInfo } from './probe/parse';
 import { probeFile } from './probe/probe';
 
@@ -134,7 +135,16 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
     // so never download the single-thread core just for that.
     if (live && (live.variant === variant || variant === 'st')) return live;
     live?.terminate();
-    session = await deps.loadSession(variant, { signal, onDownload });
+    try {
+      session = await deps.loadSession(variant, { signal, onDownload });
+    } catch (error) {
+      // A multi-thread core that never starts is treated like one that stalls:
+      // single-thread for the rest of the visit.
+      const stalled = error instanceof EngineError && error.code === 'stalled';
+      if (variant !== 'mt' || !stalled) throw error;
+      policy.multiThreadDisabled = true;
+      session = await deps.loadSession('st', { signal, onDownload });
+    }
     return session;
   }
 
@@ -191,6 +201,10 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
         const [block] = checkLimits(deps.deviceClass, plan.footprint).blocks;
         if (block) throw limitError(block);
 
+        // The caption layer is drawn once, on this thread with the page's fonts.
+        const overlay = plan.overlay ? await renderOverlay(plan.overlay) : undefined;
+        const overlayBytes = overlay ? new Uint8Array(await overlay.blob.arrayBuffer()) : undefined;
+
         const {
           value: blob,
           variant,
@@ -201,11 +215,14 @@ export function createMediaEngine(deps: MediaEngineDeps = defaultDeps()): MediaE
           getSession: (v) => getSession(v, options.signal),
           job: (live) =>
             withWorkspace(live.fs, [job.file], async (ws) => {
+              // A copy each time: writeFile hands the buffer to the worker, and a
+              // fallback to the single-thread core needs it again.
+              if (overlayBytes) await ws.writeFile(OVERLAY_FILE, overlayBytes.slice());
               // A plan may ask for one corrective pass (compress to size overshot).
               let current: Plan | null = plan;
               let output: Blob | undefined;
               while (current) {
-                await runFfmpeg(live, current.args(ws), {
+                await runFfmpeg(live, current.args(ws, overlay), {
                   expectedDurationSec: current.expectedDurationSec,
                   signal: options.signal,
                   onProgress: options.onProgress,
