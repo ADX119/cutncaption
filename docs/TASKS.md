@@ -116,7 +116,7 @@ Format: **AC** = acceptance criteria, **Test** = what proves it.
 
 - [x] **M3.1 Fonts** — add Anton, Noto Sans, Noto Sans Devanagari to `public/fonts`; loader that registers `FontFace` and returns bytes for ffmpeg.
   - Test: unit: loader resolves once per font; e2e: `document.fonts.check` true for each.
-- [ ] **M3.2 Text renderer** — `editor/render/text.ts`: wrap, auto-fit, outline, alignment, on a passed-in 2D context.
+- [x] **M3.2 Text renderer** — `editor/render/text.ts`: wrap, auto-fit, outline, alignment, on a passed-in 2D context.
   - Test: unit tests for wrapping/fit maths with a mocked `measureText`; Playwright screenshot test for Latin and Devanagari samples.
 - [ ] **M3.3 Layout geometry** — `editor/meme/layouts.ts`: output frame size, text boxes, bar height, zoom parameters for the 3 layouts.
   - Test: unit table tests across aspect ratios.

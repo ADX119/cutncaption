@@ -173,6 +173,21 @@ export const en = {
   'preview.title': 'Job states',
   'preview.converting': 'Converting',
 
+  // Unlisted design-review page for the caption renderer; the samples are drawn on canvas.
+  'textPreview.title': 'Text rendering',
+  'textPreview.loading': 'Loading fonts',
+  'textPreview.latin.label': 'Top and bottom text, Latin',
+  'textPreview.latin.top': 'When the export',
+  'textPreview.latin.bottom': 'matches the preview',
+  'textPreview.hindi.label': 'Top and bottom text, Devanagari',
+  'textPreview.hindi.top': 'दोस्त: बस पाँच मिनट में आया',
+  'textPreview.hindi.bottom': 'ट्रेन: क्षमा करें श्रीमान्',
+  'textPreview.bar.label': 'Caption bar, mixed scripts',
+  'textPreview.bar.text': 'me explaining Hinglish captions to my नानी, who understood them first',
+  'textPreview.fit.label': 'Long text shrinks to fit its box',
+  'textPreview.fit.text':
+    'nobody: absolutely nobody: me at 3 am rewriting the same caption for the ninth time',
+
   'error.already-under-target':
     'This video is already under that size, so there is nothing to do. Keep your original.',
   'error.target-unreachable':

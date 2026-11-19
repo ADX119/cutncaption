@@ -1,1 +1,1 @@
-export {};
+export { TextPreview } from './TextPreview';
