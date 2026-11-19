@@ -1,6 +1,8 @@
 import { classifyDevice, detectCapabilities, isIos, readDeviceEnv } from '../device';
 import { EngineError } from '../errors';
 import { fonts } from '../fonts';
+import { type OverlaySpec, type Rect, freezeZoomGeometry, topBottomGeometry } from '@/editor/meme';
+import { renderOverlay } from './overlay';
 import { createMediaEngine } from './engine';
 import type { MediaJob } from './jobs';
 import { type CoreVariant, FfmpegSession } from './ffmpeg/loader';
@@ -349,7 +351,109 @@ async function fontsCheck(): Promise<readonly FontCheck[]> {
   });
 }
 
+export interface OverlayCheck {
+  readonly type: string;
+  readonly width: number;
+  readonly height: number;
+  /** The file starts with the 8-byte PNG signature. */
+  readonly pngSignature: boolean;
+  /** Pixels with any opacity inside / outside the places the layout puts text (or the bar). */
+  readonly inkInside: number;
+  readonly inkOutside: number;
+  /** Fully opaque pixels inside those places, and their total area. */
+  readonly opaqueInside: number;
+  readonly boxArea: number;
+  /** Bounding box of the ink outside, for diagnosing a failure; null when there is none. */
+  readonly strayBounds: Bounds | null;
+  readonly boxes: readonly Bounds[];
+}
+
+interface Bounds {
+  readonly top: number;
+  readonly bottom: number;
+  readonly left: number;
+  readonly right: number;
+}
+
+/** Where a layout may draw: its non-empty text boxes, or the whole bar. */
+function allowedBoxes(spec: OverlaySpec, video: Rect): Rect[] {
+  if (spec.layout === 'caption-bar') {
+    return [{ x: 0, y: 0, width: spec.video.width, height: video.y }];
+  }
+  if (spec.layout === 'freeze-zoom') {
+    return spec.text.top.trim() ? [freezeZoomGeometry(spec.video, spec.textScale).box] : [];
+  }
+  const { boxes } = topBottomGeometry(spec.video, spec.textScale);
+  return [
+    ...(spec.text.top.trim() ? [boxes.top] : []),
+    ...(spec.text.bottom.trim() ? [boxes.bottom] : []),
+  ];
+}
+
+/**
+ * M3.6: renders a caption layer to PNG with the real fonts, decodes it, and counts
+ * where the ink landed.
+ */
+async function overlayCheck(spec: OverlaySpec): Promise<OverlayCheck> {
+  const rendered = await renderOverlay(spec);
+  const head = new Uint8Array(await rendered.blob.slice(0, 8).arrayBuffer());
+  const bitmap = await createImageBitmap(rendered.blob);
+  const canvas = document.createElement('canvas');
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('no 2D canvas');
+  context.drawImage(bitmap, 0, 0);
+  const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+
+  const boxes = allowedBoxes(spec, rendered.video).map((box) => ({
+    left: box.x,
+    right: box.x + box.width,
+    top: box.y,
+    bottom: box.y + box.height,
+  }));
+  let inkInside = 0;
+  let inkOutside = 0;
+  let opaqueInside = 0;
+  let boxArea = 0;
+  const stray = { top: Infinity, bottom: -Infinity, left: Infinity, right: -Infinity };
+  for (let y = 0; y < canvas.height; y += 1) {
+    for (let x = 0; x < canvas.width; x += 1) {
+      const alpha = data[(y * canvas.width + x) * 4 + 3] ?? 0;
+      const cx = x + 0.5;
+      const cy = y + 0.5;
+      const inside = boxes.some(
+        (box) => cx >= box.left && cx <= box.right && cy >= box.top && cy <= box.bottom,
+      );
+      if (inside) {
+        boxArea += 1;
+        if (alpha > 0) inkInside += 1;
+        if (alpha === 255) opaqueInside += 1;
+      } else if (alpha > 0) {
+        inkOutside += 1;
+        stray.top = Math.min(stray.top, y);
+        stray.bottom = Math.max(stray.bottom, y + 1);
+        stray.left = Math.min(stray.left, x);
+        stray.right = Math.max(stray.right, x + 1);
+      }
+    }
+  }
+  return {
+    type: rendered.blob.type,
+    width: bitmap.width,
+    height: bitmap.height,
+    pngSignature: [137, 80, 78, 71, 13, 10, 26, 10].every((byte, index) => head[index] === byte),
+    inkInside,
+    inkOutside,
+    opaqueInside,
+    boxArea,
+    strayBounds: inkOutside > 0 ? stray : null,
+    boxes: boxes.map((box) => ({ ...box })),
+  };
+}
+
 export const engineHarness = {
+  overlayCheck,
   workspaceCheck,
   probe,
   runnerCheck,

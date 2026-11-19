@@ -37,8 +37,22 @@ export interface FitRange {
   readonly minSize: number;
 }
 
+/** How far ink reaches above and below a line's centre, in pixels. */
+export interface InkExtent {
+  readonly above: number;
+  readonly below: number;
+}
+
 /** Width of `text` set in the CSS font shorthand `font`. */
-export type Measure = (text: string, font: string) => number;
+export interface Measure {
+  (text: string, font: string): number;
+  /**
+   * Ink reach of `font` around a line's centre, judged on reference letters for the
+   * scripts in `text` (fixed letters, so the text does not jump as it is typed). Without
+   * it, ink is assumed to stay within the line pitch.
+   */
+  readonly extent?: (font: string, text: string) => InkExtent;
+}
 
 export interface TextLine {
   readonly text: string;
@@ -53,9 +67,11 @@ export interface TextLayout {
   /** Anchor for every line, read with `textAlign` from the style. */
   readonly x: number;
   readonly strokeWidth: number;
-  /** Top of the first line and height of the whole block, outline excluded. */
+  /** Top of the first line box and height of all line boxes, outline excluded. */
   readonly top: number;
   readonly height: number;
+  /** Ink beyond the line boxes: above the first line and below the last, kept inside the box. */
+  readonly overshoot: { readonly top: number; readonly bottom: number };
   /** True when even the smallest size does not fit, so text spills or words split. */
   readonly overflows: boolean;
 }
@@ -82,12 +98,36 @@ export function fontString(style: Pick<TextStyle, 'family' | 'weight'>, size: nu
   return `${style.weight} ${size}px ${style.family}`;
 }
 
-/** A Measure backed by a real context. */
-export function canvasMeasure(context: Pick<TextCanvas, 'font' | 'measureText'>): Measure {
-  return (text, font) => {
+/** Accented capitals and descenders: the tallest and deepest Latin a caption is likely to hold. */
+const LATIN_REFERENCE = 'ÅÉÎÕgjpqy';
+/** Marks above the headline (ि ँ ॐ) and below the line (ृ ् ्र). */
+const DEVANAGARI_REFERENCE = 'क्षिँॐकृट्र';
+const DEVANAGARI = /[ऀ-ॿ]/;
+
+/** A Measure backed by a real context, including the font's ink extent. */
+export function canvasMeasure(
+  context: Pick<TextCanvas, 'font' | 'measureText' | 'textBaseline'>,
+): Measure {
+  const width = (text: string, font: string) => {
     context.font = font;
     return context.measureText(text).width;
   };
+  const extent = (font: string, text: string): InkExtent => {
+    context.font = font;
+    const baseline = context.textBaseline;
+    // The same baseline drawText uses, so the extent is measured from the line centre.
+    context.textBaseline = 'middle';
+    const reference = LATIN_REFERENCE + (DEVANAGARI.test(text) ? DEVANAGARI_REFERENCE : '');
+    const metrics = context.measureText(reference);
+    context.textBaseline = baseline;
+    const above = metrics.actualBoundingBoxAscent;
+    const below = metrics.actualBoundingBoxDescent;
+    return {
+      above: Number.isFinite(above) ? above : 0,
+      below: Number.isFinite(below) ? below : 0,
+    };
+  };
+  return Object.assign(width, { extent });
 }
 
 let segmenter: Intl.Segmenter | undefined;
@@ -163,6 +203,7 @@ interface Attempt {
   readonly lines: string[];
   readonly strokeWidth: number;
   readonly height: number;
+  readonly overshoot: { readonly top: number; readonly bottom: number };
   readonly fits: boolean;
 }
 
@@ -178,13 +219,20 @@ function attempt(
   const { lines, brokeWord } = wrapText(text, box.width - strokeWidth, (part) =>
     measure(part, font),
   );
-  const height = lines.length * style.lineHeight * size;
+  const pitch = style.lineHeight * size;
+  const height = lines.length * pitch;
+  const ink = measure.extent?.(font, text);
+  const overshoot = {
+    top: ink ? Math.max(0, ink.above - pitch / 2) : 0,
+    bottom: ink ? Math.max(0, ink.below - pitch / 2) : 0,
+  };
   return {
     size,
     lines,
     strokeWidth,
     height,
-    fits: !brokeWord && height + strokeWidth <= box.height,
+    overshoot,
+    fits: !brokeWord && height + overshoot.top + overshoot.bottom + strokeWidth <= box.height,
   };
 }
 
@@ -227,14 +275,15 @@ export function layoutText(
     }
   }
 
-  const { size, lines, strokeWidth, height } = best;
+  const { size, lines, strokeWidth, height, overshoot } = best;
   const inset = strokeWidth / 2;
+  const inkHeight = overshoot.top + height + overshoot.bottom;
   const top =
     style.verticalAlign === 'top'
-      ? box.y + inset
+      ? box.y + inset + overshoot.top
       : style.verticalAlign === 'bottom'
-        ? box.y + box.height - height - inset
-        : box.y + (box.height - height) / 2;
+        ? box.y + box.height - inset - overshoot.bottom - height
+        : box.y + (box.height - inkHeight) / 2 + overshoot.top;
   const x =
     style.align === 'left'
       ? box.x + inset
@@ -251,6 +300,7 @@ export function layoutText(
     strokeWidth,
     top,
     height,
+    overshoot,
     overflows: lines.length > 0 && !best.fits,
   };
 }

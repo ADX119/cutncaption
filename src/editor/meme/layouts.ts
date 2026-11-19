@@ -138,7 +138,9 @@ export function captionBarGeometry(
   const widest = { x: padX, y: padY, width: video.width - padX * 2, height: maxBar - padY * 2 };
   const trial = layoutText(text, widest, { ...BAR_STYLE, verticalAlign: 'top' }, fit, measure);
   const lines = Math.max(1, trial.lines.length);
-  const bar = Math.min(evenCeil(lines * BAR_STYLE.lineHeight * trial.size + padY * 2), maxBar);
+  const ink =
+    lines * BAR_STYLE.lineHeight * trial.size + trial.overshoot.top + trial.overshoot.bottom;
+  const bar = Math.min(evenCeil(ink + padY * 2), maxBar);
 
   const box = { x: padX, y: padY, width: widest.width, height: bar - padY * 2 };
   return {

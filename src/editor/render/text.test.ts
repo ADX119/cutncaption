@@ -201,6 +201,54 @@ describe('layoutText', () => {
     expect(big.top / 4).toBeCloseTo(small.top, 1);
   });
 
+  describe('with the font’s real ink extent', () => {
+    // Ink rises 0.7 × size above a line's centre and falls 0.5 × size below it, while
+    // a line of pitch 1.2 only allows 0.6 each way: 0.1 × size overshoots at the top.
+    const inky: Measure = Object.assign((text: string, font: string) => measure(text, font), {
+      extent: (font: string) => {
+        const size = Number(/([\d.]+)px/.exec(font)?.[1]);
+        return { above: size * 0.7, below: size * 0.5 };
+      },
+    });
+    const box = { x: 0, y: 100, width: 1000, height: 200 };
+    const fit = { maxSize: 50, minSize: 10 };
+
+    it('moves top text down by what rises above the first line', () => {
+      const layout = layoutText('a', box, STYLE, fit, inky);
+      expect(layout.overshoot).toEqual({ top: 5, bottom: 0 });
+      expect(layout.top).toBe(105);
+      expect(layout.lines[0]?.y).toBe(135);
+    });
+
+    it('keeps bottom text clear of the box bottom by what falls below the last line', () => {
+      const deep: Measure = Object.assign((text: string, font: string) => measure(text, font), {
+        extent: (font: string) => {
+          const size = Number(/([\d.]+)px/.exec(font)?.[1]);
+          return { above: size * 0.5, below: size * 0.8 };
+        },
+      });
+      const layout = layoutText('a', box, { ...STYLE, verticalAlign: 'bottom' }, fit, deep);
+      expect(layout.overshoot).toEqual({ top: 0, bottom: 10 });
+      // Line box ends 10 above the box bottom (300), so the ink ends exactly at it.
+      expect(layout.top + layout.height).toBe(290);
+    });
+
+    it('counts the overshoot when deciding whether text fits', () => {
+      // Without it, 1.2 × 50 = 60 fits a 62-high box at full size; with 5 more it does not.
+      const tight = { x: 0, y: 0, width: 1000, height: 62 };
+      expect(layoutText('a', tight, STYLE, fit, measure).size).toBe(50);
+      const shrunk = layoutText('a', tight, STYLE, fit, inky);
+      expect(shrunk.size).toBeLessThan(50);
+      expect(shrunk.height + shrunk.overshoot.top).toBeLessThanOrEqual(62 + 1e-9);
+    });
+
+    it('centres the ink, not the line boxes, in a middle-aligned box', () => {
+      const layout = layoutText('a', box, { ...STYLE, verticalAlign: 'middle' }, fit, inky);
+      // Ink block: 5 above + 60 line = 65 tall, centred in 200 → starts at 167.5.
+      expect(layout.top - layout.overshoot.top).toBeCloseTo(100 + (200 - 65) / 2, 9);
+    });
+  });
+
   it('lays out nothing for empty text', () => {
     const layout = layoutText('', BOX, STYLE, { maxSize: 40, minSize: 10 }, measure);
     expect(layout.lines).toEqual([]);
@@ -269,5 +317,25 @@ describe('canvasMeasure', () => {
   it('measures with the given font', () => {
     const { canvas } = recordingCanvas();
     expect(canvasMeasure(canvas)('abcd', '400 10px x')).toBe(20);
+  });
+
+  it('reads the ink extent from reference letters, measured from the line centre', () => {
+    const seen: { text: string; baseline: CanvasTextBaseline; font: string }[] = [];
+    const context = {
+      font: '',
+      textBaseline: 'alphabetic' as CanvasTextBaseline,
+      measureText(text: string) {
+        seen.push({ text, baseline: this.textBaseline, font: this.font });
+        return { width: 1, actualBoundingBoxAscent: 7, actualBoundingBoxDescent: 3 } as TextMetrics;
+      },
+    };
+    const measured = canvasMeasure(context);
+    expect(measured.extent?.('400 10px x', 'HELLO')).toEqual({ above: 7, below: 3 });
+    expect(seen[0]).toMatchObject({ baseline: 'middle', font: '400 10px x' });
+    expect(seen[0]?.text).not.toMatch(/[ऀ-ॿ]/);
+    // Devanagari text adds Devanagari reference marks; the baseline is put back.
+    measured.extent?.('400 10px x', 'नमस्ते');
+    expect(seen[1]?.text).toMatch(/[ऀ-ॿ]/);
+    expect(context.textBaseline).toBe('alphabetic');
   });
 });
